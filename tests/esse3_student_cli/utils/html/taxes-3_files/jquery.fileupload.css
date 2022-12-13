@@ -1,0 +1,65 @@
+@charset "UTF-8";
+/*
+ * jQuery File Upload Plugin CSS
+ * https://github.com/blueimp/jQuery-File-Upload
+ *
+ * Copyright 2013, Sebastian Tschan
+ * https://blueimp.net
+ *
+ * Licensed under the MIT license:
+ * https://opensource.org/licenses/MIT
+ */
+
+.fileinput-button {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+.fileinput-button input {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  opacity: 0;
+  -ms-filter: 'alpha(opacity=0)';
+  font-size: 200px !important;
+  direction: ltr;
+  cursor: pointer;
+}
+
+/* Fixes for IE < 8 */
+@media screen\9 {
+  .fileinput-button input {
+    filter: alpha(opacity=0);
+    font-size: 100%;
+    height: 100%;
+  }
+}
+
+
+/* Aggiunte per esse3 */
+
+#esse3 #uploadedFile {
+	margin: 5px 0;
+	overflow-wrap: break-word;
+	-ms-word-wrap: break-word; /*hack per ie*/
+}
+#esse3 .modal .progress {
+	margin-top: 10px;
+    position: relative;
+}
+#esse3 .modal .progress-bar {
+    float: none;
+    background-color: #ccc;
+}
+#esse3 .modal .progress-bar-danger {
+	background-color: #f66;
+}
+#progressBarText {
+    margin: 0 auto;
+    text-align: center;
+    width: 100%;
+    display: inline-block;
+    position: absolute;
+    z-index: 10050;
+}

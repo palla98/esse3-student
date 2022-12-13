@@ -1,0 +1,79 @@
+@import url("../JavaScript/jquery/jquery-ui-1.13.2.custom.css?v=20.04.00");
+
+/*----------------STILI PERSONALIZZATI FOR AUTOCOMPLETE ---------------------*/
+
+.ui-autocomplete {
+	max-height: 300px;
+	max-width: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+.ui-corner-all, .ui-corner-bottom, .ui-corner-left, .ui-corner-bl {
+    border-bottom-left-radius: 0px;
+}
+
+.ui-corner-all, .ui-corner-top, .ui-corner-left, .ui-corner-tl {
+    border-top-left-radius: 0px;
+
+}
+
+.ui-corner-all, .ui-corner-bottom, .ui-corner-right, .ui-corner-br {
+    border-bottom-right-radius: 0px;
+}
+.ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr {
+    border-top-right-radius: 0px;
+}
+
+
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+    background:none;
+    border:1px solid #ccc;
+    color: inherit;
+    font-weight: normal;
+}
+
+ul.ui-widget-content {
+    background:#eee;
+    border: 1px solid #D9D6C4;
+    color: #1F1F1F;
+	font-size:12px;
+}
+
+.ui-button-icon-only {
+    padding: 4px 0px;
+    position: relative;
+    top:-1px;
+	background-color:#eee;
+	border-left: 0;
+}
+.ui-widget {
+    font-size: inherit;
+    font-family: inherit;
+}
+
+.ui-tooltip{
+	background:#FAFAFA;
+	box-shadow: 0 0 5px #E0E0E0;
+	-webkit-box-shadow: 0 0 5px #E0E0E0;
+	-moz-box-shadow: 0 0 5px #E0E0E0;
+	font-size:12px;
+	}
+	
+	
+.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
+    background:#CACACA;
+	background-image: none;
+    border: 1px solid #CACACA;
+	border-left: 0 none;
+	color: inherit;
+    font-weight: bold;
+}
+
+.ui-datepicker .ui-datepicker-title select {
+    font-size: 0.8em;
+}
+.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
+    font-family: inherit;
+    font-size: 0.8em;
+}

@@ -1,0 +1,3 @@
+- ricordarsi che per gli studenti alla triennale la schermata di scelta carriera non esiste
+- pagina delle tasse per alcuni ci sono due tabelle, quindi la prima tabella che riguarda gli esami puo essere
+  come codice html --> table oppure table[1] in base se c'è l'altra tabella degli addebiti

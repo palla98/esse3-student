@@ -1,0 +1,17 @@
+/*
+*	Stili per le stampe
+*/
+
+@media print {
+	/* Evita la visualizzazione aggiunta da bootstrap dei link nelle stampe */
+	a[href]:after {
+		content: none;
+	}
+	#hamburger, #cookies {
+		display: none;
+	}
+	#esse3 .record, #esse3 .guol-text-border {
+	    border-top: 1px solid #000 !important;
+	}
+
+}

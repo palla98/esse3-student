@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "ess3-cli-student"
+version = "0.1.5"
+description = "Esse3 command line utility"
+authors = ["Antonio Pallaria <pallaria98@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+typer = "^0.6.1"
+rich = "^12.5.1"
+selenium = "^4.4.3"
+typeguard = "^2.13.3"
+valid8 = "^5.1.2"
+dataclass-type-validator = "^0.1.2"
+dateutils = "^0.6.12"
+webdriver-manager = "^3.8.3"
+export = "^0.2.0"
+pytest-localserver = "^0.7.0"
+textual = "^0.6.0"
+
+[tool.poetry.dev-dependencies]
+coverage = "^6.4.4"
+pytest = "^7.1.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+

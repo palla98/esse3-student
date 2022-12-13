@@ -1,0 +1,113 @@
+/*
+*
+*   Theme
+*   #brand #color #custom #skin #fonts #theme
+* 
+*/
+
+/* #definisci il colore di link */
+.l-content-container a {
+    color:#0000ff;
+}
+/* #header della pagina */
+
+.masthead {
+    background: url(../../img/layout/banner.png) no-repeat 85% 0px #ffffff;
+}
+
+.masthead_hamburger,
+.masthead_hamburger:hover,
+.masthead_hamburger:focus {
+  	 color:#333;
+}
+
+@media screen and (max-width: 1110px) {
+   .masthead {
+       background: #ffffff;
+   }
+   
+   .masthead_logo img {
+	height:65px;
+}
+}
+
+@media screen and (max-width: 320px){
+   
+   .masthead_logo img {
+	   height:55px;
+}
+.masthead_top {
+    padding: 1em 0;
+}
+}
+
+body.secondaryMenuBottom .masthead {
+    border-color:#EAEEED;
+}
+
+
+/* menu non in pagina */
+
+.masthead_menu_body > ul > li.masthead_menu_body_comunita {
+    border-color: #931015;
+}
+
+.masthead_menu_body > ul > li {
+    border-color:#C4161C;
+}
+
+/* menu in pagina */
+
+
+body.js-menuInPagina .masthead_menu_lang a.is-active {
+    background: #C4161C;
+}
+
+body.js-menuInPagina .masthead_menu_body > ul > li.masthead_menu_body_comunita {
+    border-color: #931015;
+}
+
+body.js-menuInPagina .masthead_menu_body > ul > li {
+    border-color: #C4161C;
+}
+
+/* #page title */
+
+.pagetitle_title:after {
+    background:#C4161C;
+}
+
+/* #secondary menu */ 
+
+
+.secondary-menu {
+    background: #EAEEED;
+}
+
+.secondary-menu a, .secondary-menu_button {
+    color: #282828;
+}
+/*#footer */ 
+
+.footer {
+    background:#C4161C;
+    text-align:right;
+}
+.footer p, .footer a {
+    color:#fff;
+}
+body.secondaryMenuTop .footer {
+    border-color: #D9D9D9;
+}
+
+
+
+
+/* ////////////STILI RIPORTATI DA CUSTOM ///////////// */
+#esse3 .record {
+    border-top: 5px solid #DCDBD5;
+}
+
+#esse3 #utility-list h2, #esse3 #navigation-list h2, #esse3 #legend-list h2, #esse3 #glossary-list h2 {
+    background-image: none;
+}
