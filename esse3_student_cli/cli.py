@@ -290,7 +290,7 @@ def command_booklet(
         colors = {"18":"bright_red", "19":"bright_red", "20":"bright_red", "21":"bright_red",\
                   "22":"yellow", "23":"yellow", "24":"yellow", "25":"yellow",\
                   "26":"blue", "27":"blue", "28":"blue", "29":"blue", "30":"blue", \
-                  '':"white"}
+                  '':"white", "IDO":"green"}
         return colors[vote]
 
     for index, exam in enumerate(track(exams, description="Processing...", transient=True), start=1):
@@ -299,7 +299,11 @@ def command_booklet(
         vote_split = colums[4].split(" - ")
         v = get_vote_color(vote_split[0])
         vote_style = Text(colums[4])
-        vote_style.stylize(f"bold {v}", 0, 2)
+        if vote_style[0:3] == Text("IDO"):
+            vote_style= Text(str(vote_style).replace("IDO", "IDONEO"))
+            vote_style.stylize(f"bold {v}", 0, 6)
+        else:
+            vote_style.stylize(f"bold {v}", 0, 2)
         if academic_year:
             if colums[1] == str(academic_year.value):
                 table.add_row(str(index), colums[0], colums[1], colums[2], f'[{c}]{colums[3]}[/{c}]', vote_style)
@@ -340,14 +344,15 @@ def command_booklet(
     else:
         table.add_row(arithmetic[4], weighted[4], str(round(degree_basis, 2)))
 
-    console.rule("[bold]Statistics[/bold]")
-    console.print(table)
+    if not academic_year and not vote and not exam_state:
+        console.rule("[bold]Statistics[/bold]")
+        console.print(table)
 
 
 @app.command(name="taxes")
 def command_taxes(
         to_pay: Optional[bool] = typer.Option(False, "--to-pay", help="Show all taxes to be paid"),
-        year: int = typer.Option(int, help="ex: '2021'; filter taxes by year"),
+        year: int = typer.Option(int, help="es: '2021'; filter taxes by year"),
 ) -> None:
 
     """
