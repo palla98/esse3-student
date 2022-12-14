@@ -15,5 +15,10 @@ def test_reservations(runner):
     assert "Reservations showcase" in result.stdout
 
 
-
-
+def test_booklet(runner):
+    result = runner.invoke(app, ["booklet"])
+    assert result.exit_code == 0
+    assert "─────────────────────────────────── Booklet ────────────────────────────────────" in result.stdout
+    assert "                                                                              \n" in result.stdout
+    assert "  #    Name             Academic Year   CFU   State             Vote            \n" in result.stdout
+    assert "────────────────────────────────────────────────────────────────────────────── \n" in result.stdout
