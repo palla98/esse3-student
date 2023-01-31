@@ -1,0 +1,244 @@
+Screen {
+    scrollbar-size: 2 2;
+    scrollbar-color: #b9b9b9;
+}
+
+#barra {
+    width: 100%;
+}
+
+.header {
+    background: $background;
+    content-align: center middle;
+}
+
+Footer {
+    background: $background;
+}
+
+#homepage{
+    width: 100%;
+    max-height: 100%;
+}
+
+.title {
+    content-align: center middle;
+    width: 100%;
+    min-height: 10%;
+    text-style: bold;
+    background: $panel;
+}
+
+.content-table{
+    content-align: center middle;
+    border: #2e6da4;
+    width: 100%;
+    height: auto;
+}
+
+#homepage > Vertical {
+    align: center middle;
+    border: outer #1d2e38;
+    width: 100%;
+}
+
+#homepage > Vertical > Button {
+    margin: 1;
+    border: tall #1d2e38;
+    width: 50%;
+}
+
+#vertical {
+    border: #2e6da4;
+    height: auto;
+}
+
+#vertical > Tables {
+    content-align: center middle;
+    border: none;
+    width: 100%;
+}
+
+#horizontal{
+    align: center middle;
+    height: auto;
+    width: 100%;
+    border: #66512c;
+}
+
+#horizontal > Button{
+    margin-right: 4;
+    margin-left: 4;
+    border: none;
+}
+
+#exams-container {
+    width: 100%;
+}
+
+#exams-empty {
+    text-style: bold italic;
+    width: 100%;
+    min-height: 30%;
+    border: heavy purple;
+    content-align: center middle;
+}
+
+#exams-table {
+    border: heavy #54422b;
+    width: 100%;
+    height: auto;
+}
+
+#exams-table > Tables {
+    content-align: center middle;
+    /* height: auto; questo qua fa in modo che rimpicciolendo lo schermo poi mi esce la scrollbar, senza invece si adatta*/
+}
+
+#exams-add {
+    border: heavy #54422b;
+    width: 100%;
+    height: 100%;
+    layout: vertical;
+    overflow: auto auto;
+}
+
+#exams-checkbox  {
+    layout: grid;
+    overflow-y: auto;
+    grid-size: 2;
+    width: 100%;
+    border: none;
+}
+
+#exams-checkbox > Line  {
+    height: auto;
+    border: heavy #54422b;
+    align: center middle;
+}
+
+#exams-checkbox  > Line > Static {
+    height: auto;
+    width: auto;
+}
+
+#exams-checkbox  > Line > Check {
+    height: auto;
+    width: auto;
+}
+
+#exams-input {
+    width: 100%;
+    border: tall #54422b;
+}
+
+#exams-container > Horizontal {
+    border: heavy #54422b;
+    align: center middle;
+    height: auto;
+}
+
+/* EXAMS */
+.exams-loading{
+    width: 100%;
+    height: 99%;
+    border: heavy yellow;
+    content-align: center middle;
+    text-style: bold italic
+}
+
+#exams-added-success{
+    width: 100%;
+    height: 100%;
+    border: heavy #2b542c;
+    content-align: center middle;
+    text-style: bold italic;
+}
+
+.exams-added-error{
+    width: 100%;
+    height: 100%;
+    border: heavy #9B0000;
+    content-align: center middle;
+    text-style: bold italic;
+}
+
+/* RESERVATIONS */
+
+.reservations-loading{
+    width: 100%;
+    height: 100%;
+    border: heavy yellow;
+    content-align: center middle;
+    text-style: bold italic;
+}
+
+#reservations-removed-success{
+    width: 100%;
+    height: 100%;
+    border: heavy #2b542c;
+    content-align: center middle;
+    text-style: bold italic;
+}
+
+.reservations-removed-error{
+    width: 100%;
+    height: 100%;
+    border: heavy #9B0000;
+    content-align: center middle;
+    text-style: bold italic;
+}
+
+/* BOOKLET */
+
+#booklet-table{
+    content-align: center middle;
+    border: heavy #2b542c;
+    width: 100%;
+    height: auto;
+}
+
+#booklet-loading {
+    width: 100%;
+    height: 90%;
+    border: heavy yellow;
+    content-align: center middle;
+    text-style: bold italic;
+}
+
+/* TAXES */
+
+#taxes-table{
+    content-align: center middle;
+    border: heavy #2b542c;
+    width: 100%;
+    height: auto;
+}
+
+#taxes-loading {
+    width: 100%;
+    height: 90%;
+    border: heavy yellow;
+    content-align: center middle;
+    text-style: bold italic;
+}
+
+
+/*
+#exams-checkbox > Static {
+    width: 100%;
+    height: 100%;
+}
+
+#exams-checkbox > Checkbox {
+    width: 100%;
+    height: 100%;
+}
+
+#exams-buttons > Button {
+    margin-bottom: 5;
+    width: 50%;
+}
+*/
+
+

@@ -52,7 +52,7 @@ def mock_esse3_app(environ, start_response):
         elif url == endpoint(BOOKLET_URL):
             html = read_html("booklet.html")
         elif url == endpoint(TAXES_URL):
-            html = read_html("taxes.html")
+            html = read_html("taxes-1.html")
 
     if TRACE and url.startswith("/auth/") and html is None:
         print('TRACE(mock_esse3_app)', 'missing page')

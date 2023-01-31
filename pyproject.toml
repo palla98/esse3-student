@@ -17,6 +17,10 @@ webdriver-manager = "^3.8.3"
 export = "^0.2.0"
 pytest-localserver = "^0.7.0"
 textual = "^0.6.0"
+aiohttp = "^3.8.3"
+httpx = "^0.23.3"
+asyncselenium = "^0.0.2"
+self = "^2020.12.3"
 
 [tool.poetry.dev-dependencies]
 coverage = "^6.4.4"

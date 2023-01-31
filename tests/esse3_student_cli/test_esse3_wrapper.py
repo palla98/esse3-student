@@ -19,12 +19,12 @@ def test_fetch_reservations(esse3_wrapper):
     exams = esse3_wrapper.fetch_reservations()
     assert len(exams) == 1
 
-'''
-def test_fetch_courses(esse3_wrapper):
-    courses = esse3_wrapper.fetch_courses()
-    assert len(courses) == 6
-    assert courses[0] == Course("CYBER OFFENSE AND DEFENSE [27008777]")
 
+def test_fetch_taxes_first_page(esse3_wrapper):
+    taxes = esse3_wrapper.fetch_taxes()
+    assert len(taxes) == 10
+    assert taxes[0] == "2013675&2022-12-22&16,50 €& non pagato"
+'''
 
 def test_fetch_exams(esse3_wrapper):
     courses = esse3_wrapper.fetch_courses()

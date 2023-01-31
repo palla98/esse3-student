@@ -9,7 +9,8 @@ from rich.table import Table
 from rich.text import Text
 
 from esse3_student_cli.esse3_wrapper import Esse3Wrapper
-from esse3_student_cli.primitives import ExaminationProcedure, ExamNotes, AcademicYear, ExamState, Vote, Cfu, Year
+from esse3_student_cli.primitives import ExaminationProcedure, ExamNotes, AcademicYear, ExamState, Vote, Cfu, Year, Exam
+
 from esse3_student_cli.utils.console import console
 
 from esse3_student_cli.utils.cred import take_credentials
@@ -57,10 +58,10 @@ def new_esse3_wrapper(detached: bool = False, with_live_status: bool = True):
 
 @app.callback()
 def main(
-        #username: str = typer.Option(..., prompt=True, envvar="CLI_STUDENT_USERNAME"),
-        #password: str = typer.Option(..., prompt=True, hide_input=True, envvar="CLI_STUDENT_PASSWORD"),
-        username: str = typer.Option(show_default=False, default=take_credentials("username"), help="default credentials in file"),
-        password: str = typer.Option(show_default=False, default=take_credentials("password"), help="default credentials in file"),
+        username: str = typer.Option(..., prompt=True, envvar="CLI_STUDENT_USERNAME"),
+        password: str = typer.Option(..., prompt=True, hide_input=True, envvar="CLI_STUDENT_PASSWORD"),
+        #username: str = typer.Option(show_default=False, default=take_credentials("username"), help="default credentials in file"),
+        #password: str = typer.Option(show_default=False, default=take_credentials("password"), help="default credentials in file"),
         debug: bool = typer.Option(False, "--debug", help="Don't minimize browser"),
 ):
 
@@ -82,25 +83,23 @@ def command_exams() -> None:
     esse_wrapper = new_esse3_wrapper()
     with console.status("loading available exams..."):
         exams = esse_wrapper.fetch_exams()
-        if len(exams) == 0:
-            console.print("No available exams!", style="bold red")
-            exit()
+
+    if len(exams) == 0:
+        console.print("No exams available!", style="bold red")
+        exit()
 
     console.rule("EXAMS")
-    table = Table(box=box.HEAVY_HEAD, header_style="bold rgb(139,69,19)")
+
+    table = Table(box=box.HEAVY_HEAD, style="rgb(139,69,19)")
     table.add_column("#", justify="center", style="bold red")
-    table.add_column("Name", justify="center", style="bold green")
-    table.add_column("Date", justify="center", style="bold")
-    table.min_width = 50
-    # table.expand = True
+    table.add_column("Name", justify="center", style="green")
+    table.add_column("Date", justify="center", style="yellow")
+    table.add_column("Signing up", justify="center", style="yellow")
+    table.add_column("Description", justify="center")
 
     for index, exam in enumerate(exams, start=1):
-        colums = exam.value.split()
-        table.add_row(
-            str(index),
-            colums[0],
-            colums[1],
-        )
+        row = list(exam.value.split("&"))
+        table.add_row(str(index), *row)
 
     console.print(table)
 
@@ -120,108 +119,87 @@ def command_reservations() -> None:
             exit()
 
     console.rule("Reservations showcase")
-    table = Table(box=box.HEAVY_HEAD)
-    table.add_column("#", justify="center")
-    table.add_column("Name", justify="center", style="bold green")
-    table.add_column("Date", justify="center", style="bold")
-    table.add_column("Registration Number", justify="center", style="bold")
-    table.add_column("Exam Type", justify="center")
-    table.add_column("Examination Procedure", justify="center", style="bold green")
-    table.add_column("Reservation Date", justify="center", style="bold")
-    table.add_column("Professor", justify="center", style="bold")
-    # table.min_width = 50
-    # table.expand = True
+    tables = {}
+    for index in range(len(reservations)):
+        tables[f'table_{index}'] = Table(box=box.HEAVY_HEAD)
+        tables[f'table_{index}'].add_column("#", justify="center", style="bold red")
+        for colum in reservations[index].keys():
+            tables[f'table_{index}'].add_column(colum, justify="center")
 
-    for index, reservation in enumerate(reservations, start=1):
-        colums = reservation.value.split("&")
-        table.add_row(
-            str(index), colums[0], colums[1], colums[2], colums[3], colums[4], colums[5], colums[6],
-        )
-
-    console.print(table)
+    for index, reservation in enumerate(reservations, start=0):
+        row = list(reservation.values())
+        tables[f'table_{index}'].add_row(str(index+1), *row)
+        console.print(tables[f'table_{index}'])
 
 
 @app.command(name="add_reservation")
 def command_add_reservation(
-        reservation: str = typer.Argument(
+        exam: str = typer.Argument(
             ...,
-            metavar="Exam index",
-            help="A string of the form: ' Index-examination_procedure-exam_notes ' "
-                 "  ;Examination_procedure(P as default): P as Presence, O as Remote exam request "
+            metavar="Exam values",
+            help="A string of the form: ' name-examination_procedure-exam_notes ' "
+                 "  ;Examination_procedure(P as default): P as Presence, RD as Remote exam request "
                  "  ;Exam_notes(optional)"
         ),
 ):
-    """
-    Pass an index representing the exam to reserve
-    """
 
-    def parse(reservation):
-        reservation = reservation.split('-')
-        index = int(reservation[0])
-        if index <= 0:
-            console.print(f"Reservation index must be positive, not {index}")
+    def parse(exam):
+        values = exam.split("-")
+        if len(values) not in [1, 2, 3]:
+            console.print("Invalid number of arguments")
             raise typer.Exit()
+        try:
+            name = Exam(values[0])
+        except ValueError:
+            console.print("Invalid values for name")
+            raise typer.Exit()
+        modality = ExaminationProcedure(values[1] if len(values) >= 2 else "P")
+        notes = ExamNotes(values[2] if len(values) >= 3 else " ")
+        return name, modality, notes
 
-        examination_procedure = ExaminationProcedure.PRESENCE
-        if len(reservation) > 1:
-            examination_procedure = ExaminationProcedure(reservation[1])
-            if examination_procedure not in[ExaminationProcedure.PRESENCE, ExaminationProcedure.REMOTE_EXAM_REQUEST]:
-                console.print(f"Select P as Presence or O as Remote exam request")
-                raise typer.Exit()
+    name, modality, notes = parse(exam)
 
-        note = ExamNotes(" ")
-        if len(reservation) > 2:
-            note = ExamNotes(reservation[2])
+    esse_wrapper = new_esse3_wrapper()
 
-        return index, examination_procedure, note
-
-    pre = parse(reservation)
-
-    esse3_wrapper = new_esse3_wrapper()
-    with console.status("loading available exams..."):
-        exams = esse3_wrapper.fetch_exams()
-    if len(exams) == 0:
-        console.print("No exam available!", style="bold red")
-        exit()
-
-    index, examination_procedure, note = pre
-    exam = exams[index - 1]
-    split = exam.value.split(" ")
-    name = split[0]
-    date = split[1]
-    with console.status(f"Exam booking [bold]{name}[/bold] in progress..."):
+    with console.status(f"Exam booking [bold]{name.value}[/bold] in progress..."):
         time.sleep(3)
-        esse3_wrapper.add_reservation(index, examination_procedure, note)
-        console.log(f"[bold]✅  Exam with name:[/bold] [bold green]{name}[/bold green] [bold]of [/bold]"
-            f"[bold blue]{date}[/bold blue] [bold]added[/bold]")
+        value = esse_wrapper.add_reservation(name, modality, notes)
+        if value == "name error":
+            console.print("Wrong name passed!", style="bold red")
+        elif value == "empty":
+            console.print("No exams available!", style="bold yellow")
+        else:
+            console.log(f"[bold] ✅  Exam with name: [bold green]{name.value}[/bold green] added")
 
 
 @app.command(name="remove_reservation")
 def command_remove_reservation(
-        index: int = typer.Argument(
+        name: str = typer.Argument(
             ...,
-            metavar="Reservation index",
-            help="An integer indicating the reservation of the reservation board"
+            metavar="The name of reservations",
+            help="A string indicating the reservation to remove"
         ),
 
 ):
-    """
-    Pass an index representing the exam to remove
-    """
+    try:
+        name = Exam(name).value
+    except ValueError:
+        console.print("Invalid values for name")
+        raise typer.Exit()
 
     esse_wrapper = new_esse3_wrapper()
-    with console.status(f"Reservations loading..."):
+
+    with console.status(f"Remove reservation [bold]{name}[/bold]  in progress ..."):
         time.sleep(3)
-        reservation = esse_wrapper.fetch_reservations()
-    if len(reservation) == 0:
-        console.print("No reservation to remove!", style="bold red")
-        exit()
-    r = reservation[0].value.split(" ")
-    r_name = r[0]
-    with console.status(f"Remove reservation [bold]{r_name}[/bold]  in progress ..."):
-        time.sleep(3)
-        esse_wrapper.remove_reservation(index)
-        console.log(f"[bold]✅  Reservation with name:[/bold] [bold green]{r_name}[/bold green] [red]removed[/red] ")
+        result = esse_wrapper.remove_reservation(name)
+        if result == "success":
+            console.log(f"[bold]✅  Reservation with name:[/bold] [bold green]{name}[/bold green] [red]removed[/red] ")
+        elif result == "wrong name passed":
+            console.log(f"[bold]❌ Wrong name passed !!")
+        elif result == "empty":
+            console.log(f"[bold]❌ No exams to remove !!")
+        else:
+            console.log(f"[bold]❌  Impossible to unsubscribe [bold green]{name}[/bold green]: cause subscription closed")
 
 
 @app.command(name="booklet")
@@ -300,7 +278,7 @@ def command_booklet(
         v = get_vote_color(vote_split[0])
         vote_style = Text(colums[4])
         if vote_style[0:3] == Text("IDO"):
-            vote_style= Text(str(vote_style).replace("IDO", "IDONEO"))
+            vote_style = Text(str(vote_style).replace("IDO", "IDONEO"))
             vote_style.stylize(f"bold {v}", 0, 6)
         else:
             vote_style.stylize(f"bold {v}", 0, 2)
@@ -405,5 +383,11 @@ def command_taxes(
     console.print(table)
 
 
+@app.command(name="tui")
+def tui() -> None:
+    from esse3_student_cli.tui.ui import Tui
+    # faccio l import qua perchè altrimenti: from textual.app import App, ComposeResult, RenderResult, mi apre
+    # un socket nonostante non lanci il run
+    Tui().run()
 
 

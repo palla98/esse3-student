@@ -3,12 +3,15 @@ import time
 from dataclasses import InitVar
 from typing import List
 
+from asyncselenium.webdriver.remote.async_webdriver import AsyncWebdriver
+from asyncselenium.webdriver.support.async_wait import AsyncWebDriverWait
+from asyncselenium.webdriver.support import async_expected_conditions as ec
 
 import typeguard
 from selenium import webdriver
 from selenium.common import WebDriverException
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver import Keys, ActionChains
+from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -46,15 +49,15 @@ class Esse3Wrapper:
     username: InitVar[Username]
     password: InitVar[Password]
     debug: bool = dataclasses.field(default=False)
-    driver: webdriver.Chrome = dataclasses.field(default_factory=webdriver.Chrome)
+    driver: AsyncWebdriver = dataclasses.field(default_factory=AsyncWebdriver)
     __key = object()
 
-    def __post_init__(self, key: object, username: Username, password: Password):
+    async def __post_init__(self, key: object, username: Username, password: Password):
         validators.validate_dataclass(self)
         validators.validate('key', key, equals=self.__key, help_msg="Can only be instantiated using a factory method")
-        self.maximize()
-        self.__login(username, password)
-        self.choose_carrier()  # commentare quando si fanno i test
+        await self.maximize()
+        await self.__login(username, password)
+        await self.choose_carrier()  # commentare quando si fanno i test
 
     def __del__(self):
         if not self.debug:
@@ -67,13 +70,13 @@ class Esse3Wrapper:
                 pass
 
     @classmethod
-    def create(cls, username: str, password: str, debug: bool = False, detached: bool = False,
-               headless: bool = True) -> 'Esse3Wrapper':
+    async def create(cls, username: str, password: str, debug: bool = False, detached: bool = False,
+                     headless: bool = True) -> 'Esse3Wrapper':
         options = webdriver.ChromeOptions()
         options.headless = headless
         if debug or detached:
             options.add_experimental_option("detach", True)
-        driver = webdriver.Chrome(options=options)
+        driver = await AsyncWebdriver(options=options)
 
         return Esse3Wrapper(
             key=cls.__key,
@@ -87,39 +90,39 @@ class Esse3Wrapper:
     def is_headless(self) -> bool:
         return self.driver.execute_script("return navigator.webdriver")
 
-    def __login(self, username: Username, password: Password) -> None:
-        self.driver.get(LOGIN_URL)
-        """WebDriverWait(self.driver, 20).until \
-            (EC.visibility_of_element_located(
-                (By.XPATH, "//*[@id='esse3']")))"""
-        self.driver.find_element(By.ID, 'u').send_keys(username.value)
-        self.driver.find_element(By.ID, 'p').send_keys(password.value)
-        self.driver.find_element(By.ID, 'btnLogin').send_keys(Keys.RETURN)
+    async def __login(self, username: Username, password: Password) -> None:
+        await self.driver.get(LOGIN_URL)
+        await self.driver.find_element(By.ID, 'u').send_keys(username.value)
+        await self.driver.find_element(By.ID, 'p').send_keys(password.value)
+        await self.driver.find_element(By.ID, 'btnLogin').send_keys(Keys.RETURN)
 
-    def __logout(self) -> None:
-        self.driver.get(LOGOUT_URL)
+    async def __logout(self) -> None:
+        await self.driver.aget(LOGOUT_URL)
 
-    def minimize(self) -> None:
-        self.driver.minimize_window()
+    async def minimize(self) -> None:
+        await self.driver.aminimize_window()
 
-    def maximize(self) -> None:
-        self.driver.maximize_window()
+    async def maximize(self) -> None:
+        await self.driver.amaximize_window()
 
-    def choose_carrier(self) -> None:
-        # nota: dentro la funzione visibility_of_element_located i due argomenti devono essere passati nelle () per essere come unico arg
-        carrier = WebDriverWait(self.driver, 10).until\
-            (EC.visibility_of_element_located((By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/table/tbody/tr[1]/td[5]/div/a")))
-        carrier.click()
+    async def choose_carrier(self) -> None:
+        carrier = await asyncio.wait_for(
+            self.driver.find_element(By.XPATH,
+                                     "/html/body/div[2]/div/div/main/div[3]/div/div/table/tbody/tr[1]/td[5]/div/a"),
+            timeout=10
+        )
+        await carrier.click()
 
-    def fetch_exams(self) -> List[Exam]:
-        self.driver.get(EXAMS_URL)
+    async def fetch_exams(self) -> List[Exam]:
+        await self.driver.get(EXAMS_URL)
         try:
-            WebDriverWait(self.driver, 10).until(
-                EC.visibility_of_element_located((By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/div/table")))
-        except NoSuchElementException:
-            return []
+            await asyncio.wait_for(
+                EC.visibility_of_element_located((By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/div/table")),
+                timeout=10)
+        except:
+            return list()
 
-        exams = self.driver.find_elements(By.XPATH, "//*[@id='app-tabella_appelli']/tbody/tr")
+        exams = await self.driver.find_elements(By.XPATH, "//*[@id='app-tabella_appelli']/tbody/tr")
         rows = []
 
         for index, exam in enumerate(exams, start=1):
@@ -128,13 +131,13 @@ class Esse3Wrapper:
                 xpath_suffix = ""
             else:
                 xpath_suffix = f"[{index}]"
-            elements = exam.find_elements(By.XPATH, f"{xpath_base}{xpath_suffix}/td")
-            name = elements[1].text
-            date = elements[2].text
-            s = elements[3].get_attribute('innerText')
-            signing_up = s[:10] + " - " + s[10:]
-            description = elements[4].get_attribute('innerHTML')
-            row = f"{name}&{date}&{signing_up}&{description}"
+            elements = await exam.find_elements(By.XPATH, f"{xpath_base}{xpath_suffix}/td")
+            if self.debug:
+                name, date, signing_up, description = [await e.text for e in elements[1:5]]
+                row = f"{name}&{date}&{signing_up}&{description}"
+            else:
+                name, date = [await e.text for e in elements[1:3]]
+                row = f"{name}&{date}"
             rows.append(Exam.of(row))
         return rows
 
@@ -154,7 +157,7 @@ class Esse3Wrapper:
         for reservation in reservations:
             name = reservation.find_element(By.XPATH,
                                             f"/html/body/div[2]/div/div/main/div[3]/div/div/div/div[{index}]/h2").text
-            start = name.find(" [") # per evitare che stampi anche il codice nel nome
+            start = name.find("[") # per evitare che stampi anche il codice nel nome
             name = name[:start]
             dict = {"Name": name}
             elements = reservation.find_elements(By.XPATH, "./dl/dt")
@@ -168,63 +171,78 @@ class Esse3Wrapper:
             rows.append(dict)
             index += 2
         return rows
+    '''
+    rows = []
+    index = 2
+    for reservation in reservations:
+        name = reservation.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/div/div[{index}]/h2")
+        dict = {
+            "Name": name.text,
+        }
+        elements = self.driver.find_elements(By.XPATH,
+                                             f"/html/body/div[2]/div/div/main/div[3]/div/div/div/div[{index}]/dl/dt")
+        for position, element in enumerate(elements, start=1):
+            key = element.find_element(By.XPATH,
+                                       f"/html/body/div[2]/div/div/main/div[3]/div/div/div/div[{index}]/dl/dt[{position}]")
+            value = element.find_element(By.XPATH,
+                                         f"/html/body/div[2]/div/div/main/div[3]/div/div/div/div[{index}]/dl/dd[{position}]")
+            if position == 1:
+                dict["Date"] = key.text
+            else:
+                dict[key.text] = value.text
+            position += 1
 
-    def add_reservation(self, name: Exam, modality: ExaminationProcedure, note: ExamNotes) -> str:
+        rows.append(dict)
+        index += 2
+    '''
 
-        self.driver.get(EXAMS_URL)
+    def add_reservation(self, index: int, examination_procedure: ExaminationProcedure, note: ExamNotes) -> None:
+
         WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located((By.XPATH, "//table/tbody/tr")))
-        exams = self.driver.find_elements(By.XPATH, "//table/tbody/tr")
-        if not exams:
-            return "empty"
-        for i, exam in enumerate(exams, start=1):
-            if exam.find_element(By.XPATH, f"//table/tbody/tr[{i}]/td[2]").text == name.value:
-                exam_link = self.driver.find_element(By.XPATH, f"//table/tbody/tr[{i}]/td/div/a")
-                self.driver.execute_script("arguments[0].scrollIntoView();", exam_link)
-                exam_link.send_keys(Keys.ENTER)
-                self.driver.find_element(By.XPATH, "//textarea[@id='app-textAreaNoteDoc']").send_keys(note.value)
-                self.driver.find_element(By.XPATH, "//select[@id='app-selectionSvolgEsame']").send_keys(modality.value)
-                save_button = self.driver.find_element(By.XPATH, "//*[@id='btnSalva']")
-                self.driver.execute_script("arguments[0].scrollIntoView();", save_button)
-                save_button.send_keys(Keys.ENTER)
-                return "ok"
-        return "name error"
+            EC.visibility_of_element_located((By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/div/table/tbody/tr")))
+
+        if index == 1:
+            self.driver.find_element(By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/div/table/tbody/tr/td[1]/div/a").click()
+        else:
+            self.driver.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/div/table/tbody/tr[{index}/td[1]/div/a").click()
+
+        # solo in debug mode funziona il blocco sottostante
+        """
+        if examination_procedure.value == "O":
+            self.driver.find_element(By.XPATH, "//*[@id='app-selectionSvolgEsame']").send_keys("RD")
+        else:
+            self.driver.find_element(By.XPATH, "//*[@id='app-selectionSvolgEsame']").send_keys("P")
+        """
+        self.driver.find_element(By.XPATH, "//*[@id='app-textAreaNoteDoc']").send_keys(note.value)
+        WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, "//*[@id='btnSalva']"))).click()
 
     def remove_reservation(self, reservation: str) -> str:
 
         self.driver.get(RESERVATIONS_URL)
         try:
             WebDriverWait(self.driver, 10).until(
-                EC.visibility_of_element_located((By.XPATH, "//*[@id='textHeader']")))
-        except TimeoutError:
-            return "empty"
-
-        boxprenotazione = self.driver.find_elements(By.XPATH, "//*[@id='boxPrenotazione']")
-        if not boxprenotazione:
-            return "empty"
-        toolbar = self.driver.find_elements(By.XPATH, "//*[@id='toolbarAzioni']")
-        found = False
-        for i, name in enumerate(boxprenotazione, start=1):
-            value = name.find_element(By.CLASS_NAME, "record-h2").text
-            value = value[:value.index(" [")].strip()
-            if value == reservation:
-                for j, remove in enumerate(toolbar, start=1):
-                    if j == i:
-                        try:
-                            element = remove.find_element(By.ID, 'btnCancella')
-                            found = True
+                EC.visibility_of_element_located((By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/div/div[2]")))
+            boxprenotazione = self.driver.find_elements(By.XPATH, "//*[@id='boxPrenotazione']")
+            toolbar = self.driver.find_elements(By.XPATH, "//*[@id='toolbarAzioni']")
+            found = False
+            for i, name in enumerate(boxprenotazione, start=1):
+                if name.find_element(By.CLASS_NAME, "record-h2").text.startswith(reservation):
+                    for j, remove in enumerate(toolbar, start=1):
+                        if j == i:
+                            try:
+                                element = remove.find_element(By.ID, 'btnCancella')
+                            except NoSuchElementException:
+                                return "error"
                             break
-                        except NoSuchElementException:
-                            return "impossible to remove"
-                if found:
-                    break
-        if found:
+                    if found:
+                        break
             element.click()
             confirm = self.driver.find_element(By.XPATH, "//*[@id='btnConferma']")
             confirm.click()
             return "success"
-        else:
-            return "wrong name passed"
+        except TimeoutError:
+            return "timeout"
 
     def fetch_booklet(self) -> List[Exam]:
 
@@ -233,14 +251,15 @@ class Esse3Wrapper:
             EC.visibility_of_element_located((By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/div/table/tbody/tr")))
         exams = self.driver.find_elements(By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/div/table/tbody/tr")
         rows = []
-        for i, exam in enumerate(exams, start=1):
-            name = exam.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/div/table/tbody/tr[{i}]/td[1]/a").text
-            academic_year = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[2]").text
-            cfu = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[3]").text
-            state = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[4]/img").get_attribute('aria-label')
-            vote_date = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[6]").text
+        for index, exam in enumerate(exams, start=1):
+            name = exam.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/div/table/tbody/tr[{index}]/td[1]/a")
+            academic_year = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{index}]/td[2]")
+            cfu = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{index}]/td[3]")
+            state = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{index}]/td[4]/img")
+            vote_date = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{index}]/td[6]")
 
-            row = f"{name}&{academic_year}&{cfu}&{state}&{vote_date}"
+            row = name.text + "&" + academic_year.text + "&" + cfu.text + \
+                  "&" + state.get_attribute('aria-label') + "&" + vote_date.text
             rows.append(Exam.of(row))
 
         return rows

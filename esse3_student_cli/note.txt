@@ -1,3 +1,106 @@
 - ricordarsi che per gli studenti alla triennale la schermata di scelta carriera non esiste
 - pagina delle tasse per alcuni ci sono due tabelle, quindi la prima tabella che riguarda gli esami puo essere
   come codice html --> table oppure table[1] in base se c'è l'altra tabella degli addebiti
+- Fetch exams --> far partire il comando con il debug a true e modalità schermo intero altrimenti signed_up e
+                    description non si vedono
+- Fetch reservations --> i dati cambiano alcuni appelli hanno la riga "tipo prova: scritto e orale", per esempio...
+                            e verso la fine della chiusura appello appare la riga "Cancella Prenotazione: Impossibile
+                            cancellare l'iscrizione: iscrizione chiusa", quindi bisogna calcolare queste eventualità
+- Remove reservations --> il tasto cancella sparisce quando non si puo eliminare piu l appello dalle prenotazioni
+
+
+Ci sono diverse ragioni per cui potresti non riuscire ad utilizzare l'app mentre il processo fetch_date è in
+esecuzione. Una delle ragioni potrebbe essere che il tuo codice non è strutturato in modo adeguato per l'utilizzo
+di thread o processi separati. Ad esempio, potrebbe esserci un problema di concorrenza nell'accesso ai dati
+condivisi tra i thread o i processi. Un altro problema potrebbe essere che il codice non è stato scritto per
+essere utilizzato in modo asincrono. Ad esempio, potrebbero esserci chiamate bloccanti che impediscono
+all'interfaccia utente di essere aggiornata mentre il processo fetch_date è in esecuzione. Infine, potrebbe
+esserci un problema con la libreria Selenium che utilizzi, potrebbe essere necessario utilizzare un driver
+specifico per la piattaforma o la versione del browser che utilizzi. Per risolvere questi problemi, potresti
+dover rivedere il tuo codice e apportare modifiche per garantire che i dati condivisi siano protetti da una
+sincronizzazione adeguata, che il codice sia scritto per l'esecuzione asincrona e che il driver Selenium
+sia configurato correttamente. Inoltre, è sempre utile leggere la documentazione e i forum di supporto
+per Selenium e per la libreria che utilizzi per verificare se ci sono problemi noti o soluzioni per
+problemi simili.
+
+..............................................
+ td_elements = self.driver.find_elements(By.XPATH, f"//*[@id='app-tabella_appelli']/tbody/tr[*]/td[text()='{name.value}']")
+        if len(td_elements) > 0:
+            a_element = td_elements[0].find_element(By.XPATH, "//*[@id='app-toolbarTipoAppello']")
+            a_element.click()
+            self.driver.find_element(By.XPATH, "//*[@id='app-selectionSvolgEsame']").send_keys(note.value)
+            self.driver.find_element(By.XPATH, "//*[@id='btnSalva']").click()
+            return "ok"
+        else:
+            return ""
+..................................................
+
+<tr>
+<td title="" class="footable-first-visible" style="display: table-cell;"><span class="footable-toggle fooicon fooicon-plus"></span>
+    <div id="app-toolbarTipoAppello" class="tool-bar toolbar-align-left">
+        <a id="app-toolbarTipoAppello" href="auth/studente/Appelli/DatiPrenotazioneAppello.do?APP_ID=16&amp;CDS_ESA_ID=10711&amp;ATT_DID_ESA_ID=16980&amp;ADSCE_ID=8532624&amp;AA_OFF_ID=2021&amp;CDS_ID=10711&amp;PDS_ID=1&amp;AA_ORD_ID=2021&amp;ISCR_APERTA=1&amp;TIPO_ATTIVITA=1&amp;TIPO_APP_COD=0" title="informazioni sull'appello" aria-label="informazioni sull'appello" class="toolbar-s-image" style="background-image:url(images/prove_finali.gif)">​</a>
+    </div>
+</td>
+<td title="" style="display: table-cell;">DATA ANALYTICS</td>
+<td title="" class="footable-last-visible" style="display: table-cell;">06/02/2023<br></td>
+<td title="" style="display: none;">23/12/2022<br>04/02/2023</td><td title="" style="display: none;">Secondo appello</td>
+<td title="Esame in Presenza" style="display: none;">P</td><td title="" style="display: none;">2022/2023<br></td>
+</tr>
+........................................
+from selenium.common.exceptions import ElementClickInterceptedException
+
+element = self.driver.find_element(By.XPATH, '//td[@class="footable-first-visible"]/div/a[@id="app-toolbarTipoAppello"]')
+
+try:
+    element.click()
+except ElementClickInterceptedException:
+    action = ActionChains(self.driver)
+    action.move_to_element(element).perform()
+    element.click()
+...............................................
+element = self.driver.find_element(By.XPATH,
+                                                       f'//tr[{i}]/td[@class="footable-first-visible"]/div/a[@id="app-toolbarTipoAppello"]')
+                    self.driver.execute_script("arguments[0].scrollIntoView();", element)
+                    element.send_keys(Keys.ENTER)
+.....................................................
+ codice fetch_exams():
+    rows = []
+    index = 2
+    for reservation in reservations:
+        name = reservation.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/div/div[{index}]/h2")
+        dict = {
+            "Name": name.text,
+        }
+        elements = self.driver.find_elements(By.XPATH,
+                                             f"/html/body/div[2]/div/div/main/div[3]/div/div/div/div[{index}]/dl/dt")
+        for position, element in enumerate(elements, start=1):
+            key = element.find_element(By.XPATH,
+                                       f"/html/body/div[2]/div/div/main/div[3]/div/div/div/div[{index}]/dl/dt[{position}]")
+            value = element.find_element(By.XPATH,
+                                         f"/html/body/div[2]/div/div/main/div[3]/div/div/div/div[{index}]/dl/dd[{position}]")
+            if position == 1:
+                dict["Date"] = key.text
+            else:
+                dict[key.text] = value.text
+            position += 1
+
+        rows.append(dict)
+        index += 2
+    '''
+....................................................
+
+class Barra(Static):
+
+    def __init__(self):
+        super().__init__("")
+        self._bar = Progress(BarColumn(bar_width=100))
+        self._bar.add_task("Loading...", total=None)
+        #self._spinner = Spinner("aesthetic")
+
+    def on_mount(self) -> None:
+        self.set_interval(1 / 60, self.update_progress_bar)
+        self.styles.border = ( "tall", "red")
+
+    def update_progress_bar(self) -> None:
+       self.update(self._bar)
+       # self.update(self._spinner)
