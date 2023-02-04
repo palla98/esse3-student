@@ -138,7 +138,7 @@ class Esse3Wrapper:
             rows.append(Exam.of(row))
         return rows
 
-    def fetch_reservations(self) -> List:
+    def fetch_reservations(self) -> list:
 
         self.driver.get(RESERVATIONS_URL)
         try:
@@ -169,7 +169,7 @@ class Esse3Wrapper:
             index += 2
         return rows
 
-    def add_reservation(self, name: Exam, modality: ExaminationProcedure, note: ExamNotes) -> str:
+    def add_reservation(self, names: list, modality: ExaminationProcedure, note: ExamNotes) -> str:
 
         self.driver.get(EXAMS_URL)
         WebDriverWait(self.driver, 10).until(
@@ -177,18 +177,24 @@ class Esse3Wrapper:
         exams = self.driver.find_elements(By.XPATH, "//table/tbody/tr")
         if not exams:
             return "empty"
-        for i, exam in enumerate(exams, start=1):
-            if exam.find_element(By.XPATH, f"//table/tbody/tr[{i}]/td[2]").text == name.value:
-                exam_link = self.driver.find_element(By.XPATH, f"//table/tbody/tr[{i}]/td/div/a")
-                self.driver.execute_script("arguments[0].scrollIntoView();", exam_link)
-                exam_link.send_keys(Keys.ENTER)
-                self.driver.find_element(By.XPATH, "//textarea[@id='app-textAreaNoteDoc']").send_keys(note.value)
-                self.driver.find_element(By.XPATH, "//select[@id='app-selectionSvolgEsame']").send_keys(modality.value)
-                save_button = self.driver.find_element(By.XPATH, "//*[@id='btnSalva']")
-                self.driver.execute_script("arguments[0].scrollIntoView();", save_button)
-                save_button.send_keys(Keys.ENTER)
-                return "ok"
-        return "name error"
+        while names:
+            name = names.pop()
+            for i, exam in enumerate(exams, start=1):
+                if exam.find_element(By.XPATH, f"//table/tbody/tr[{i}]/td[2]").text == name:
+                    exam_link = self.driver.find_element(By.XPATH, f"//table/tbody/tr[{i}]/td/div/a")
+                    self.driver.execute_script("arguments[0].scrollIntoView();", exam_link)
+                    exam_link.send_keys(Keys.ENTER)
+                    self.driver.find_element(By.XPATH, "//textarea[@id='app-textAreaNoteDoc']").send_keys(note.value)
+                    self.driver.find_element(By.XPATH, "//select[@id='app-selectionSvolgEsame']").send_keys(modality.value)
+                    save_button = self.driver.find_element(By.XPATH, "//*[@id='btnSalva']")
+                    self.driver.execute_script("arguments[0].scrollIntoView();", save_button)
+                    save_button.send_keys(Keys.ENTER)
+                    break
+            self.driver.get(EXAMS_URL)
+            WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.XPATH, "//table/tbody/tr")))
+            exams = self.driver.find_elements(By.XPATH, "//table/tbody/tr")
+        return "ok"
 
     def remove_reservation(self, reservation: str) -> str:
 
@@ -226,11 +232,17 @@ class Esse3Wrapper:
         else:
             return "wrong name passed"
 
-    def fetch_booklet(self) -> List[Exam]:
+    def fetch_booklet(self) -> list[Exam]:
 
         self.driver.get(BOOKLET_URL)
+
         WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located((By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/div/table/tbody/tr")))
+
+        arithmetic_average = self.driver.find_element(By.XPATH, "//div[@id='boxMedie']//li[1]").text.split()[4]
+        weighted_average = self.driver.find_element(By.XPATH, "//div[@id='boxMedie']//li[2]").text.split()[4]
+        sum = 0
+
         exams = self.driver.find_elements(By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/div/table/tbody/tr")
         rows = []
         for i, exam in enumerate(exams, start=1):
@@ -240,9 +252,12 @@ class Esse3Wrapper:
             state = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[4]/img").get_attribute('aria-label')
             vote_date = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[6]").text
 
+            if state == "Superata":
+                sum = sum + int(cfu)
+
             row = f"{name}&{academic_year}&{cfu}&{state}&{vote_date}"
             rows.append(Exam.of(row))
-
+        rows.append(Exam.of(f"{arithmetic_average}&{weighted_average}&{sum}"))
         return rows
 
     def fetch_exams_average(self) -> str:

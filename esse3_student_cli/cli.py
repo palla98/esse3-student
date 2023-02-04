@@ -250,7 +250,6 @@ def command_booklet(
     esse3_wrapper = new_esse3_wrapper()
     with console.status("Fetching exams booklet..."):
         exams = esse3_wrapper.fetch_booklet()
-        averages = esse3_wrapper.fetch_exams_average()
 
     table = Table(header_style="rgb(210,105,30) bold", box=box.SIMPLE_HEAD)
     table.add_column("#", style="red bold")
@@ -273,26 +272,27 @@ def command_booklet(
 
     for index, exam in enumerate(track(exams, description="Processing...", transient=True), start=1):
         colums = exam.value.split("&")
-        c = get_state_color(colums[3])
-        vote_split = colums[4].split(" - ")
-        v = get_vote_color(vote_split[0])
-        vote_style = Text(colums[4])
-        if vote_style[0:3] == Text("IDO"):
-            vote_style = Text(str(vote_style).replace("IDO", "IDONEO"))
-            vote_style.stylize(f"bold {v}", 0, 6)
-        else:
-            vote_style.stylize(f"bold {v}", 0, 2)
-        if academic_year:
-            if colums[1] == str(academic_year.value):
+        if len(colums) != 3:
+            c = get_state_color(colums[3])
+            vote_split = colums[4].split(" - ")
+            v = get_vote_color(vote_split[0])
+            vote_style = Text(colums[4])
+            if vote_style[0:3] == Text("IDO"):
+                vote_style = Text(str(vote_style).replace("IDO", "IDONEO"))
+                vote_style.stylize(f"bold {v}", 0, 6)
+            else:
+                vote_style.stylize(f"bold {v}", 0, 2)
+            if academic_year:
+                if colums[1] == str(academic_year.value):
+                    table.add_row(str(index), colums[0], colums[1], colums[2], f'[{c}]{colums[3]}[/{c}]', vote_style)
+            elif exam_state:
+                if colums[3] == exam_state.value:
+                    table.add_row(str(index), colums[0], colums[1], colums[2], f'[{c}]{colums[3]}[/{c}]', vote_style)
+            elif vote:
+                if colums[4][0:2] == str(vote.value):
+                    table.add_row(str(index), colums[0], colums[1], colums[2], f'[{c}]{colums[3]}[/{c}]', vote_style)
+            else:
                 table.add_row(str(index), colums[0], colums[1], colums[2], f'[{c}]{colums[3]}[/{c}]', vote_style)
-        elif exam_state:
-            if colums[3] == exam_state.value:
-                table.add_row(str(index), colums[0], colums[1], colums[2], f'[{c}]{colums[3]}[/{c}]', vote_style)
-        elif vote:
-            if colums[4][0:2] == str(vote.value):
-                table.add_row(str(index), colums[0], colums[1], colums[2], f'[{c}]{colums[3]}[/{c}]', vote_style)
-        else:
-            table.add_row(str(index), colums[0], colums[1], colums[2], f'[{c}]{colums[3]}[/{c}]', vote_style)
 
         time.sleep(0.1)
 
@@ -303,24 +303,24 @@ def command_booklet(
     table.add_column("Arithmetic average", style="bold", justify="center")
     table.add_column("Weighted average", style="bold", justify="center")
     table.add_column("Degree basis", style="bold", justify="center")
-    colums = averages.split("&")
-    arithmetic = colums[0].split(" ")
-    weighted = colums[1].split(" ")
-    degree_basis = (float(weighted[4])*11.0)/3.0
+    averages = exams[len(exams)-1].value.split("&")
+    arithmetic = averages[0]
+    weighted = averages[1]
+    degree_basis = (float(weighted)*11.0)/3.0
     if new_average[1] is not None:
         table.add_column("Vote", style="bold", justify="center")
         table.add_column("Cfu", style="bold", justify="center")
         table.add_column("new average", style="bold", justify="center")
         table.add_column("New degree basis", style="bold", justify="center")
-        actual_average = float(weighted[4])
-        actual_cfu = float(colums[2])
+        actual_average = float(weighted)
+        actual_cfu = float(averages[2])
         new = ((actual_average*actual_cfu)+(new_vote*new_cfu)) / (actual_cfu+new_cfu)
         new_degree_basis = (new * 11.0) / 3.0
 
-        table.add_row(arithmetic[4], weighted[4], str(round(degree_basis, 2)), str(new_vote),
+        table.add_row(arithmetic, weighted, str(round(degree_basis, 2)), str(new_vote),
                       str(new_cfu), str(round(new, 2)), str(round(new_degree_basis, 2)))
     else:
-        table.add_row(arithmetic[4], weighted[4], str(round(degree_basis, 2)))
+        table.add_row(arithmetic, weighted, str(round(degree_basis, 2)))
 
     if not academic_year and not vote and not exam_state:
         console.rule("[bold]Statistics[/bold]")

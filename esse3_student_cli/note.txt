@@ -104,3 +104,37 @@ class Barra(Static):
     def update_progress_bar(self) -> None:
        self.update(self._bar)
        # self.update(self._spinner)
+................................................
+    def add_exams(self) -> None:
+        selected_exam = next((c for c in self.query("Checkbox") if c.value), None)
+        if not selected_exam:
+            return
+
+        exam_name = Exam(selected_exam.parameter)
+        exam_notes_input = self.query_one("#exams-input")
+        exam_notes = ExamNotes(" ")
+
+
+        add_screen_name = "add-" + exam_name.value
+        if self.is_screen_installed(add_screen_name):
+            self.push_screen(add_screen_name)
+        else:
+            self.install_screen(Exams.AddExams(exam_name, ExaminationProcedure("P"), exam_notes), name=add_screen_name)
+            self.push_screen(add_screen_name)
+
+        if self.is_screen_installed("reservations"):
+            self.uninstall_screen("reservations")
+
+        remove_screen_name = "remove-" + add_screen_name
+        if self.is_screen_installed(remove_screen_name):
+            self.uninstall_screen(remove_screen_name)
+..................................
+exams = []
+row1 = Exam.of("colonna1_riga1&colonna2_riga1&colonna3_riga1&colonna4_riga1")
+row2 = Exam.of("colonna1_riga2&colonna2_riga2&colonna3_riga2&colonna4_riga1")
+row3 = Exam.of("colonna1_riga3&colonna2_riga3&colonna3_riga3&colonna4_riga1")
+row4 = Exam.of("colonna1_riga4&colonna2_riga4&colonna3_riga4&colonna4_riga1")
+exams.append(row1)
+exams.append(row2)
+exams.append(row3)
+exams.append(row4)

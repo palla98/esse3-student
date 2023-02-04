@@ -1,6 +1,7 @@
 import asyncio
+import time
 
-from esse3_student_cli.primitives import Exam, ExaminationProcedure, ExamNotes
+from esse3_student_cli.primitives import Exam, ExaminationProcedure, ExamNotes, Vote, Cfu
 from esse3_student_cli import cli
 from typing import Tuple
 
@@ -21,6 +22,8 @@ class Header(Static):
 
 class Booklet(Screen):
 
+    exams = None
+
     class Tables(Static):
 
         def __init__(self, exams) -> None:
@@ -28,7 +31,7 @@ class Booklet(Screen):
             super().__init__()
 
         def on_mount(self):
-            self.id = "booklet-table"
+            self.id = "booklet-table-exams"
             self.table(self.exams)
 
         def get_state(self, state: str) -> Text:
@@ -60,35 +63,138 @@ class Booklet(Screen):
             table.add_column("Vote", style="bold")
 
             for index, exam in enumerate(exams, start=1):
-                colums = exam.value.split("&")
+                if index <= 15:
+                    colums = exam.value.split("&")
 
-                state = self.get_state(colums[3])
+                    state = self.get_state(colums[3])
 
-                vote_split = colums[4].split(" - ")
-                vote = self.get_vote(vote_split[0])
+                    vote_split = colums[4].split(" - ")
+                    vote = self.get_vote(vote_split[0])
 
-                table.add_row(str(index), colums[0], colums[1], colums[2], state, vote)
+                    table.add_row(str(index), colums[0], colums[1], colums[2], state, vote)
 
             self.update(table)
 
+    class Filter(Input):
+
+        def __init__(self, field) -> None:
+            self.field = field
+            super().__init__()
+
+        def on_mount(self):
+            self.placeholder = self.field + "..."
+            self.id = self.field
+
+    class Average(Static):
+
+        def __init__(self, averages) -> None:
+            self.averages = averages
+            super().__init__()
+
+        def on_mount(self):
+            self.table(self.averages)
+
+        def table(self, averages):
+            table = Table(header_style="rgb(255,204,51) bold", box=box.SIMPLE_HEAD)
+            table.add_column("Average", style="bold", justify="center")
+            table.add_column("Degree basis", style="bold", justify="center")
+            values = averages[len(averages)-1].value.split("&")
+            weighted = values[1]
+            degree_basis = (float(weighted) * 11.0) / 3.0
+
+            table.add_row(weighted, str(round(degree_basis, 2)))
+            self.update(table)
+
+    class NewAverage(Static):
+
+        def __init__(self, averages, vote, cfu) -> None:
+            self.averages = averages
+            self.vote = vote
+            self.cfu = cfu
+            super().__init__()
+
+        def on_mount(self):
+            self.table(self.averages, self.vote, self.cfu)
+
+        def table(self, averages, new_vote, new_cfu):
+            table = Table(header_style="rgb(210,105,30) bold", box=box.SIMPLE_HEAD)
+            table.add_column("Vote", style="bold", justify="center")
+            table.add_column("Cfu", style="bold", justify="center")
+            table.add_column("new average", style="bold", justify="center")
+            table.add_column("New degree basis", style="bold", justify="center")
+            values = averages[len(averages)-1].value.split("&")
+            weighted = values[1]
+            actual_average = float(weighted)
+            actual_cfu = float(values[2])
+            new_average = ((actual_average * actual_cfu) + (int(new_vote) * int(new_cfu))) / (actual_cfu + int(new_cfu))
+            new_degree_basis = (new_average * 11.0) / 3.0
+
+            table.add_row(str(new_vote), str(new_cfu), str(round(new_average, 2)), str(round(new_degree_basis, 2)))
+            self.update(table)
+
     async def fetch_data(self) -> None:
-        exams = cli.new_esse3_wrapper().fetch_booklet()
+        """self.exams = [
+                    Exam.of("c1-riga1&c2-riga1&c3-riga1&c4-riga1"),
+                    Exam.of("c1-riga2&c2-riga2&c3-riga2&c4-riga2"),
+                    Exam.of("c1-riga3&c2-riga3&c3-riga3&c4-riga3"),
+                    Exam.of("c1-riga4&c2-riga4&c3-riga4&c4-riga4"),
+                    Exam.of("c1-riga4&ca2-riga4&c3-riga4&c4-riga4"),
+                    Exam.of("c1-riga4&ca2-riga4&c3-riga4&c4_riga4"),
+                    Exam.of("25.8&27.8&30"),
+                ]"""
+        self.exams = cli.new_esse3_wrapper().fetch_booklet()
+
         await self.query_one("#booklet-loading").remove()
-        self.query_one(Container).mount(
-            Vertical(
-                self.Tables(exams),
-            )
+        await self.query_one("#principale").mount(
+            Vertical(self.Tables(self.exams))
         )
+        await self.query_one("#principale").mount(
+                            Static("Compute new average", classes="title"),
+                            Container(
+                                self.Average(self.exams),
+                                Horizontal(
+                                    self.Filter("vote"),
+                                    self.Filter("cfu"),
+                                    Button("compute", id="booklet-button"),
+                                    id="booklet-filters"
+                                ),
+                                id="booklet-container-filters"
+                            )
+                        )
 
     async def on_mount(self) -> None:
         await asyncio.sleep(0.1)
         asyncio.create_task(self.fetch_data())
 
+    def on_button_pressed(self, event: Button.Pressed):
+        if event.button.id == "booklet-button":
+            try:
+                element1 = self.query(self.NewAverage).last()
+                element1.remove()
+            except:
+                pass
+            try:
+                element2 = self.query("#booklet-value-error").last()
+                element2.remove()
+            except:
+                pass
+
+            vote = self.query_one("#vote").value
+            cfu = self.query_one("#cfu").value
+            if vote != "" and cfu != "":
+                try:
+                    vote = Vote(int(vote)).value
+                    cfu = int(Cfu(cfu).value)
+                    self.query_one("#principale").mount(self.NewAverage(self.exams, vote, cfu))
+                except ValueError:
+                    self.query_one("#principale").mount(Static("Wrong values", id="booklet-value-error"))
+
     def compose(self) -> ComposeResult:
         yield Header("Booklet", classes="header")
         yield Container(
             Static("List passed exams", classes="title"),
-            Static("exam booklet loading in progress.....", id="booklet-loading"),
+            Static("[b][green]exam booklet[/] loading in progress.....[/]", id="booklet-loading"),
+            id="principale"
         )
         yield Footer()
 
@@ -168,22 +274,17 @@ class Exams(Screen):
             self.exams = exams
             super().__init__()
 
-        def _on_mount(self) -> None:
+        def on_mount(self) -> None:
             self.get_table(self.exams)
 
         def get_table(self, exams: list) -> None:
 
             table = Table(box=box.HEAVY_HEAD, style="rgb(139,69,19)")
             table.add_column("#", justify="center", style="bold red")
-            colums = exams[0].value.split("&")
-            if len(colums) == 2:
-                table.add_column("Name", justify="center", style="green")
-                table.add_column("Date", justify="center", style="yellow")
-            else:
-                table.add_column("Name", justify="center", style="green")
-                table.add_column("Date", justify="center", style="yellow")
-                table.add_column("Signing up", justify="center", style="yellow")
-                table.add_column("Description", justify="center")
+            table.add_column("Name", justify="center", style="green")
+            table.add_column("Date", justify="center", style="yellow")
+            table.add_column("Signing up", justify="center", style="yellow")
+            table.add_column("Description", justify="center")
 
             for index, exam in enumerate(exams, start=1):
                 row = list(exam.value.split("&"))
@@ -197,7 +298,7 @@ class Exams(Screen):
             self.value = list(exam.value.split("&"))
             super().__init__()
 
-        def _on_mount(self) -> None:
+        def on_mount(self) -> None:
             self.mount(self.Name(self.value[0]))
             self.mount(self.Check(self.value[0]))
 
@@ -206,16 +307,17 @@ class Exams(Screen):
                 self.value = name
                 super().__init__()
 
-            def _on_mount(self) -> None:
+            def on_mount(self) -> None:
                 self.update(self.value)
 
         class Check(Checkbox):
             def __init__(self, value) -> None:
-                self.parameter = value
+                self.name_value = value
                 super().__init__()
 
-            def _on_mount(self) -> None:
+            def on_mount(self) -> None:
                 self.value = False
+                self.id = self.name_value
 
     BINDINGS = [
         Binding(key="r", action="app.pop_screen", description="return"),
@@ -224,13 +326,13 @@ class Exams(Screen):
 
     async def fetch_date(self) -> None:
         """exams = [
-            ["colonna1_riga1", "colonna2_riga1", "colonna9_riga1", "colonna4_riga1"],
-            ["colonna1_riga2", "colonna2_riga2", "colonna3_riga2", "colonna4_riga2"],
-            ["colonna1_riga3", "colonna2_riga3", "colonna3_riga3", "colonna4_riga3"],
-            ["colonna1_riga4", "colonna2_riga4", "colonna3_riga4", "colonna4_riga4"],
-            ["colonna1_riga4", "colonna2_riga4", "colonna3_riga4", "colonna4_riga4"],
-            ["colonna1_riga4", "colonna2_riga4", "colonna3_riga4", "colonna4_riga4"],
-            ["colonna1_riga4", "colonna2_riga4", "colonna3_riga4", "colonna4_riga4"],
+            ["colonna1-riga1", "colonna2-riga1", "colonna9-riga1", "colonna4-riga1"],
+            ["colonna1-riga2", "colonna2-riga2", "colonna3-riga2", "colonna4-riga2"],
+            ["colonna1-riga3", "colonna2-riga3", "colonna3-riga3", "colonna4-riga3"],
+            ["colonna1-riga4", "colonna2-riga4", "colonna3-riga4", "colonna4-riga4"],
+            ["colonna1-riga4", "colonna2-riga4", "colonna3-riga4", "colonna4-riga4"],
+            ["colonna1-riga4", "colonna2-riga4", "colonna3-riga4", "colonna4_riga4"],
+            ["colonna1-riga4", "colonna2-riga4", "colonna3-riga4", "colonna4_riga4"],
         ]"""
         exams = cli.new_esse3_wrapper().fetch_exams()
         await self.query_one(".exams-loading").remove()
@@ -241,7 +343,7 @@ class Exams(Screen):
             await self.query_one("#exams-container").mount(Static("List of available exams", classes="title"))
             await self.query_one("#exams-container").mount(Vertical(id="exams-table"))
             await self.query_one("#exams-container").mount(Container(
-                Input(placeholder="Notes...", id="exams-input"),
+                #Input(placeholder="Notes...", id="exams-input"),
                 Container(id="exams-checkbox"),
                 id="exams-add"
             ))
@@ -256,39 +358,36 @@ class Exams(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header("Exams", classes="header")
-        yield Static("loading available exams in progress.....", classes="exams-loading")
+        yield Static("loading [yellow]available exams[/] in progress.....", classes="exams-loading")
         yield Footer()
 
-    class AddExams(Screen):
 
-        def __init__(self, exam, modality, notes) -> None:
-            self.exam = exam
-            self.modality = modality
-            self.notes = notes
-            super().__init__()
+class AddExams(Screen):
 
-        async def fetch_date(self) -> None:
-            result = cli.new_esse3_wrapper().add_reservation(self.exam, self.modality, self.notes)
-            await self.query_one(".exams-loading").remove()
-            if result == "ok":
-                self.query_one(Container).mount(Static(f"Exam: {self.exam} added", id="exams-added-success"))
-            elif result == "name error":
-                self.query_one(Container).mount(Static(f"❌ Wrong name passed !!", classes="exams-added-error"))
-            elif result == "empty":
-                self.query_one(Container).mount(Static(f"❌ No exams to add !!", classes="exams-added-error"))
+    def __init__(self, exams, modality, notes) -> None:
+        self.exams = exams
+        self.modality = modality
+        self.notes = notes
+        super().__init__()
 
-        async def on_mount(self) -> None:
-            await asyncio.sleep(0.1)
-            asyncio.create_task(self.fetch_date())
+    async def fetch_date(self) -> None:
+        cli.new_esse3_wrapper().add_reservation(list(self.exams), self.modality, self.notes)
+        await self.query_one(".exams-loading").remove()
+        self.query_one(Container).mount(Static(f"Exams: [green]{', '.join(map(str, self.exams))}[/] added", id="exams-added-success"))
 
-        def compose(self) -> ComposeResult:
-            yield Header("Exam added", classes="header")
-            yield Container(Static("added reservation in progress.....", classes="exams-loading"))
-            yield Footer()
+    async def on_mount(self) -> None:
+        await asyncio.sleep(0.1)
+        asyncio.create_task(self.fetch_date())
 
-        BINDINGS = [
-            Binding(key="r", action="app.pop_screen", description="return")
-        ]
+    def compose(self) -> ComposeResult:
+        yield Header("Exam added", classes="header")
+        yield Container(Static("added [yellow]reservations[/] in progress.....", classes="exams-loading"))
+        yield Footer()
+
+    BINDINGS = [
+        Binding(key="r", action="app.reload('exams')", description="return"),
+        Binding(key="h", action="app.homepage('exams')", description="homepage"),
+    ]
 
 
 class Reservations(Screen):
@@ -314,10 +413,37 @@ class Reservations(Screen):
             table.add_row(str(index), *row)
             self.update(table)
 
-        def _on_mount(self) -> None:
+        def on_mount(self) -> None:
             self.table(self.reservation, self.index)
 
-    class Buttons(Button):
+    class Line(Horizontal):
+
+        def __init__(self, reservation) -> None:
+            self.values = list(reservation.values())
+            super().__init__()
+
+        def on_mount(self) -> None:
+            self.mount(self.Name(self.values[0]))
+            self.mount(self.Check(self.values[0]))
+
+        class Name(Static):
+            def __init__(self, name) -> None:
+                self.value = name
+                super().__init__()
+
+            def on_mount(self) -> None:
+                self.update(self.value)
+
+        class Check(Checkbox):
+            def __init__(self, value) -> None:
+                self.name_value = value
+                super().__init__()
+
+            def on_mount(self) -> None:
+                self.value = False
+                self.id = self.name_value
+
+    """class Buttons(Button):
 
         def __init__(self, reservation) -> None:
             self.reservation = reservation
@@ -327,9 +453,9 @@ class Reservations(Screen):
             colums = list(reservation.values())
             return colums[0]
 
-        def _on_mount(self) -> None:
+        def on_mount(self) -> None:
             self.label = self.value(self.reservation)
-            self.id = self.value(self.reservation)
+            self.id = self.value(self.reservation)"""
 
     BINDINGS = [
         Binding(key="r", action="app.pop_screen", description="return"),
@@ -337,20 +463,40 @@ class Reservations(Screen):
     ]
 
     async def fetch_date(self) -> None:
-        reservations = cli.new_esse3_wrapper().fetch_reservations()
+        reservations = [{'name': 'BUSINESS GAME', '1': 'igikpwnygi', '2': 'jfsxfckizr', '3': 'rsyxjxhxgw', '4': 'otykbzckdf',
+                          '5': 'ulxxftcxzp', '6': 'wlyztntjtl', '7': 'kjagclbcax', '8': 'pshhggmmxw',
+                          '9': 'upbluuynsj'},
+                        {'name': 'DATA ANALYTICS', '1': 'unqfqxmbbs', '2': 'wnjhosvbck', '3': 'azrprrbrgw', '4': 'vifbxzwefb',
+                          '5': 'kmiehveaol', '6': 'rytpxgepda', '7': 'fyznnfjkrc', '8': 'ymkklaxmkj',
+                          '9': 'cwzojlxgxf'},
+                        {'name': "DIDATTICA DELL'INFORMATICA", '1': 'unqfqxmbbs', '2': 'wnjhosvbck', '3': 'azrprrbrgw',
+                         '4': 'vifbxzwefb',
+                         '5': 'kmiehveaol', '6': 'rytpxgepda', '7': 'fyznnfjkrc', '8': 'ymkklaxmkj',
+                         '9': 'cwzojlxgxf'},
+                        {'name': 'MOBILE', '1': 'unqfqxmbbs', '2': 'wnjhosvbck', '3': 'azrprrbrgw',
+                         '4': 'vifbxzwefb',
+                         '5': 'kmiehveaol', '6': 'rytpxgepda', '7': 'fyznnfjkrc', '8': 'ymkklaxmkj',
+                         '9': 'cwzojlxgxf'},
+                        {'name': 'GOOD', '1': 'unqfqxmbbs', '2': 'wnjhosvbck', '3': 'azrprrbrgw',
+                         '4': 'vifbxzwefb',
+                         '5': 'kmiehveaol', '6': 'rytpxgepda', '7': 'fyznnfjkrc', '8': 'ymkklaxmkj',
+                         '9': 'cwzojlxgxf'}
+                       ]
+        #reservations = cli.new_esse3_wrapper().fetch_reservations()
         await self.query_one(".reservations-loading").remove()
         if len(reservations) == 0:
-            self.query_one(Container).mount(Static(f"❌ No appeals booked !!", classes="reservations-removed-error"))
+            await self.query_one("#reservations-container").mount(Static(f"❌ No appeals booked !!", classes="reservations-removed-error"))
         else:
-            self.query_one(Container).mount(
+            await self.query_one("#reservations-container").mount(
                 Static("List of Reservations", classes="title"),
-                Vertical(id="vertical"),
+                Vertical(id="reservations-vertical"),
                 Static("Select exam to remove:", classes="title"),
-                Horizontal(id="horizontal"),
+                Container(id="reservations-buttons"),
             )
             for index, reservation in enumerate(reservations, start=1):
                 self.query_one(Vertical).mount(self.Tables(reservation, index))
-                self.query_one(Horizontal).mount(self.Buttons(reservation))
+                await self.query_one("#reservations-buttons").mount(self.Line(reservation))
+            await self.query_one("#reservations-container").mount(Horizontal(Button("send data", id="reservations-remove")))
 
     async def on_mount(self) -> None:
         await asyncio.sleep(0.1)
@@ -358,7 +504,8 @@ class Reservations(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header("Reservations", classes="header")
-        yield Container(Static("loading exams booked in progress.....", classes="reservations-loading"))
+        yield Container(Static("loading [yellow]exams booked[/] in progress.....", classes="reservations-loading")
+                        , id="reservations-container")
         yield Footer()
 
 
@@ -388,7 +535,8 @@ class RemoveReservation(Screen):
         yield Footer()
 
     BINDINGS = [
-        Binding(key="r", action="app.pop_screen", description="return")
+        Binding(key="r", action="app.reload('reservations')", description="return"),
+        Binding(key="h", action="app.homepage('reservations')", description="homepage"),
     ]
 
 
@@ -423,34 +571,96 @@ class Tui(App):
     def on_mount(self) -> None:
         self.push_screen("homepage")
 
+    def add_exams(self) -> None:
+        name = None
+        entro = False
+        exams = []
+        for c in self.query("Checkbox"):
+            if c.value:
+                name = c.name_value
+                exams.append(name)
+                entro = True
+                #break
+        if not entro:
+            return
+
+        """n = ""
+        for c in self.query("Input"):
+            if c.value != "":
+                n = c.value
+                break
+        if n != "":
+            notes = ExamNotes(n)
+        else:
+            notes = ExamNotes(" ")"""
+
+        name_value = "add-" + name
+
+        if not self.is_screen_installed(name_value):
+            self.install_screen(AddExams(exams, ExaminationProcedure("P"), ExamNotes(" ")), name=name_value)
+        self.push_screen(name_value)
+
+        for c in self.query("Input"):
+            c.value = ""
+
+        for c in self.query("Checkbox"):
+            c.value = False
+
+        if self.is_screen_installed("reservations"):
+            self.uninstall_screen("reservations")
+        if self.is_screen_installed("remove-"+name_value):
+            self.uninstall_screen("remove-"+name_value)
+
+    def remove_reservation(self) -> None:
+        name = None
+        entro = False
+        for c in self.query("Checkbox"):
+            if c.value:
+                name = c.name_value
+                entro = True
+                break
+        if not entro:
+            return
+
+        name_value = "remove-" + name
+
+        if not self.is_screen_installed(name_value):
+            self.install_screen(RemoveReservation(name), name=name_value)
+        self.push_screen(name_value)
+
+        for c in self.query("Checkbox"):
+            c.value = False
+            c.refresh()
+
+        if self.is_screen_installed("exams"):
+            self.uninstall_screen("exams")
+        if self.is_screen_installed("add-"+name_value):
+            self.uninstall_screen("add-"+name_value)
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         screens = {"booklet": Booklet(), "reservations": Reservations(), "taxes": Taxes(), "exams": Exams()}
-        buttons = ["booklet", "reservations", "taxes", "exams"]
+        commands = ["booklet", "reservations", "taxes", "exams"]
         if event.button.id == "exams-send":
-            for c in self.query("Checkbox"):
-                if c.value:
-                    name = Exam(c.parameter)
-                    break
-            if self.query_one("#exams-input").value == "":
-                notes = ExamNotes(" ")
-            else:
-                notes = ExamNotes(self.query_one("#exams-input").value)
-            if not self.is_screen_installed(f"{name.value}"):
-                self.install_screen(Exams.AddExams(name, ExaminationProcedure("P"), notes), name=f"{name.value}")
-            self.push_screen(f"{name.value}")
+            self.add_exams()
+        elif event.button.id == "reservations-remove":
+            self.remove_reservation()
         else:
-            if not self.is_screen_installed(f"{event.button.id}") and event.button.id not in buttons:
-                self.install_screen(RemoveReservation(event.button.id), name=f"{event.button.id}")
-            elif not self.is_screen_installed(f"{event.button.id}"):
-                self.install_screen(screens[f"{event.button.id}"], name=f"{event.button.id}")
-            self.push_screen(f"{event.button.id}")
-
-    def action_refresh(self, screen) -> None:
-        screens = {"booklet": Booklet(), "reservations": Reservations(), "taxes": Taxes(), "exams": Exams()}
-        self.pop_screen()
-        self.uninstall_screen(screen)
-        self.install_screen(screens[f"{screen}"], name=f"{screen}")
-        self.push_screen(screen)
+            if event.button.id not in commands and event.button.id != "booklet-button":
+                if not self.is_screen_installed("remove-"+event.button.id):
+                    self.install_screen(RemoveReservation(event.button.id), name="remove-"+event.button.id)
+                    self.push_screen("remove-"+event.button.id)
+                else:
+                    self.push_screen("remove-"+event.button.id)
+                if self.is_screen_installed("exams"):
+                    self.uninstall_screen("exams")
+                if self.is_screen_installed("add-" + event.button.id):
+                    self.uninstall_screen("add-" + event.button.id)
+            elif event.button.id != "booklet-button":
+                if not self.is_screen_installed(f"{event.button.id}"):
+                    self.install_screen(screens[f"{event.button.id}"], name=f"{event.button.id}")
+                    self.push_screen(f"{event.button.id}")
+                else:
+                    self.push_screen(f"{event.button.id}")
 
     def action_key_escape(self) -> None:
         self.exit()
@@ -458,4 +668,22 @@ class Tui(App):
     def action_light_mode_toggle(self) -> None:
         self.dark = not self.dark
 
+    def action_refresh(self, screen):
+        screens = {"booklet": Booklet(), "reservations": Reservations(), "taxes": Taxes(), "exams": Exams()}
+        self.pop_screen()
+        self.uninstall_screen(screen)
+        self.install_screen(screens[f"{screen}"], name=f"{screen}")
+        self.push_screen(screen)
 
+    def action_reload(self, screen):
+        screens = {"booklet": Booklet(), "reservations": Reservations(), "taxes": Taxes(), "exams": Exams()}
+        self.pop_screen()
+        self.pop_screen()
+        self.uninstall_screen(screen)
+        self.install_screen(screens[f"{screen}"], name=f"{screen}")
+        self.push_screen(screen)
+
+    def action_homepage(self, screen):
+        self.pop_screen()
+        self.pop_screen()
+        self.uninstall_screen(screen)

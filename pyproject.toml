@@ -21,6 +21,7 @@ aiohttp = "^3.8.3"
 httpx = "^0.23.3"
 asyncselenium = "^0.0.2"
 self = "^2020.12.3"
+termcolor = "^2.2.0"
 
 [tool.poetry.dev-dependencies]
 coverage = "^6.4.4"

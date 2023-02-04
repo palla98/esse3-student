@@ -31,7 +31,7 @@ class Course:
     pass
 
 
-@bounded_string(min_length=3, max_length=255, pattern=r"[-A-Z a-z 0-9 \/:[\]’'&\n]+")
+@bounded_string(min_length=3, max_length=255, pattern=r"[-A-Z a-z 0-9 \.\/:[\]’'&\n]+")
 class Exam:
     pass
 

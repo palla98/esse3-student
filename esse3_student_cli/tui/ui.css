@@ -24,7 +24,7 @@ Footer {
 .title {
     content-align: center middle;
     width: 100%;
-    min-height: 10%;
+    min-height: 3;
     text-style: bold;
     background: $panel;
 }
@@ -46,30 +46,6 @@ Footer {
     margin: 1;
     border: tall #1d2e38;
     width: 50%;
-}
-
-#vertical {
-    border: #2e6da4;
-    height: auto;
-}
-
-#vertical > Tables {
-    content-align: center middle;
-    border: none;
-    width: 100%;
-}
-
-#horizontal{
-    align: center middle;
-    height: auto;
-    width: 100%;
-    border: #66512c;
-}
-
-#horizontal > Button{
-    margin-right: 4;
-    margin-left: 4;
-    border: none;
 }
 
 #exams-container {
@@ -107,12 +83,12 @@ Footer {
     layout: grid;
     overflow-y: auto;
     grid-size: 2;
-    width: 100%;
     border: none;
 }
 
 #exams-checkbox > Line  {
-    height: auto;
+    height: 100%;
+    width: 100%;
     border: heavy #54422b;
     align: center middle;
 }
@@ -165,6 +141,48 @@ Footer {
 
 /* RESERVATIONS */
 
+#reservations-vertical {
+    border: heavy #2b542c;
+    height: 40%;
+}
+
+#reservations-vertical > Tables {
+    content-align: center middle;
+    border: none;
+    width: 100%;
+    height: auto;
+}
+
+#reservations-buttons{
+    layout: horizontal;
+    height: auto;
+    align: center middle;
+}
+
+#reservations-buttons > Line  {
+    border: heavy #FFCC33;
+    align: center middle;
+    height: auto;
+    width: auto;
+}
+
+#reservations-buttons  > Line > Static {
+    width: auto;
+    height: auto;
+}
+
+#reservations-buttons  > Line > Check {
+    width: auto;
+    height: auto;
+}
+
+#reservations-container > Horizontal {
+    border: heavy #FFCC33;
+    align: center middle;
+    height: auto;
+    width: 100%;
+}
+
 .reservations-loading{
     width: 100%;
     height: 100%;
@@ -191,7 +209,50 @@ Footer {
 
 /* BOOKLET */
 
-#booklet-table{
+#principale > Vertical > Tables{
+    content-align: center middle;
+    border: heavy #2b542c;
+    width: 100%;
+    height: auto;
+}
+
+#principale > NewAverage{
+    border: heavy #66512c;
+    content-align: center middle;
+}
+
+#booklet-container-filters{
+    height: auto;
+    layout: horizontal;
+    align: center middle;
+    border: heavy #FFCC33;
+}
+
+#booklet-container-filters > Average {
+    width: auto;
+}
+
+#booklet-filters{
+    align: center middle;
+    width: 60%;
+}
+
+#booklet-filters > Input{
+    width: 10%;
+}
+
+#booklet-filters > Button{
+    margin-left: 3;
+}
+
+#booklet-table-exams{
+    content-align: center middle;
+    border: heavy #2b542c;
+    width: 100%;
+    height: auto;
+}
+
+#booklet-table-average{
     content-align: center middle;
     border: heavy #2b542c;
     width: 100%;
@@ -203,7 +264,12 @@ Footer {
     height: 90%;
     border: heavy yellow;
     content-align: center middle;
-    text-style: bold italic;
+    text-style: italic;
+}
+
+#booklet-value-error {
+    border: heavy #9B0000;
+    content-align: center middle;
 }
 
 /* TAXES */
