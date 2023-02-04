@@ -186,7 +186,7 @@
 }
 .exams-loading{
     width: 100%;
-    height: 90%;
+    height: 100%;
     border: heavy #ec971f;
     content-align: center middle;
     text-style: bold italic
@@ -254,7 +254,7 @@
 
 .reservations-loading{
     width: 100%;
-    height: 100%;
+    height: 90%;
     border: heavy #ec971f;
     content-align: center middle;
     text-style: bold italic;
@@ -270,7 +270,7 @@
 
 .reservations-removed-error{
     width: 100%;
-    height: 100%;
+    height: 90%;
     border: heavy #9B0000;
     content-align: center middle;
     text-style: bold italic;

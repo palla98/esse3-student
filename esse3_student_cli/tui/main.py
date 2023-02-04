@@ -59,24 +59,11 @@ class Tui(App):
         if not entro:
             return
 
-        """n = ""
-        for c in self.query("Input"):
-            if c.value != "":
-                n = c.value
-                break
-        if n != "":
-            notes = ExamNotes(n)
-        else:
-            notes = ExamNotes(" ")"""
-
         name_value = "add-" + name
 
         if not self.is_screen_installed(name_value):
             self.install_screen(Exams.AddExams(exams, ExaminationProcedure("P"), ExamNotes(" ")), name=name_value)
         self.push_screen(name_value)
-
-        for c in self.query("Input"):
-            c.value = ""
 
         for c in self.query("Checkbox"):
             c.value = False
@@ -87,30 +74,24 @@ class Tui(App):
             self.uninstall_screen("remove-"+name_value)
 
     def remove_reservation(self) -> None:
-        name = None
-        entro = False
-        for c in self.query("Checkbox"):
-            if c.value:
-                name = c.name_value
-                entro = True
-                break
-        if not entro:
+        checked_box = next((c for c in self.query("Checkbox") if c.value), None)
+        if not checked_box:
             return
 
-        name_value = "remove-" + name
+        name = checked_box.name_value
+        screen_name = "remove-" + name
 
-        if not self.is_screen_installed(name_value):
-            self.install_screen(Reservations.RemoveReservation(name), name=name_value)
-        self.push_screen(name_value)
+        if not self.is_screen_installed(screen_name):
+            self.install_screen(Reservations.RemoveReservation(name), name=screen_name)
+        self.push_screen(screen_name)
 
         for c in self.query("Checkbox"):
             c.value = False
-            c.refresh()
 
         if self.is_screen_installed("exams"):
             self.uninstall_screen("exams")
-        if self.is_screen_installed("add-"+name_value):
-            self.uninstall_screen("add-"+name_value)
+        if self.is_screen_installed("add-"+name):
+            self.uninstall_screen("add-"+name)
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         screens = {"booklet": Booklet(), "reservations": Reservations(), "taxes": Taxes(), "exams": Exams()}

@@ -75,7 +75,7 @@ class Reservations(Screen):
     ]
 
     async def fetch_date(self) -> None:
-        reservations = [{'name': 'BUSINESS GAME', '1': 'igikpwnygi', '2': 'jfsxfckizr', '3': 'rsyxjxhxgw', '4': 'otykbzckdf',
+        """reservations = [{'name': 'BUSINESS GAME', '1': 'igikpwnygi', '2': 'jfsxfckizr', '3': 'rsyxjxhxgw', '4': 'otykbzckdf',
                           '5': 'ulxxftcxzp', '6': 'wlyztntjtl', '7': 'kjagclbcax', '8': 'pshhggmmxw',
                           '9': 'upbluuynsj'},
                         {'name': 'DATA ANALYTICS', '1': 'unqfqxmbbs', '2': 'wnjhosvbck', '3': 'azrprrbrgw', '4': 'vifbxzwefb',
@@ -93,14 +93,13 @@ class Reservations(Screen):
                          '4': 'vifbxzwefb',
                          '5': 'kmiehveaol', '6': 'rytpxgepda', '7': 'fyznnfjkrc', '8': 'ymkklaxmkj',
                          '9': 'cwzojlxgxf'}
-                       ]
-        #reservations = cli.new_esse3_wrapper().fetch_reservations()
+                       ]"""
+        reservations = cli.new_esse3_wrapper().fetch_reservations()
         await self.query_one(".reservations-loading").remove()
         if len(reservations) == 0:
             await self.query_one("#reservations-container").mount(Static(f"❌ No appeals booked !!", classes="reservations-removed-error"))
         else:
             await self.query_one("#reservations-container").mount(
-                Static("List of Reservations", classes="title"),
                 Vertical(id="reservations-vertical"),
                 Static("Select exam to remove:", classes="title"),
                 Container(id="reservations-buttons"),
@@ -116,8 +115,9 @@ class Reservations(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header("Reservations", classes="header")
-        yield Container(Static("loading [#ec971f]exams booked[/] in progress.....", classes="reservations-loading")
-                        , id="reservations-container")
+        yield Container(Static("List of Reservations", classes="title"),
+                        Static("loading [#ec971f]exams booked[/] in progress.....", classes="reservations-loading"),
+                        id="reservations-container")
         yield Footer()
 
     class RemoveReservation(Screen):
