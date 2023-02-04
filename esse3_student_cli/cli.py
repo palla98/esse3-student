@@ -13,8 +13,6 @@ from esse3_student_cli.primitives import ExaminationProcedure, ExamNotes, Academ
 
 from esse3_student_cli.utils.console import console
 
-from esse3_student_cli.utils.cred import take_credentials
-
 
 @dataclasses.dataclass(frozen=True)
 class AppOptions:
@@ -385,7 +383,7 @@ def command_taxes(
 
 @app.command(name="tui")
 def tui() -> None:
-    from esse3_student_cli.tui.ui import Tui
+    from esse3_student_cli.tui.main import Tui
     # faccio l import qua perchè altrimenti: from textual.app import App, ComposeResult, RenderResult, mi apre
     # un socket nonostante non lanci il run
     Tui().run()
