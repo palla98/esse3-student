@@ -11,6 +11,8 @@ from textual.screen import Screen
 from rich import box
 from rich.table import Table
 
+from esse3_student_cli.primitives import Exam
+
 
 class Header(Static):
     pass
@@ -75,23 +77,19 @@ class Exams(Screen):
     ]
 
     async def fetch_date(self) -> None:
-        """exams = [
-            ["colonna1-riga1", "colonna2-riga1", "colonna9-riga1", "colonna4-riga1"],
-            ["colonna1-riga2", "colonna2-riga2", "colonna3-riga2", "colonna4-riga2"],
-            ["colonna1-riga3", "colonna2-riga3", "colonna3-riga3", "colonna4-riga3"],
-            ["colonna1-riga4", "colonna2-riga4", "colonna3-riga4", "colonna4-riga4"],
-            ["colonna1-riga4", "colonna2-riga4", "colonna3-riga4", "colonna4-riga4"],
-            ["colonna1-riga4", "colonna2-riga4", "colonna3-riga4", "colonna4_riga4"],
-            ["colonna1-riga4", "colonna2-riga4", "colonna3-riga4", "colonna4_riga4"],
-        ]"""
-        exams = cli.new_esse3_wrapper().fetch_exams()
-        await self.query_one(".exams-loading").remove()
+        exams = [Exam(value='BUSINESS GAME&08/02/2023&18/01/2023 - 06/02/2023&MDCS 6 ECTS'),
+                 Exam(value="DIDATTICA DELL'INFORMATICA&22/02/2023&23/01/2023 - 20/02/2023&Secondo appello sessione invernale"),
+                 Exam(value='NETWORK SECURITY & 07 / 02 / 2023 & 05 / 01 / 2023 - 06 / 02 / 2023 & Oral exam and project discussion'),
+                 Exam(value='THEORETICAL COMPUTER SCIENCE & 18 / 02 / 2023 & 03 / 02 / 2023 - 17 / 02 / 2023 & Prova orale con alcune domande scritte'),
+                 Exam(value='TRAINING&25/02/2023&01/02/2023 - 24/02/2023&appello sessione invernale')
+                ]
+        #exams = cli.new_esse3_wrapper().fetch_exams()
+        await self.query_one(".exams-loading1").remove()
         if len(exams) == 0:
             await self.query_one("#exams-container").mount(Static("no exams available !!", id="exams-empty"))
         else:
             await self.query_one("#exams-container").mount(Vertical(id="exams-table"))
             await self.query_one("#exams-container").mount(Container(
-                # Input(placeholder="Notes...", id="exams-input"),
                 Container(id="exams-checkbox"),
                 id="exams-add"
             ))
@@ -107,22 +105,20 @@ class Exams(Screen):
     def compose(self) -> ComposeResult:
         yield Header("Exams", classes="header")
         yield Container(Static("List of available exams", classes="title"),
-                        Static("loading [#ec971f]available exams[/] in progress.....", classes="exams-loading"),
+                        Static("loading [#ec971f]available exams[/] in progress.....", classes="exams-loading1"),
                         id="exams-container"
                         )
         yield Footer()
 
     class AddExams(Screen):
 
-        def __init__(self, exams, modality, notes) -> None:
+        def __init__(self, exams) -> None:
             self.exams = exams
-            self.modality = modality
-            self.notes = notes
             super().__init__()
 
         async def fetch_date(self) -> None:
-            cli.new_esse3_wrapper().add_reservation(list(self.exams), self.modality, self.notes)
-            await self.query_one(".exams-loading").remove()
+            cli.new_esse3_wrapper().add_reservation(list(self.exams))
+            await self.query_one(".exams-loading2").remove()
             self.query_one(Container).mount \
                 (Static(f"Exams: [green]{', '.join(map(str, self.exams))}[/] added", id="exams-added-success"))
 
@@ -132,7 +128,7 @@ class Exams(Screen):
 
         def compose(self) -> ComposeResult:
             yield Header("Exam added", classes="header")
-            yield Container(Static("added [yellow]reservations[/] in progress.....", classes="exams-loading"))
+            yield Container(Static("adding [yellow]reservations[/] in progress.....", classes="exams-loading2"))
             yield Footer()
 
         BINDINGS = [

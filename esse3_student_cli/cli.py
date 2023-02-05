@@ -132,72 +132,83 @@ def command_reservations() -> None:
 
 @app.command(name="add_reservation")
 def command_add_reservation(
-        exam: str = typer.Argument(
+        exams: str = typer.Argument(
             ...,
-            metavar="Exam values",
-            help="A string of the form: ' name-examination_procedure-exam_notes ' "
-                 "  ;Examination_procedure(P as default): P as Presence, RD as Remote exam request "
-                 "  ;Exam_notes(optional)"
+            metavar="Exams name",
+            help='A string of the form: "name1-name2...." or "name1" for single value'
         ),
 ):
 
-    def parse(exam):
-        values = exam.split("-")
-        if len(values) not in [1, 2, 3]:
-            console.print("Invalid number of arguments")
-            raise typer.Exit()
+    def parse(exams) -> []:
+        values = exams.split("-")
         try:
-            name = Exam(values[0])
+            for v in values:
+                Exam(v)
         except ValueError:
-            console.print("Invalid values for name")
+            console.print("Invalid name or names")
             raise typer.Exit()
-        modality = ExaminationProcedure(values[1] if len(values) >= 2 else "P")
-        notes = ExamNotes(values[2] if len(values) >= 3 else " ")
-        return name, modality, notes
 
-    name, modality, notes = parse(exam)
+        return values
+
+    names = parse(exams)
 
     esse_wrapper = new_esse3_wrapper()
 
-    with console.status(f"Exam booking [bold]{name.value}[/bold] in progress..."):
+    with console.status(f"[bold green]Exams booking[/] in progress..."):
         time.sleep(3)
-        value = esse_wrapper.add_reservation(name, modality, notes)
-        if value == "name error":
-            console.print("Wrong name passed!", style="bold red")
+        value = esse_wrapper.add_reservation(list(names))
+        if value == "ok":
+            console.log(f"[bold] ✅ Exams with name: [green]{', '.join(map(str, names))}[/] added")
         elif value == "empty":
             console.print("No exams available!", style="bold yellow")
-        else:
-            console.log(f"[bold] ✅  Exam with name: [bold green]{name.value}[/bold green] added")
 
 
 @app.command(name="remove_reservation")
 def command_remove_reservation(
-        name: str = typer.Argument(
+        reservations: str = typer.Argument(
             ...,
-            metavar="The name of reservations",
-            help="A string indicating the reservation to remove"
+            metavar="Reservations name",
+            help='A string of the form: "name1-name2...." or "name1" for single value'
         ),
 
 ):
-    try:
-        name = Exam(name).value
-    except ValueError:
-        console.print("Invalid values for name")
-        raise typer.Exit()
+    def parse(reservations) -> list:
+        values = []
+        try:
+            for r in reservations.split("-"):
+                values.append(Exam(r).value)
+        except ValueError:
+            console.print("[bold red]Invalid characters[/]")
+            raise typer.Exit()
 
-    esse_wrapper = new_esse3_wrapper()
+        return values
 
-    with console.status(f"Remove reservation [bold]{name}[/bold]  in progress ..."):
+    names = parse(reservations)
+
+    esse3_wrapper = new_esse3_wrapper()
+
+    with console.status(f"[bold][green]Search reservations[/] to remove in progress....[/]"):
         time.sleep(3)
-        result = esse_wrapper.remove_reservation(name)
-        if result == "success":
-            console.log(f"[bold]✅  Reservation with name:[/bold] [bold green]{name}[/bold green] [red]removed[/red] ")
-        elif result == "wrong name passed":
-            console.log(f"[bold]❌ Wrong name passed !!")
-        elif result == "empty":
-            console.log(f"[bold]❌ No exams to remove !!")
+        values = esse3_wrapper.remove_reservation(list(names))
+
+        if len(values) == 0:
+            console.log(f"[bold]❌ No exams to remove or wrong values passed[/]!!!")
         else:
-            console.log(f"[bold]❌  Impossible to unsubscribe [bold green]{name}[/bold green]: cause subscription closed")
+            all_success = True
+            all_closed = True
+            for i in values.keys():
+                if i == 0:
+                    all_success = False
+                else:
+                    all_closed = False
+
+            if all_closed:
+                console.log(f"[bold]❌ Impossible to remove: [red]{', '.join([x for x in values[0]])}[/] cause subscription closed[/]")
+            elif all_success:
+                console.log(f"[bold]Reservations: [green]{', '.join([x for x in values[1]])}[/] removed[/]")
+            else:
+                console.log(f"[bold]✅ Reservations: [green]{', '.join([x for x in values[1]])}[/] removed[/]")
+                console.log(f"[bold]❌ Impossible to remove: [red]{', '.join([x for x in values[0]])}[/] cause subscription closed[/]")
 
 
 @app.command(name="booklet")

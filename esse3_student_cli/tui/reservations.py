@@ -27,13 +27,15 @@ class Reservations(Screen):
 
         def table(self, reservation, index: int):
 
-            table = Table(box=box.HEAVY_HEAD, style="rgb(139,69,19)")
+            table = Table(header_style="rgb(210,105,30) bold", box=box.SIMPLE_HEAD)
             table.add_column("#", justify="center", style="bold red")
             for colum in reservation.keys():
                 if colum == "Name":
-                    table.add_column(colum, justify="center", style="bold green")
+                    table.add_column(colum, justify="center", style="bold")
+                elif colum == "Cancella Prenotazione":
+                    table.add_column(colum, justify="center", style="bold red")
                 else:
-                    table.add_column(colum, justify="center")
+                    table.add_column(colum, justify="center", style="bold")
 
             row = list(reservation.values())
             table.add_row(str(index), *row)
@@ -75,7 +77,7 @@ class Reservations(Screen):
     ]
 
     async def fetch_date(self) -> None:
-        """reservations = [{'name': 'BUSINESS GAME', '1': 'igikpwnygi', '2': 'jfsxfckizr', '3': 'rsyxjxhxgw', '4': 'otykbzckdf',
+        """ reservations = [{'name': 'BUSINESS GAME', '1': 'igikpwnygi', '2': 'jfsxfckizr', '3': 'rsyxjxhxgw', '4': 'otykbzckdf',
                           '5': 'ulxxftcxzp', '6': 'wlyztntjtl', '7': 'kjagclbcax', '8': 'pshhggmmxw',
                           '9': 'upbluuynsj'},
                         {'name': 'DATA ANALYTICS', '1': 'unqfqxmbbs', '2': 'wnjhosvbck', '3': 'azrprrbrgw', '4': 'vifbxzwefb',
@@ -85,7 +87,7 @@ class Reservations(Screen):
                          '4': 'vifbxzwefb',
                          '5': 'kmiehveaol', '6': 'rytpxgepda', '7': 'fyznnfjkrc', '8': 'ymkklaxmkj',
                          '9': 'cwzojlxgxf'},
-                        {'name': 'MOBILE', '1': 'unqfqxmbbs', '2': 'wnjhosvbck', '3': 'azrprrbrgw',
+                        {'name': 'TRAINING', '1': 'unqfqxmbbs', '2': 'wnjhosvbck', '3': 'azrprrbrgw',
                          '4': 'vifbxzwefb',
                          '5': 'kmiehveaol', '6': 'rytpxgepda', '7': 'fyznnfjkrc', '8': 'ymkklaxmkj',
                          '9': 'cwzojlxgxf'},
@@ -97,11 +99,11 @@ class Reservations(Screen):
         reservations = cli.new_esse3_wrapper().fetch_reservations()
         await self.query_one(".reservations-loading").remove()
         if len(reservations) == 0:
-            await self.query_one("#reservations-container").mount(Static(f"❌ No appeals booked !!", classes="reservations-removed-error"))
+            await self.query_one("#reservations-container").mount(Static(f"❌ No appeals booked !!", classes="reservations-empty"))
         else:
             await self.query_one("#reservations-container").mount(
                 Vertical(id="reservations-vertical"),
-                Static("Select exam to remove:", classes="title"),
+                Static("Select checkbox of exam to remove:", classes="title"),
                 Container(id="reservations-buttons"),
             )
             for index, reservation in enumerate(reservations, start=1):
@@ -122,19 +124,36 @@ class Reservations(Screen):
 
     class RemoveReservation(Screen):
 
-        def __init__(self, reservation) -> None:
-            self.reservation = reservation
+        def __init__(self, reservations) -> None:
+            self.reservations = reservations
             super().__init__()
 
         async def fetch_date(self) -> None:
-            result = cli.new_esse3_wrapper().remove_reservation(self.reservation)
-            await self.query_one(".reservations-loading").remove()
-            if result == "success":
-                self.query_one(Container).mount(Static(f"Reservation: {self.reservation} removed", id="reservations-removed-success"))
-            elif result == "empty":
-                self.query_one(Container).mount(Static(f"❌ No exams to remove !!", classes="reservations-removed-error"))
+            values = cli.new_esse3_wrapper().remove_reservation(list(self.reservations))
+
+            all_success = True
+            all_closed = True
+            for i in values.keys():
+                if i == 0:
+                    all_success = False
+                else:
+                    all_closed = False
+
+            await self.query_one("#reservations-loading-removed").remove()
+
+            if all_closed:
+                self.query_one(Container).mount(
+                    Static(f"❌ Impossible to remove: [red]{', '.join([x for x in values[0]])}[/] cause subscription closed",
+                           classes="reservations-removed-error"))
+            elif all_success:
+                self.query_one(Container).mount(
+                    Static(f"Reservations: [green]{', '.join([x for x in values[1]])}[/] removed",
+                           id="reservations-removed-success"))
             else:
-                self.query_one(Container).mount(Static(f"❌ Impossible to remove: {self.reservation} cause subscription closed", classes="reservations-removed-error"))
+                self.query_one(Container).mount(
+                    Static(f"✅ Reservations: [green]{', '.join([x for x in values[1]])}[/] removed \n\n"
+                           f"❌ Impossible to remove: [red]{', '.join([x for x in values[0]])}[/] cause subscription closed",
+                           classes="reservations-removed-mix"))
 
         async def on_mount(self) -> None:
             await asyncio.sleep(0.1)
@@ -142,7 +161,7 @@ class Reservations(Screen):
 
         def compose(self) -> ComposeResult:
             yield Header("Reservation removed", classes="header")
-            yield Container(Static("exam [#ec971f]booking removal[/] in progress.....", classes="reservations-loading"))
+            yield Container(Static("exams [#ec971f]booking removal[/] in progress.....", id="reservations-loading-removed"))
             yield Footer()
 
         BINDINGS = [

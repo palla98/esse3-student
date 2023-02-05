@@ -136,6 +136,8 @@ class Esse3Wrapper:
             description = elements[4].get_attribute('innerHTML')
             row = f"{name}&{date}&{signing_up}&{description}"
             rows.append(Exam.of(row))
+
+        print(rows)
         return rows
 
     def fetch_reservations(self) -> list:
@@ -163,40 +165,45 @@ class Esse3Wrapper:
                 value = element.find_element(By.XPATH, f"../dd[{position}]").text
                 if position == 1:
                     dict["Date"] = key
-                else:
+                elif key != "Riservato per" and key != "Data Prenotazione":
                     dict[key] = value
             rows.append(dict)
             index += 2
         return rows
 
-    def add_reservation(self, names: list, modality: ExaminationProcedure, note: ExamNotes) -> str:
+    def add_reservation(self, names: list) -> str:
 
         self.driver.get(EXAMS_URL)
         WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located((By.XPATH, "//table/tbody/tr")))
         exams = self.driver.find_elements(By.XPATH, "//table/tbody/tr")
+        values = {}
+        entro = False
         if not exams:
             return "empty"
         while names:
             name = names.pop()
+            entro = False
             for i, exam in enumerate(exams, start=1):
                 if exam.find_element(By.XPATH, f"//table/tbody/tr[{i}]/td[2]").text == name:
+                    values[1] = name
+                    entro = True
                     exam_link = self.driver.find_element(By.XPATH, f"//table/tbody/tr[{i}]/td/div/a")
                     self.driver.execute_script("arguments[0].scrollIntoView();", exam_link)
                     exam_link.send_keys(Keys.ENTER)
-                    self.driver.find_element(By.XPATH, "//textarea[@id='app-textAreaNoteDoc']").send_keys(note.value)
-                    self.driver.find_element(By.XPATH, "//select[@id='app-selectionSvolgEsame']").send_keys(modality.value)
                     save_button = self.driver.find_element(By.XPATH, "//*[@id='btnSalva']")
                     self.driver.execute_script("arguments[0].scrollIntoView();", save_button)
                     save_button.send_keys(Keys.ENTER)
                     break
+            if not entro:
+                values[0] = name
             self.driver.get(EXAMS_URL)
             WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_element_located((By.XPATH, "//table/tbody/tr")))
             exams = self.driver.find_elements(By.XPATH, "//table/tbody/tr")
         return "ok"
 
-    def remove_reservation(self, reservation: str) -> str:
+    def remove_reservation(self, names: list) -> {}:
 
         self.driver.get(RESERVATIONS_URL)
         try:
@@ -204,33 +211,49 @@ class Esse3Wrapper:
                 EC.visibility_of_element_located((By.XPATH, "//*[@id='textHeader']")))
         except TimeoutError:
             return "empty"
-
+        values = {
+            0: [" "],
+            1: [" "],
+        }
         boxprenotazione = self.driver.find_elements(By.XPATH, "//*[@id='boxPrenotazione']")
-        if not boxprenotazione:
-            return "empty"
         toolbar = self.driver.find_elements(By.XPATH, "//*[@id='toolbarAzioni']")
-        found = False
-        for i, name in enumerate(boxprenotazione, start=1):
-            value = name.find_element(By.CLASS_NAME, "record-h2").text
-            value = value[:value.index(" [")].strip()
-            if value == reservation:
-                for j, remove in enumerate(toolbar, start=1):
-                    if j == i:
-                        try:
-                            element = remove.find_element(By.ID, 'btnCancella')
-                            found = True
-                            break
-                        except NoSuchElementException:
-                            return "impossible to remove"
-                if found:
-                    break
-        if found:
-            element.click()
-            confirm = self.driver.find_element(By.XPATH, "//*[@id='btnConferma']")
-            confirm.click()
-            return "success"
-        else:
-            return "wrong name passed"
+        if not boxprenotazione:
+            return []
+        while names:
+            reservation = names.pop()
+            found = False
+            element = None
+            for i, name in enumerate(boxprenotazione, start=1):
+                value = name.find_element(By.CLASS_NAME, "record-h2").text
+                value = value[:value.index(" [")].strip()
+                if value == reservation:
+                    for j, remove in enumerate(toolbar, start=1):
+                        if j == i:
+                            try:
+                                element = remove.find_element(By.ID, 'btnCancella')
+                                found = True
+                                break
+                            except NoSuchElementException:
+                                values[0].append(reservation)
+                    if found:
+                        break
+            if found:
+                element.click()
+                confirm = self.driver.find_element(By.XPATH, "//*[@id='btnConferma']")
+                confirm.click()
+                values[1].append(reservation)
+                self.driver.get(RESERVATIONS_URL)
+                WebDriverWait(self.driver, 10).until(
+                    EC.visibility_of_element_located((By.XPATH, "//*[@id='textHeader']")))
+                boxprenotazione = self.driver.find_elements(By.XPATH, "//*[@id='boxPrenotazione']")
+                toolbar = self.driver.find_elements(By.XPATH, "//*[@id='toolbarAzioni']")
+        values[0].pop(0)
+        values[1].pop(0)
+        for k, v in list(values.items()):
+            if len(v) == 0:
+                values.pop(k)
+        print(values)
+        return values
 
     def fetch_booklet(self) -> list[Exam]:
 

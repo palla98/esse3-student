@@ -37,14 +37,14 @@ class Tui(App):
 
     CSS_PATH = "style.css"
 
-    SCREENS = {"homepage": HomePage()}
+    SCREENS = {"exams": Exams()}
 
     BINDINGS = [
         Binding(key="escape", action="key_escape", description="exit"),
     ]
 
     def on_mount(self) -> None:
-        self.push_screen("homepage")
+        self.push_screen("exams")
 
     def add_exams(self) -> None:
         name = None
@@ -62,7 +62,7 @@ class Tui(App):
         name_value = "add-" + name
 
         if not self.is_screen_installed(name_value):
-            self.install_screen(Exams.AddExams(exams, ExaminationProcedure("P"), ExamNotes(" ")), name=name_value)
+            self.install_screen(Exams.AddExams(exams), name=name_value)
         self.push_screen(name_value)
 
         for c in self.query("Checkbox"):
@@ -74,16 +74,20 @@ class Tui(App):
             self.uninstall_screen("remove-"+name_value)
 
     def remove_reservation(self) -> None:
-        checked_box = next((c for c in self.query("Checkbox") if c.value), None)
-        if not checked_box:
+        name = None
+        entro = False
+        exams = []
+        for c in self.query("Checkbox"):
+            if c.value:
+                name = c.name_value
+                exams.append(name)
+                entro = True
+        if not entro:
             return
 
-        name = checked_box.name_value
-        screen_name = "remove-" + name
-
-        if not self.is_screen_installed(screen_name):
-            self.install_screen(Reservations.RemoveReservation(name), name=screen_name)
-        self.push_screen(screen_name)
+        if not self.is_screen_installed("reservations-removed"):
+            self.install_screen(Reservations.RemoveReservation(exams), name="reservations-removed")
+        self.push_screen("reservations-removed")
 
         for c in self.query("Checkbox"):
             c.value = False
@@ -130,7 +134,7 @@ class Tui(App):
 
     def action_reload(self, screen):
         screens = {"booklet": Booklet(), "reservations": Reservations(), "taxes": Taxes(), "exams": Exams()}
-        self.pop_screen()
+        self.uninstall_screen(self.pop_screen())
         self.pop_screen()
         self.uninstall_screen(screen)
         self.install_screen(screens[f"{screen}"], name=f"{screen}")
