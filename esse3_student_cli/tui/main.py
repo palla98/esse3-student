@@ -37,14 +37,14 @@ class Tui(App):
 
     CSS_PATH = "style.css"
 
-    SCREENS = {"exams": Exams()}
+    SCREENS = {"homepage": HomePage()}
 
     BINDINGS = [
         Binding(key="escape", action="key_escape", description="exit"),
     ]
 
     def on_mount(self) -> None:
-        self.push_screen("exams")
+        self.push_screen("homepage")
 
     def add_exams(self) -> None:
         name = None

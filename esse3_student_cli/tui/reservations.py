@@ -27,15 +27,17 @@ class Reservations(Screen):
 
         def table(self, reservation, index: int):
 
-            table = Table(header_style="rgb(210,105,30) bold", box=box.SIMPLE_HEAD)
+            table = Table(box=box.SIMPLE_HEAD, style="rgb(139,69,19)")
             table.add_column("#", justify="center", style="bold red")
             for colum in reservation.keys():
                 if colum == "Name":
-                    table.add_column(colum, justify="center", style="bold")
+                    table.add_column(colum, justify="center", style="bold green")
+                elif colum == "Date":
+                    table.add_column(colum, justify="center", style="bold yellow")
                 elif colum == "Cancella Prenotazione":
                     table.add_column(colum, justify="center", style="bold red")
                 else:
-                    table.add_column(colum, justify="center", style="bold")
+                    table.add_column(colum, justify="center", style="bold #f7ecb5")
 
             row = list(reservation.values())
             table.add_row(str(index), *row)
@@ -99,17 +101,17 @@ class Reservations(Screen):
         reservations = cli.new_esse3_wrapper().fetch_reservations()
         await self.query_one(".reservations-loading").remove()
         if len(reservations) == 0:
-            await self.query_one("#reservations-container").mount(Static(f"❌ No appeals booked !!", classes="reservations-empty"))
+            await self.query_one(".reservations-container").mount(Static(f"❌ No appeals booked !!", classes="reservations-empty"))
         else:
-            await self.query_one("#reservations-container").mount(
-                Vertical(id="reservations-vertical"),
+            await self.query_one(".reservations-container").mount(
+                Vertical(classes="reservations-vertical"),
                 Static("Select checkbox of exam to remove:", classes="title"),
-                Container(id="reservations-buttons"),
+                Container(classes="reservations-buttons"),
             )
             for index, reservation in enumerate(reservations, start=1):
                 self.query_one(Vertical).mount(self.Tables(reservation, index))
-                await self.query_one("#reservations-buttons").mount(self.Line(reservation))
-            await self.query_one("#reservations-container").mount(Horizontal(Button("send data", id="reservations-remove")))
+                await self.query_one(".reservations-buttons").mount(self.Line(reservation))
+            await self.query_one(".reservations-container").mount(Horizontal(Button("send data", id="reservations-remove")))
 
     async def on_mount(self) -> None:
         await asyncio.sleep(0.1)
@@ -119,7 +121,7 @@ class Reservations(Screen):
         yield Header("Reservations", classes="header")
         yield Container(Static("List of Reservations", classes="title"),
                         Static("loading [#ec971f]exams booked[/] in progress.....", classes="reservations-loading"),
-                        id="reservations-container")
+                        classes="reservations-container")
         yield Footer()
 
     class RemoveReservation(Screen):

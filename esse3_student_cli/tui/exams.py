@@ -31,12 +31,12 @@ class Exams(Screen):
 
         def get_table(self, exams: list) -> None:
 
-            table = Table(box=box.HEAVY_HEAD, style="rgb(139,69,19)")
+            table = Table(box=box.SIMPLE_HEAD, style="rgb(139,69,19)")
             table.add_column("#", justify="center", style="bold red")
-            table.add_column("Name", justify="center", style="green")
-            table.add_column("Date", justify="center", style="yellow")
-            table.add_column("Signing up", justify="center", style="yellow")
-            table.add_column("Description", justify="center")
+            table.add_column("Name", justify="center", style="bold green")
+            table.add_column("Date", justify="center", style="bold yellow")
+            table.add_column("Signing up", justify="center", style="bold yellow")
+            table.add_column("Description", justify="center", style="bold #f7ecb5")
 
             for index, exam in enumerate(exams, start=1):
                 row = list(exam.value.split("&"))
@@ -77,26 +77,26 @@ class Exams(Screen):
     ]
 
     async def fetch_date(self) -> None:
-        exams = [Exam(value='BUSINESS GAME&08/02/2023&18/01/2023 - 06/02/2023&MDCS 6 ECTS'),
+        """exams = [Exam(value='BUSINESS GAME&08/02/2023&18/01/2023 - 06/02/2023&MDCS 6 ECTS'),
                  Exam(value="DIDATTICA DELL'INFORMATICA&22/02/2023&23/01/2023 - 20/02/2023&Secondo appello sessione invernale"),
                  Exam(value='NETWORK SECURITY&07/02/2023&05/01/2023 - 06/02/2023&Oral exam and project discussion'),
                  Exam(value='THEORETICAL COMPUTER SCIENCE&18/02/2023&03/02/2023 - 17/02/2023&Prova orale con alcune domande scritte'),
                  Exam(value='TRAINING&25/02/2023&01/02/2023 - 24/02/2023&appello sessione invernale')
-                ]
-        #exams = cli.new_esse3_wrapper().fetch_exams()
+                ]"""
+        exams = cli.new_esse3_wrapper().fetch_exams()
         await self.query_one(".exams-loading1").remove()
         if len(exams) == 0:
-            await self.query_one("#exams-container").mount(Static("no exams available !!", id="exams-empty"))
+            await self.query_one(".reservations-container").mount(Static("no exams available !!", id="exams-empty"))
         else:
-            await self.query_one("#exams-container").mount(Vertical(id="exams-table"))
-            await self.query_one("#exams-container").mount(Container(
-                Container(id="exams-checkbox"),
-                id="exams-add"
-            ))
-            await self.query_one(Vertical).mount(self.Tables(exams))
+            await self.query_one(".reservations-container").mount(
+                Vertical(id="exams-table"),
+                Static("Select checkbox of exam to add:", classes="title"),
+                Container(classes="reservations-buttons"),
+            )
+            await self.query_one("#exams-table").mount(self.Tables(exams))
             for index, exam in enumerate(exams, start=1):
-                await self.query_one("#exams-checkbox").mount(self.Line(exam))
-            await self.query_one("#exams-container").mount(Horizontal(Button("send data", id="exams-send")))
+                await self.query_one(".reservations-buttons").mount(self.Line(exam))
+            await self.query_one(".reservations-container").mount(Horizontal(Button("send data", id="exams-send")))
 
     async def on_mount(self) -> None:
         await asyncio.sleep(0.1)
@@ -106,7 +106,7 @@ class Exams(Screen):
         yield Header("Exams", classes="header")
         yield Container(Static("List of available exams", classes="title"),
                         Static("loading [#ec971f]available exams[/] in progress.....", classes="exams-loading1"),
-                        id="exams-container"
+                        classes="reservations-container"
                         )
         yield Footer()
 

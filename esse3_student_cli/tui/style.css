@@ -1,7 +1,8 @@
-/*Screen {
+Screen {
     scrollbar-size: 2 2;
     scrollbar-color: #b9b9b9;
-}*/
+    background: $background;
+}
 
 /* HEADER */
 .header {
@@ -35,19 +36,24 @@
     margin: 1;
     border: tall #1d2e38;
     width: 50%;
+    background: $primary-background-darken-2;
+}
+
+#homepage > Vertical > Button:hover {
+    background: #2d4156;
 }
 
 /* BOOKLET */
 
 #principale > Vertical > Tables{
     content-align: center middle;
-    border: heavy #2b542c;
+    border: #ec971f;
     width: 100%;
     height: auto;
 }
 
 #principale > NewAverage{
-    border: heavy #ec971f;
+    border: #ec971f;
     content-align: center middle;
 }
 
@@ -55,7 +61,7 @@
     height: auto;
     layout: horizontal;
     align: center middle;
-    border: heavy #ec971f;
+    border: #ec971f;
 }
 
 #booklet-container-filters > Average {
@@ -92,7 +98,7 @@
 #booklet-loading {
     width: 100%;
     height: 90%;
-    border: heavy #ec971f;
+    border: #ec971f;
     content-align: center middle;
     text-style: italic;
 }
@@ -106,7 +112,7 @@
 
 #taxes-table{
     content-align: center middle;
-    border: heavy #2b542c;
+    border: #ec971f;
     width: 100%;
     height: auto;
 }
@@ -114,7 +120,7 @@
 #taxes-loading {
     width: 100%;
     height: 90%;
-    border: heavy #ec971f;
+    border: #ec971f;
     content-align: center middle;
     text-style: bold italic;
 }
@@ -133,7 +139,7 @@
 }
 
 #exams-table {
-    border: heavy #54422b;
+    border: #ec971f;
     width: 100%;
     height: auto;
 }
@@ -145,6 +151,7 @@
 
 #exams-add {
     border: heavy #54422b;
+    border: seagreen;
     width: 100%;
     height: 100%;
     layout: vertical;
@@ -175,28 +182,28 @@
     width: auto;
 }
 
-#exams-input {
-    width: 100%;
-    border: tall #54422b;
+#exams-send {
+    border: tall #1d2e38;
+    width: 30%;
+    background: $primary-background-darken-2;
 }
 
-#exams-container > Horizontal {
-    border: heavy #54422b;
-    align: center middle;
-    height: auto;
+#exams-send:hover {
+    background: #2d4156;
 }
+
 .exams-loading1{
     width: 100%;
     height: 90%;
-    border: heavy #ec971f;
+    border: #ec971f;
     content-align: center middle;
-    text-style: bold italic
+    text-style: bold italic;
 }
 
 .exams-loading2{
     width: 100%;
     height: 100%;
-    border: heavy #ec971f;
+    border: #ec971f;
     content-align: center middle;
     text-style: bold italic
 }
@@ -219,48 +226,61 @@
 
 /* RESERVATIONS */
 
-#reservations-vertical {
+.reservations-vertical {
     height: 40%;
     border: #ec971f;
 }
 
-#reservations-vertical > Tables {
-    margin-bottom: 1;
+.reservations-vertical > Tables {
     content-align: center middle;
     border: none;
     width: 100%;
     height: auto;
 }
 
-#reservations-buttons{
+.reservations-buttons{
+    margin-top: 1;
     layout: horizontal;
     height: auto;
     align: center middle;
+    scrollbar-color: #f7ecb5;
+    scrollbar-size: 1 2;
 }
 
-#reservations-buttons > Line  {
+.reservations-buttons > Line  {
     border: #ec971f;
     align: center middle;
     height: auto;
     width: auto;
 }
 
-#reservations-buttons  > Line > Static {
+.reservations-buttons  > Line > Static {
     width: auto;
     height: auto;
     text-style: bold;
+    border: $background;
 }
 
-#reservations-buttons  > Line > Check {
+.reservations-buttons  > Line > Check {
     width: auto;
     height: auto;
 }
 
-#reservations-container > Horizontal {
+.reservations-container > Horizontal {
     margin-top: 1;
     align: center middle;
     height: auto;
     width: 100%;
+}
+
+#reservations-remove {
+    border: tall #1d2e38;
+    width: 30%;
+    background: $primary-background-darken-2;
+}
+
+#reservations-remove:hover {
+    background: #2d4156;
 }
 
 .reservations-loading{

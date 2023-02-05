@@ -115,7 +115,7 @@ class Booklet(Screen):
             self.table(self.averages, self.vote, self.cfu)
 
         def table(self, averages, new_vote, new_cfu):
-            table = Table(header_style="rgb(210,105,30) bold", box=box.SIMPLE_HEAD)
+            table = Table(header_style="rgb(255,204,51) bold", box=box.SIMPLE_HEAD)
             table.add_column("Vote", style="bold", justify="center")
             table.add_column("Cfu", style="bold", justify="center")
             table.add_column("new average", style="bold", justify="center")
