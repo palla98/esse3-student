@@ -79,8 +79,8 @@ class Exams(Screen):
     async def fetch_date(self) -> None:
         exams = [Exam(value='BUSINESS GAME&08/02/2023&18/01/2023 - 06/02/2023&MDCS 6 ECTS'),
                  Exam(value="DIDATTICA DELL'INFORMATICA&22/02/2023&23/01/2023 - 20/02/2023&Secondo appello sessione invernale"),
-                 Exam(value='NETWORK SECURITY & 07 / 02 / 2023 & 05 / 01 / 2023 - 06 / 02 / 2023 & Oral exam and project discussion'),
-                 Exam(value='THEORETICAL COMPUTER SCIENCE & 18 / 02 / 2023 & 03 / 02 / 2023 - 17 / 02 / 2023 & Prova orale con alcune domande scritte'),
+                 Exam(value='NETWORK SECURITY&07/02/2023&05/01/2023 - 06/02/2023&Oral exam and project discussion'),
+                 Exam(value='THEORETICAL COMPUTER SCIENCE&18/02/2023&03/02/2023 - 17/02/2023&Prova orale con alcune domande scritte'),
                  Exam(value='TRAINING&25/02/2023&01/02/2023 - 24/02/2023&appello sessione invernale')
                 ]
         #exams = cli.new_esse3_wrapper().fetch_exams()
