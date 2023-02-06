@@ -191,7 +191,7 @@ class Booklet(Screen):
         yield Header("Booklet", classes="header")
         yield Container(
             Static("Booklet exams:", classes="title"),
-            Static("[b][yellow]exams booklet[/] loading in progress.....[/]", id="booklet-loading"),
+            Static("[b][yellow]exams booklet[/] loading in progress....[/]", id="booklet-loading"),
             id="principale"
         )
         yield Footer()

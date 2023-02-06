@@ -1,23 +1,20 @@
 import dataclasses
 import time
+import screeninfo
 from dataclasses import InitVar
 from typing import List
-
-import screeninfo
-
 
 import typeguard
 from selenium import webdriver
 from selenium.common import WebDriverException
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver import Keys, ActionChains
+from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 from esse3_student_cli.utils import validators
-from esse3_student_cli.primitives import Username, Password, Exam, ExaminationProcedure, ExamNotes
-import asyncio
+from esse3_student_cli.primitives import Username, Password, Exam
 
 ESSE3_SERVER = "https://unical.esse3.cineca.it"
 LOGIN_URL = f'{ESSE3_SERVER}/auth/Logon.do?menu_opened_cod='
@@ -260,7 +257,6 @@ class Esse3Wrapper:
         for k, v in list(values.items()):
             if len(v) == 0:
                 values.pop(k)
-        print(values)
         return values
 
     def fetch_booklet(self) -> list[Exam]:
