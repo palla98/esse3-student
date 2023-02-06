@@ -3,6 +3,8 @@ import time
 from dataclasses import InitVar
 from typing import List
 
+import screeninfo
+
 
 import typeguard
 from selenium import webdriver
@@ -89,9 +91,13 @@ class Esse3Wrapper:
 
     def __login(self, username: Username, password: Password) -> None:
         self.driver.get(LOGIN_URL)
-        """WebDriverWait(self.driver, 20).until \
-            (EC.visibility_of_element_located(
-                (By.XPATH, "//*[@id='esse3']")))"""
+        try:
+            WebDriverWait(self.driver, 20).until \
+                (EC.visibility_of_element_located(
+                    (By.XPATH, "//*[@id='c-s-bn']")))
+        except NoSuchElementException:
+            pass
+        self.driver.find_element(By.XPATH, "//*[@id='c-s-bn']").click()
         self.driver.find_element(By.ID, 'u').send_keys(username.value)
         self.driver.find_element(By.ID, 'p').send_keys(password.value)
         self.driver.find_element(By.ID, 'btnLogin').send_keys(Keys.RETURN)
@@ -103,7 +109,11 @@ class Esse3Wrapper:
         self.driver.minimize_window()
 
     def maximize(self) -> None:
-        self.driver.maximize_window()
+        #self.driver.maximize_window()
+        screen = screeninfo.get_monitors()[0]
+        width, height = screen.width, screen.height
+        self.driver.set_window_size(width // 2, height)
+        self.driver.set_window_position(width // 2, 0)
 
     def choose_carrier(self) -> None:
         # nota: dentro la funzione visibility_of_element_located i due argomenti devono essere passati nelle () per essere come unico arg
