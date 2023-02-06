@@ -39,12 +39,12 @@ class Taxes(Screen):
 
         def table(self, taxes) -> None:
 
-            table = Table(header_style="rgb(210,105,30) bold", box=box.SIMPLE_HEAD)
+            table = Table(style="rgb(139,69,19) bold", box=box.SIMPLE_HEAD)
             table.add_column("#", style="red bold")
             table.add_column("ID", style="cyan bold")
-            table.add_column("Expiration date", style="bold", justify="center")
+            table.add_column("Expiration date", style="bold yellow", justify="center")
             table.add_column("Amount", style="bold")
-            table.add_column("Payment status", style="bold")
+            table.add_column("Payment status", style="bold #f7ecb5")
 
             for index, taxe in enumerate(taxes, start=1):
                 colums = taxe.split("&")
@@ -69,8 +69,8 @@ class Taxes(Screen):
     def compose(self) -> ComposeResult:
         yield Header("Taxes", classes="header")
         yield Container(
-            Static("List of taxes", classes="title"),
-            Static("[#ec971f]taxes loading[/] in progress.....", id="taxes-loading"),
+            Static("List of taxes:", classes="title"),
+            Static("[yellow]taxes loading[/] in progress.....", id="taxes-loading"),
         )
         yield Footer()
 

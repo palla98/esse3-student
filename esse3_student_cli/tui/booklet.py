@@ -33,7 +33,7 @@ class Booklet(Screen):
             self.table(self.exams)
 
         def get_state(self, state: str) -> Text:
-            colors = {"Superata": "green", "Frequenza attribuita d'ufficio": "yellow"}
+            colors = {"Superata": "green", "Frequenza attribuita d'ufficio": "#f7ecb5"}
             value = Text(state)
             value.stylize(f"{colors[state]}")
             return value
@@ -52,7 +52,7 @@ class Booklet(Screen):
 
         def table(self, exams) -> None:
 
-            table = Table(header_style="rgb(210,105,30) bold", box=box.SIMPLE_HEAD)
+            table = Table(style="rgb(139,69,19) bold", box=box.SIMPLE_HEAD)
             table.add_column("#", style="red bold")
             table.add_column("Name", style="cyan bold")
             table.add_column("Academic Year", style="bold", justify="center")
@@ -94,8 +94,8 @@ class Booklet(Screen):
 
         def table(self, averages):
             table = Table(header_style="rgb(255,204,51) bold", box=box.SIMPLE_HEAD)
-            table.add_column("Average", style="bold", justify="center")
-            table.add_column("Degree basis", style="bold", justify="center")
+            table.add_column("Actual Average", style="bold", justify="center")
+            table.add_column("Actual Degree basis", style="bold", justify="center")
             values = averages[len(averages)-1].value.split("&")
             weighted = values[1]
             degree_basis = (float(weighted) * 11.0) / 3.0
@@ -118,8 +118,8 @@ class Booklet(Screen):
             table = Table(header_style="rgb(255,204,51) bold", box=box.SIMPLE_HEAD)
             table.add_column("Vote", style="bold", justify="center")
             table.add_column("Cfu", style="bold", justify="center")
-            table.add_column("new average", style="bold", justify="center")
-            table.add_column("New degree basis", style="bold", justify="center")
+            table.add_column("New Average", style="bold", justify="center")
+            table.add_column("New Degree basis", style="bold", justify="center")
             values = averages[len(averages)-1].value.split("&")
             weighted = values[1]
             actual_average = float(weighted)
@@ -147,7 +147,7 @@ class Booklet(Screen):
             Vertical(self.Tables(self.exams))
         )
         await self.query_one("#principale").mount(
-                            Static("Compute new average", classes="title"),
+                            Static("Compute new average:", classes="title"),
                             Container(
                                 self.Average(self.exams),
                                 Horizontal(
@@ -190,8 +190,8 @@ class Booklet(Screen):
     def compose(self) -> ComposeResult:
         yield Header("Booklet", classes="header")
         yield Container(
-            Static("Booklet exams", classes="title"),
-            Static("[b][#ec971f]exams booklet[/] loading in progress.....[/]", id="booklet-loading"),
+            Static("Booklet exams:", classes="title"),
+            Static("[b][yellow]exams booklet[/] loading in progress.....[/]", id="booklet-loading"),
             id="principale"
         )
         yield Footer()

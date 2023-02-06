@@ -31,7 +31,7 @@ class Reservations(Screen):
             table.add_column("#", justify="center", style="bold red")
             for colum in reservation.keys():
                 if colum == "Name":
-                    table.add_column(colum, justify="center", style="bold green")
+                    table.add_column(colum, justify="center", style="bold cyan", no_wrap=True)
                 elif colum == "Date":
                     table.add_column(colum, justify="center", style="bold yellow")
                 elif colum == "Cancella Prenotazione":
@@ -79,7 +79,7 @@ class Reservations(Screen):
     ]
 
     async def fetch_date(self) -> None:
-        """ reservations = [{'name': 'BUSINESS GAME', '1': 'igikpwnygi', '2': 'jfsxfckizr', '3': 'rsyxjxhxgw', '4': 'otykbzckdf',
+        """reservations = [{'name': 'BUSINESS GAME', '1': 'igikpwnygi', '2': 'jfsxfckizr', '3': 'rsyxjxhxgw', '4': 'otykbzckdf',
                           '5': 'ulxxftcxzp', '6': 'wlyztntjtl', '7': 'kjagclbcax', '8': 'pshhggmmxw',
                           '9': 'upbluuynsj'},
                         {'name': 'DATA ANALYTICS', '1': 'unqfqxmbbs', '2': 'wnjhosvbck', '3': 'azrprrbrgw', '4': 'vifbxzwefb',
@@ -105,7 +105,7 @@ class Reservations(Screen):
         else:
             await self.query_one(".reservations-container").mount(
                 Vertical(classes="reservations-vertical"),
-                Static("Select checkbox of exam to remove:", classes="title"),
+                Static("Select the checkboxes of the exams to be removed:", classes="title"),
                 Container(classes="reservations-buttons"),
             )
             for index, reservation in enumerate(reservations, start=1):
@@ -119,8 +119,8 @@ class Reservations(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header("Reservations", classes="header")
-        yield Container(Static("List of Reservations", classes="title"),
-                        Static("loading [#ec971f]exams booked[/] in progress.....", classes="reservations-loading"),
+        yield Container(Static("List of Reservations:", classes="title"),
+                        Static("loading [yellow]exams booked[/] in progress.....", classes="reservations-loading"),
                         classes="reservations-container")
         yield Footer()
 
@@ -163,7 +163,7 @@ class Reservations(Screen):
 
         def compose(self) -> ComposeResult:
             yield Header("Reservation removed", classes="header")
-            yield Container(Static("exams [#ec971f]booking removal[/] in progress.....", id="reservations-loading-removed"))
+            yield Container(Static("exams [yellow]booking removal[/] in progress.....", id="reservations-loading-removed"))
             yield Footer()
 
         BINDINGS = [

@@ -9,15 +9,17 @@ Screen {
     background: $background;
     content-align: center middle;
     text-style: bold;
+    color: #ebccd1;
 }
 
 /* GENERAL */
 .title {
     content-align: center middle;
     width: 100%;
-    min-height: 3;
+    min-height: 1;
     text-style: bold;
     background: $panel;
+    border: hkey #2d4156;
 }
 
 /* HOMEPAGE */
@@ -79,6 +81,13 @@ Screen {
 
 #booklet-filters > Button{
     margin-left: 3;
+    border: tall #1d2e38;
+    width: 30%;
+    background: $primary-background-darken-2;
+}
+
+#booklet-filters > Button:hover {
+    background: #2d4156;
 }
 
 #booklet-table-exams{
@@ -97,8 +106,8 @@ Screen {
 
 #booklet-loading {
     width: 100%;
-    height: 90%;
-    border: #ec971f;
+    height: 1fr;
+    border: double #ec971f;
     content-align: center middle;
     text-style: italic;
 }
@@ -119,8 +128,8 @@ Screen {
 
 #taxes-loading {
     width: 100%;
-    height: 90%;
-    border: #ec971f;
+    height: 1fr;
+    border: double #ec971f;
     content-align: center middle;
     text-style: bold italic;
 }
@@ -194,23 +203,23 @@ Screen {
 
 .exams-loading1{
     width: 100%;
-    height: 90%;
-    border: #ec971f;
+    height: 1fr;
+    border: double #ec971f;
     content-align: center middle;
     text-style: bold italic;
 }
 
 .exams-loading2{
     width: 100%;
-    height: 100%;
-    border: #ec971f;
+    height: 1fr;
+    border: double #ec971f;
     content-align: center middle;
     text-style: bold italic
 }
 
 #exams-added-success{
     width: 100%;
-    height: 100%;
+    height: 1fr;
     border: heavy #2b542c;
     content-align: center middle;
     text-style: bold italic;
@@ -218,7 +227,7 @@ Screen {
 
 .exams-added-error{
     width: 100%;
-    height: 100%;
+    height: 1fr;
     border: heavy #9B0000;
     content-align: center middle;
     text-style: bold italic;
@@ -266,6 +275,10 @@ Screen {
     height: auto;
 }
 
+.reservations-buttons  > Line > Check:hover {
+    background: #2d4156;
+}
+
 .reservations-container > Horizontal {
     margin-top: 1;
     align: center middle;
@@ -285,23 +298,23 @@ Screen {
 
 .reservations-loading{
     width: 100%;
-    height: 90%;
-    border: #ec971f;
+    height: 1fr;
+    border: double #ec971f;
     content-align: center middle;
     text-style: bold italic;
 }
 
 #reservations-loading-removed{
     width: 100%;
-    height: 100%;
-    border: heavy #ec971f;
+    height: 1fr;
+    border: double #ec971f;
     content-align: center middle;
     text-style: bold italic;
 }
 
 #reservations-removed-success{
     width: 100%;
-    height: 100%;
+    height: 1fr;
     border: heavy #2b542c;
     content-align: center middle;
     text-style: bold italic;
@@ -309,7 +322,7 @@ Screen {
 
 .reservations-removed-error{
     width: 100%;
-    height: 90%;
+    height: 1fr;
     border: heavy #9B0000;
     content-align: center middle;
     text-style: bold italic;
@@ -317,7 +330,7 @@ Screen {
 
 .reservations-empty{
     width: 100%;
-    height: 90%;
+    height: 1fr;
     border: heavy #9B0000;
     content-align: center middle;
     text-style: bold italic;
@@ -325,7 +338,7 @@ Screen {
 
 .reservations-removed-mix{
     width: 100%;
-    height: 100%;
+    height: 1fr;
     border: heavy #2b542c;
     content-align: center middle;
     text-style: bold italic;

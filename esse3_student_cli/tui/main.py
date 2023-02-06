@@ -21,7 +21,7 @@ class HomePage(Screen):
     def compose(self) -> ComposeResult:
         yield Header("Homepage", classes="header")
         yield Container(
-            Static("Commands", classes="title"),
+            Static("Commands:", classes="title"),
             Vertical(
                 Button("Booklet", id="booklet"),
                 Button("Taxes", id="taxes"),

@@ -11,8 +11,6 @@ from textual.screen import Screen
 from rich import box
 from rich.table import Table
 
-from esse3_student_cli.primitives import Exam
-
 
 class Header(Static):
     pass
@@ -31,10 +29,10 @@ class Exams(Screen):
 
         def get_table(self, exams: list) -> None:
 
-            table = Table(box=box.SIMPLE_HEAD, style="rgb(139,69,19)")
+            table = Table(box=box.SIMPLE_HEAD, style="rgb(139,69,19)", leading=1)
             table.add_column("#", justify="center", style="bold red")
-            table.add_column("Name", justify="center", style="bold green")
-            table.add_column("Date", justify="center", style="bold yellow")
+            table.add_column("Name", justify="center", style="bold cyan")
+            table.add_column("Date", justify="center", style="bold green")
             table.add_column("Signing up", justify="center", style="bold yellow")
             table.add_column("Description", justify="center", style="bold #f7ecb5")
 
@@ -90,7 +88,7 @@ class Exams(Screen):
         else:
             await self.query_one(".reservations-container").mount(
                 Vertical(id="exams-table"),
-                Static("Select checkbox of exam to add:", classes="title"),
+                Static("Select the checkboxes of the exams to be added:", classes="title"),
                 Container(classes="reservations-buttons"),
             )
             await self.query_one("#exams-table").mount(self.Tables(exams))
@@ -104,8 +102,8 @@ class Exams(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header("Exams", classes="header")
-        yield Container(Static("List of available exams", classes="title"),
-                        Static("loading [#ec971f]available exams[/] in progress.....", classes="exams-loading1"),
+        yield Container(Static("List of available exams:", classes="title"),
+                        Static("loading [yellow]available exams[/] in progress.....", classes="exams-loading1"),
                         classes="reservations-container"
                         )
         yield Footer()
@@ -128,7 +126,7 @@ class Exams(Screen):
 
         def compose(self) -> ComposeResult:
             yield Header("Exam added", classes="header")
-            yield Container(Static("adding [yellow]reservations[/] in progress.....", classes="exams-loading2"))
+            yield Container(Static("adding [#ec971f]reservations[/] in progress.....", classes="exams-loading2"))
             yield Footer()
 
         BINDINGS = [
