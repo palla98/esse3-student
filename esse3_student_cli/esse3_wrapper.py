@@ -136,8 +136,6 @@ class Esse3Wrapper:
             description = elements[4].get_attribute('innerHTML')
             row = f"{name}&{date}&{signing_up}&{description}"
             rows.append(Exam.of(row))
-
-        print(rows)
         return rows
 
     def fetch_reservations(self) -> list:
