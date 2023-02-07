@@ -120,7 +120,7 @@ class Esse3Wrapper:
 
     def fetch_exams(self) -> List[Exam]:
         self.driver.get(EXAMS_URL)
-
+        time.sleep(1)
         exams = self.driver.find_elements(By.XPATH, "//*[@id='app-tabella_appelli']/tbody/tr")
         if not exams:
             return []
