@@ -66,7 +66,7 @@ class Booklet(Screen):
 
                     state = self.get_state(colums[3])
 
-                    vote_split = colums[4].split(" - ")
+                    vote_split = colums[4].split(" ")
                     vote = self.get_vote(vote_split[0])
 
                     table.add_row(str(index), colums[0], colums[1], colums[2], state, vote)

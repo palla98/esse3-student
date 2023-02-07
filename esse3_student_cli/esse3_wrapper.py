@@ -274,11 +274,11 @@ class Esse3Wrapper:
         rows = []
         for i, exam in enumerate(exams, start=1):
             name = exam.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/div/table/tbody/tr[{i}]/td[1]/a").text
-            academic_year = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[2]").text
-            cfu = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[3]").text
+            academic_year = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[2]").get_attribute("innerHTML")
+            cfu = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[3]").get_attribute("innerHTML")
             state = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[4]/img").get_attribute('aria-label')
-            vote_date = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[6]").text
-
+            vote_date = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[6]").get_attribute("innerHTML")
+            vote_date = vote_date.replace("&nbsp;-&nbsp;", " - ")
             if state == "Superata":
                 sum = sum + int(cfu)
 

@@ -29,7 +29,7 @@ class Exams(Screen):
 
         def get_table(self, exams: list) -> None:
 
-            table = Table(box=box.SIMPLE_HEAD, style="rgb(139,69,19)", leading=1)
+            table = Table(box=box.SIMPLE_HEAD, style="rgb(139,69,19)")
             table.add_column("#", justify="center", style="bold red")
             table.add_column("Name", justify="center", style="bold cyan")
             table.add_column("Date", justify="center", style="bold green")
