@@ -84,7 +84,7 @@ class Exams(Screen):
         exams = cli.new_esse3_wrapper().fetch_exams()
         await self.query_one(".exams-loading1").remove()
         if len(exams) == 0:
-            await self.query_one(".reservations-container").mount(Static("no exams available !!", id="exams-empty"))
+            await self.query_one(".reservations-container").mount(Static("No exams available !!!", id="exams-empty"))
         else:
             await self.query_one(".reservations-container").mount(
                 Vertical(id="exams-table"),

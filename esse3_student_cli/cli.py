@@ -77,7 +77,7 @@ def command_exams() -> None:
     """
 
     esse_wrapper = new_esse3_wrapper()
-    with console.status("[bold]Fetching [green]available exams in progress[/]....[/]", spinner="aesthetic"):
+    with console.status("[bold]Fetching [green]available exams[/] in progress....[/]", spinner="aesthetic"):
         time.sleep(2)
         exams = esse_wrapper.fetch_exams()
 
@@ -109,7 +109,7 @@ def command_reservations() -> None:
     """
 
     esse_wrapper = new_esse3_wrapper()
-    with console.status("[bold]Fetching [green]available reservations in progress[/]....[/]", spinner="aesthetic"):
+    with console.status("[bold]Fetching [green]available reservations[/] in progress....[/]", spinner="aesthetic"):
         time.sleep(2)
         reservations = esse_wrapper.fetch_reservations()
         if len(reservations) == 0:

@@ -120,14 +120,12 @@ class Esse3Wrapper:
 
     def fetch_exams(self) -> List[Exam]:
         self.driver.get(EXAMS_URL)
-        try:
-            WebDriverWait(self.driver, 10).until(
-                EC.visibility_of_element_located((By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/div/table")))
-        except NoSuchElementException:
-            return []
 
         exams = self.driver.find_elements(By.XPATH, "//*[@id='app-tabella_appelli']/tbody/tr")
-        rows = []
+        if not exams:
+            return []
+        else:
+            rows = []
 
         for index, exam in enumerate(exams, start=1):
             xpath_base = "//*[@id='app-tabella_appelli']/tbody/tr"
@@ -143,6 +141,7 @@ class Esse3Wrapper:
             description = elements[4].get_attribute('innerHTML')
             row = f"{name}&{date}&{signing_up}&{description}"
             rows.append(Exam.of(row))
+
         return rows
 
     def fetch_reservations(self) -> list:
@@ -179,8 +178,6 @@ class Esse3Wrapper:
     def add_reservation(self, names: list) -> str:
 
         self.driver.get(EXAMS_URL)
-        WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located((By.XPATH, "//table/tbody/tr")))
         exams = self.driver.find_elements(By.XPATH, "//table/tbody/tr")
         values = {}
         entro = False
