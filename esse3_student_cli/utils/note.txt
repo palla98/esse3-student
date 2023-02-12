@@ -165,3 +165,49 @@ def add_reservation(self, names: list) -> str:
             EC.visibility_of_element_located((By.XPATH, "//table/tbody/tr")))
         exams = self.driver.find_elements(By.XPATH, "//table/tbody/tr")
     return "ok"
+..............................................
+
+import inspect
+import typer
+
+app = typer.Typer()
+
+def get_options_info(func):
+    sig = inspect.signature(func)
+    options_info = []
+    for name, param in sig.parameters.items():
+        if param.kind == param.POSITIONAL_OR_KEYWORD:
+            data_type = param.annotation
+            default = param.default
+            help_text = param.help
+            options_info.append((name, data_type, default, help_text))
+    return options_info
+
+def extract_command_options(command_name: str) -> None:
+    cmd = typer.Typer.get_command(app, command_name)
+    if cmd is None:
+        typer.echo(f"Command {command_name} not found")
+        return
+
+    options_info = get_options_info(cmd.callback)
+    for name, data_type, default, help_text in options_info:
+        typer.echo(f"Option name: {name}")
+        typer.echo(f"Option type: {data_type}")
+        typer.echo(f"Option default: {default}")
+        typer.echo(f"Option help text: {help_text}")
+    # do something with the options information
+    ...
+
+@app.command(name="booklet")
+def command_booklet(
+        academic_year: int = typer.Option(int, help="academic year (1 to 3)"),
+        exam_state: str = typer.Option(str, help="'Superata' like 'Passed' or 'Frequenza attribuita d'ufficio' like 'To do'"),
+        vote: int = typer.Option(int, help="vote of the exam"),
+        new_average: Tuple[int, str] = typer.Option((None, None), help="calculate new average: (vote cfu); ex: '25 12' "),
+) -> None:
+    pass
+
+if __name__ == "__main__":
+    command_name = typer.context.invoked_subcommand
+    if command_name is not None:
+        extract_command_options(command_name)

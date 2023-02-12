@@ -354,7 +354,7 @@ def command_booklet(
 @app.command(name="taxes")
 def command_taxes(
         to_pay: Optional[bool] = typer.Option(False, "--to-pay", help="Show all taxes to be paid"),
-        year: int = typer.Option(int, help="es: '2021'; filter taxes by year"),
+        year: int = typer.Option(int, "--year", help="es: '2021'; filter taxes by year"),
 ) -> None:
 
     """
