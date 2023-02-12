@@ -3,8 +3,8 @@ from textual.binding import Binding
 from textual.widgets import Static, Button, Footer
 from textual.containers import Container, Vertical
 from textual.screen import Screen
-
-from esse3_student_cli.primitives import ExaminationProcedure, ExamNotes
+from textual import events
+from textual.pilot import Pilot
 
 from esse3_student_cli.tui.booklet import Booklet
 from esse3_student_cli.tui.exams import Exams
@@ -96,6 +96,14 @@ class Tui(App):
             self.uninstall_screen("exams")
         if self.is_screen_installed("add-"+name):
             self.uninstall_screen("add-"+name)
+
+    async def on_key(self, event: events.Key):
+        if event.key == "up":
+            pilot = Pilot(self)
+            await pilot.press("shift+tab")
+        if event.key == "down":
+            pilot = Pilot(self)
+            await pilot.press("tab")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         screens = {"booklet": Booklet(), "reservations": Reservations(), "taxes": Taxes(), "exams": Exams()}
