@@ -37,14 +37,14 @@ class Tui(App):
 
     CSS_PATH = "style.css"
 
-    SCREENS = {"homepage": HomePage()}
+    SCREENS = {"booklet": Booklet()}
 
     BINDINGS = [
         Binding(key="escape", action="key_escape", description="exit"),
     ]
 
     def on_mount(self) -> None:
-        self.push_screen("homepage")
+        self.push_screen("booklet")
 
     def add_exams(self) -> None:
         name = None
@@ -108,12 +108,13 @@ class Tui(App):
     def on_button_pressed(self, event: Button.Pressed) -> None:
         screens = {"booklet": Booklet(), "reservations": Reservations(), "taxes": Taxes(), "exams": Exams()}
         commands = ["booklet", "reservations", "taxes", "exams"]
+        booklet_buttons = ["average", "clear", "degree", "votes", "compute-average", "compute-vote"]
         if event.button.id == "exams-send":
             self.add_exams()
         elif event.button.id == "reservations-remove":
             self.remove_reservation()
         else:
-            if event.button.id not in commands and event.button.id != "booklet-button":
+            if event.button.id not in commands and event.button.id not in booklet_buttons:
                 if not self.is_screen_installed("remove-"+event.button.id):
                     self.install_screen(Reservations.RemoveReservation(event.button.id), name="remove-"+event.button.id)
                     self.push_screen("remove-"+event.button.id)
@@ -123,7 +124,7 @@ class Tui(App):
                     self.uninstall_screen("exams")
                 if self.is_screen_installed("add-" + event.button.id):
                     self.uninstall_screen("add-" + event.button.id)
-            elif event.button.id != "booklet-button":
+            elif event.button.id not in booklet_buttons:
                 if not self.is_screen_installed(f"{event.button.id}"):
                     self.install_screen(screens[f"{event.button.id}"], name=f"{event.button.id}")
                     self.push_screen(f"{event.button.id}")

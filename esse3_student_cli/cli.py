@@ -61,6 +61,8 @@ def main(
         debug: bool = typer.Option(False, "--debug", help="To show browser backend operations"),
 ):
 
+    """Esse3 command line utility"""
+
     global app_options
     app_options = AppOptions(
         username=username,
@@ -409,6 +411,9 @@ def command_taxes(
 
 @app.command(name="tui")
 def tui() -> None:
+    """
+        Run text user interface
+    """
     from esse3_student_cli.tui.main import Tui
     # faccio l import qua perchè altrimenti: from textual.app import App, ComposeResult, RenderResult, mi apre
     # un socket nonostante non lanci il run

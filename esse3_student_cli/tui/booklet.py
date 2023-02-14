@@ -1,6 +1,6 @@
 import asyncio
 
-from esse3_student_cli.primitives import Vote, Cfu
+from esse3_student_cli.primitives import Vote, Cfu, Exam
 from esse3_student_cli import cli
 
 from textual.app import ComposeResult
@@ -131,16 +131,19 @@ class Booklet(Screen):
             self.update(table)
 
     async def fetch_data(self) -> None:
-        """self.exams = [
-                    Exam.of("c1-riga1&c2-riga1&c3-riga1&c4-riga1"),
-                    Exam.of("c1-riga2&c2-riga2&c3-riga2&c4-riga2"),
-                    Exam.of("c1-riga3&c2-riga3&c3-riga3&c4-riga3"),
-                    Exam.of("c1-riga4&c2-riga4&c3-riga4&c4-riga4"),
-                    Exam.of("c1-riga4&ca2-riga4&c3-riga4&c4-riga4"),
-                    Exam.of("c1-riga4&ca2-riga4&c3-riga4&c4_riga4"),
-                    Exam.of("25.8&27.8&30"),
-                ]"""
-        self.exams = cli.new_esse3_wrapper().fetch_booklet()
+        self.exams = [
+            Exam(value='27007802 - AGILE SOFTWARE DEVELOPMENT&1&6&Superata&23 - 31/01/2022'),
+            Exam(value='27008537 - ALGORITHMIC GAME THEORY&1&6&Superata&30 - 25/02/2022'),
+            Exam(value="27006172 - CRYPTOGRAPHY&1&6&Frequenza attribuita d'ufficio&"),
+            Exam(value="27007791 - DATA ANALYTICS&1&12&Frequenza attribuita d'ufficio&"),
+            Exam(value="27007399 - NETWORK SECURITY&1&6&Frequenza attribuita d'ufficio&"),
+            Exam(value='27006179 - SECURE SOFTWARE DESIGN&1&6&Superata&23 - 19/01/2022'),
+            Exam(value="27006163 - THEORETICAL COMPUTER SCIENCE&1&12&Frequenza attribuita d'ufficio&"),
+            Exam(value="27005226 - ASPETTI ETICI E GIURIDICI DELL’INFORMATICA&2&6&Frequenza attribuita d'ufficio&"),
+            Exam(value="27000275 - BUSINESS GAME&2&6&Frequenza attribuita d'ufficio&"),
+            Exam(value='27008777 - CYBER OFFENSE AND DEFENSE&2&6&Superata&27 - 31/01/2023'),
+            ]
+        #self.exams = cli.new_esse3_wrapper().fetch_booklet()
 
         await self.query_one("#booklet-loading").remove()
         await self.query_one("#principale").mount(
@@ -150,14 +153,18 @@ class Booklet(Screen):
                             Static("Compute new average:", classes="title"),
                             Container(
                                 self.Average(self.exams),
-                                Horizontal(
-                                    self.Filter("vote"),
-                                    self.Filter("cfu"),
-                                    Button("compute", id="booklet-button"),
-                                    id="booklet-filters"
-                                ),
-                                id="booklet-container-filters"
-                            )
+                                Button("Schedule Average", id="average"),
+                                Button("Schedule Degree basis", id="degree"),
+                                Button("project vote", id="votes"),
+                                Button("clear", id="clear"),
+                                #Horizontal(
+                                 #   self.Filter("vote"),
+                                  #  self.Filter("cfu"),
+                                   # Button("compute", id="booklet-button"),
+                                    #id="booklet-filters"
+                                #),
+                                classes="booklet-container-options"
+                            ),
                         )
 
     async def on_mount(self) -> None:
@@ -165,27 +172,101 @@ class Booklet(Screen):
         asyncio.create_task(self.fetch_data())
 
     def on_button_pressed(self, event: Button.Pressed):
-        if event.button.id == "booklet-button":
+
+        if event.button.id == "clear":
             try:
-                element1 = self.query(self.NewAverage).last()
-                element1.remove()
+                element2 = self.query(".booklet-container-filters").last()
+                element2.remove()
             except:
                 pass
+            return
+
+        if event.button.id == "average":
             try:
-                element2 = self.query("#booklet-value-error").last()
+                element2 = self.query(".booklet-container-filters").last()
                 element2.remove()
             except:
                 pass
 
+            self.query_one("#principale").mount(
+                                Container(
+                                    Static("[b]Che media vorresti avere?[/]"),
+                                    Input(placeholder="media..."),
+                                    Static("[b]Quanti cfu hai ancora a disposizione?[/]"),
+                                    Input(placeholder="cfu..."),
+                                    Button("[b]compute[/]", classes="compute", id="compute-average"),
+                                    classes="booklet-container-filters",
+                                ),
+            )
+
+        if event.button.id == "compute-average":
+            self.query_one(".booklet-container-filters").mount(Static("cssss"))
+
+        if event.button.id == "votes":
+            try:
+                element2 = self.query(".booklet-container-filters").last()
+                element2.remove()
+            except:
+                pass
+
+            self.query_one("#principale").mount(
+                                Container(
+                                    Static("[b]Che voto pensi di prendere?[/]"),
+                                    Input(placeholder="voto...", id="vote"),
+                                    Static("[b]Quanti cfu ha l'esame?[/]"),
+                                    Input(placeholder="cfu...", id="cfu"),
+                                    Button("[b]compute[/]", classes="compute", id="compute-vote"),
+                                    classes="booklet-container-filters",
+                                ),
+            )
+
+        if event.button.id == "compute-vote":
             vote = self.query_one("#vote").value
             cfu = self.query_one("#cfu").value
             if vote != "" and cfu != "":
                 try:
                     vote = Vote(int(vote)).value
                     cfu = int(Cfu(cfu).value)
-                    self.query_one("#principale").mount(self.NewAverage(self.exams, vote, cfu))
+                    values = self.exams[len(self.exams) - 1].value.split("&")
+                    weighted = values[1]
+                    actual_average = float(weighted)
+                    actual_cfu = float(values[2])
+                    new_average = ((actual_average * actual_cfu) + (int(vote) * int(cfu))) / (
+                                actual_cfu + int(cfu))
+                    new_degree_basis = (new_average * 11.0) / 3.0
+                    """try:
+                        element2 = self.query_one("#booklet-value-error")
+                        element2.remove()
+                    except:
+                        pass"""
+                    self.query_one(".booklet-container-filters").mount(Static(f"{round(new_average, 2)} {round(new_degree_basis, 2)}"))
                 except ValueError:
-                    self.query_one("#principale").mount(Static("Wrong values", id="booklet-value-error"))
+                    self.query_one(".booklet-container-filters").mount(Static("[red]Wrong values[/]", id="booklet-value-error"))
+
+        if event.button.id == "degree":
+            self.query_one("#principale").mount(
+                                Horizontal(
+                                    Static("che voto di laurea vorresti avere?"),
+                                    Input(placeholder="66-110"),
+                                    Static("quanti cfu hai ancora?"),
+                                    Input(placeholder="n° CFU"),
+                                    Button("compute"),
+                                    classes="booklet-average"
+                                ),
+            )
+
+        if event.button.id == "averagee":
+            try:
+                element1 = self.query(self.NewAverage).last()
+                element1.remove()
+            except:
+                pass
+            try:
+                element2 = self.query(".booklet-container-filters").last()
+                element2.remove()
+            except:
+                pass
+
 
     def compose(self) -> ComposeResult:
         yield Header("Booklet", classes="header")

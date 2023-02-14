@@ -1,8 +1,8 @@
 import subprocess
 
-comando = "esse3-student"
+comando = "./cli_student.py"
 risultato = subprocess.run(
-    [comando, "booklet", "--help"],
+    ["poetry", "run", comando, "booklet", "--help"],
     capture_output=True,
 )
 
@@ -13,3 +13,4 @@ if __name__ == "__main__":
     error = risultato.stderr.decode().split('\n')
     for line in error:
         print(line)
+

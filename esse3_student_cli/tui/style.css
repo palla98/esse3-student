@@ -59,20 +59,110 @@ Screen {
     content-align: center middle;
 }
 
-#booklet-container-filters{
+.booklet-container-options{
     height: auto;
     layout: horizontal;
     align: center middle;
     border: #ec971f;
 }
 
-#booklet-container-filters > Average {
+.booklet-container-options > Average {
     width: auto;
 }
 
+.booklet-container-options > Button{
+    margin-left: 1;
+    margin-top: 2;
+    border: tall #1d2e38;
+    width: auto;
+    background: $primary-background-darken-2;
+}
+
+.booklet-container-options > Button:hover {
+    background: #2d4156;
+}
+
+.booklet-container-options > Static {
+    width: auto;
+    height: auto;
+    border: blank;
+}
+
+.booklet-container-options> Input {
+    width: auto;
+    height: auto;
+}
+
+.booklet-container-options > .options{
+    margin-left: 1;
+    border: tall #1d2e38;
+    width: auto;
+    background: $primary-background-darken-2;
+}
+
+.booklet-container-options > .options:hover {
+    background: #2d4156;
+}
+
+.booklet-container-filters{
+    height: auto;
+    layout: horizontal;
+    align: center middle;
+    border: #ec971f;
+}
+
+.booklet-container-filters > Average {
+    width: auto;
+}
+
+.booklet-container-filters > Button{
+    margin-left: 1;
+    margin-top: 2;
+    border: tall #1d2e38;
+    width: auto;
+    background: $primary-background-darken-2;
+}
+
+.booklet-container-filters > Button:hover {
+    background: #2d4156;
+}
+
+.booklet-container-filters > Static {
+    width: auto;
+    height: auto;
+    border: blank;
+}
+
+.booklet-container-filters > Input {
+    width: auto;
+    height: auto;
+}
+
+.booklet-container-filters > .compute{
+    margin-left: 10;
+    border: tall #1d2e38;
+    width: auto;
+    background: $primary-background-darken-2;
+}
+
+.booklet-container-filters > .compute:hover {
+    background: #2d4156;
+}
+
+#clear{
+    margin-left: 2;
+    margin-top: 2;
+    background: #f7e1b5;
+}
+
+#clear:hover {
+    background: #818360;
+}
+
+/*
 #booklet-filters{
     align: center middle;
-    width: 60%;
+    width: auto;
 }
 
 #booklet-filters > Input{
@@ -82,14 +172,14 @@ Screen {
 #booklet-filters > Button{
     margin-left: 3;
     border: tall #1d2e38;
-    width: 30%;
+    width: auto;
     background: $primary-background-darken-2;
 }
 
 #booklet-filters > Button:hover {
     background: #2d4156;
 }
-
+*/
 #booklet-table-exams{
     content-align: center middle;
     border: heavy #2b542c;
@@ -113,9 +203,33 @@ Screen {
 }
 
 #booklet-value-error {
-    border: heavy #9B0000;
+    border: blank;
+    content-align: center middle;
+    width: auto;
+}
+
+.booklet-average {
+    border: red;
+    height: auto;
+}
+
+.booklet-average > Static {
+    width: 20%;
+    height: auto;
+    border: blank;
     content-align: center middle;
 }
+
+.booklet-average > Input {
+    width: 20%;
+    height: auto;
+}
+
+.booklet-average > Button {
+    width: 20%;
+    height: auto;
+}
+
 
 /* TAXES */
 
