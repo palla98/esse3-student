@@ -244,7 +244,7 @@ class Booklet(Screen):
                         element2.remove()
                     except:
                         pass
-                    self.query_one(".booklet-container-filters").mount(Static(f"[b][yellow]New average:[/] {round(new_average, 2)}\n[yellow]New basis:[/] {round(new_degree_basis, 2)}[/]", id="result"))
+                    self.query_one(".booklet-container-filters").mount(Static(f"[b][yellow]New Average:[/] {round(new_average, 2)}\n[yellow]New Degree basis:[/] {round(new_degree_basis, 2)}[/]", id="result"))
                 except ValueError:
                     try:
                         element2 = self.query_one("#booklet-value-error")

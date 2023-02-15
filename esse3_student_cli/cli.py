@@ -22,7 +22,7 @@ class AppOptions:
 
 
 app_options = AppOptions()
-app = typer.Typer()
+app = typer.Typer(rich_markup_mode="rich", add_completion=False)
 
 
 def is_debug_on():
@@ -61,7 +61,9 @@ def main(
         debug: bool = typer.Option(False, "--debug", help="To show browser backend operations"),
 ):
 
-    """Esse3 command line utility"""
+    """
+    [bold][green]Esse3 command line utility[/green][/bold] :computer:
+    """
 
     global app_options
     app_options = AppOptions(
@@ -75,7 +77,7 @@ def main(
 def command_exams() -> None:
 
     """
-    Available exams list
+    [bold][#E1C699]Show all available exams list[/][/bold] :bookmark_tabs:
     """
 
     esse_wrapper = new_esse3_wrapper()
@@ -100,14 +102,14 @@ def command_exams() -> None:
         row = list(exam.value.split("&"))
         table.add_row(str(index), *row)
 
-    console.print(table)
+    console.print(table, justify="center")
 
 
 @app.command(name="reservations")
 def command_reservations() -> None:
 
     """
-    Available reservations list
+    [bold][#E1C699]Show all available reservations list[/][/bold] :bookmark_tabs:
     """
 
     esse_wrapper = new_esse3_wrapper()
@@ -136,7 +138,7 @@ def command_reservations() -> None:
     for index, reservation in enumerate(reservations, start=0):
         row = list(reservation.values())
         tables[f'table_{index}'].add_row(str(index+1), *row)
-        console.print(tables[f'table_{index}'])
+        console.print(tables[f'table_{index}'], justify="center")
 
 
 @app.command(name="book_exams")
@@ -148,7 +150,7 @@ def command_add_reservation(
         ),
 ):
     """
-    Operation that allows the booking of exams
+    [bold][#E1C699]Operation that allows the [green]booking[/green] of exams[/][/bold] :blue_book:
     """
 
     def parse(exams) -> []:
@@ -186,7 +188,7 @@ def command_remove_reservation(
 ):
 
     """
-    Operation that allows the removal of exam bookings
+    [bold][#E1C699]Operation that allows the [red]removal[/red] of exam bookings[/][/bold] :wastebasket:
     """
 
     def parse(reservations) -> list:
@@ -237,7 +239,7 @@ def command_booklet(
 ) -> None:
 
     """
-    Show all carrier exams
+    [bold][#E1C699]Show all carrier exams[/][/bold] :bookmark_tabs:
     """
 
     if academic_year:
@@ -283,7 +285,7 @@ def command_booklet(
     table.add_column("Academic Year", style="bold", justify="center")
     table.add_column("CFU", style="bold", justify="center")
     table.add_column("State", style="bold")
-    table.add_column("Vote", style="bold")
+    table.add_column("Vote - Date", style="bold")
 
     def get_state_color(state):
         colors = {"Superata":"green", "Frequenza attribuita d'ufficio":"yellow"}
@@ -323,7 +325,7 @@ def command_booklet(
         time.sleep(0.1)
 
     console.rule("[bold]BOOKLET SHOWCASE[/bold]")
-    console.print(table)
+    console.print(table, justify="center")
 
     table = Table(header_style="rgb(210,105,30) bold", box=box.SIMPLE_HEAD)
     table.add_column("Arithmetic average", style="bold", justify="center")
@@ -350,7 +352,7 @@ def command_booklet(
 
     if not academic_year and not vote and not exam_state:
         console.rule("[bold]STATISTICS[/bold]")
-        console.print(table)
+        console.print(table, justify="center")
 
 
 @app.command(name="taxes")
@@ -360,7 +362,7 @@ def command_taxes(
 ) -> None:
 
     """
-    Show all taxes
+    [bold][#E1C699]Show all taxes[/][/bold] :bookmark_tabs:
     """
 
     if year:
@@ -406,13 +408,14 @@ def command_taxes(
         time.sleep(0.1)
 
     console.rule("[bold]TAXES SHOWCASE[/bold]")
-    console.print(table)
+    console.print(table, justify="center")
 
 
 @app.command(name="tui")
 def tui() -> None:
+
     """
-        Run text user interface
+    [bold][#E1C699]Run [yellow]text-user-interface[/yellow][/][/bold]
     """
     from esse3_student_cli.tui.main import Tui
     # faccio l import qua perchè altrimenti: from textual.app import App, ComposeResult, RenderResult, mi apre
