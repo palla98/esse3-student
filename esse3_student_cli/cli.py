@@ -5,6 +5,7 @@ import typer
 from typing import List, Tuple, Optional
 from rich import box
 from rich.progress import track
+from rich.style import Style
 from rich.table import Table
 from rich.text import Text
 
@@ -103,6 +104,8 @@ def command_exams() -> None:
         table.add_row(str(index), *row)
 
     console.print(table, justify="center")
+    console.rule("[bold]STATISTICS[/]", style="yellow")
+    console.print("\n[bold]clicks saved: [blue]4[/]\n", justify="center")
 
 
 @app.command(name="reservations")
@@ -146,7 +149,7 @@ def command_add_reservation(
         exams: str = typer.Argument(
             ...,
             metavar="Exams name",
-            help='A string of the form: "name1-name2...." or "name1" for single value'
+            help='[bold]A string of the form: [#E1C699]"name1-name2...."[/] or [#E1C699]"name1"[/] for single value'
         ),
 ):
     """
@@ -168,7 +171,7 @@ def command_add_reservation(
 
     esse_wrapper = new_esse3_wrapper()
 
-    with console.status(f"[bold green]Exams booking[/] in progress....", spinner="aesthetic"):
+    with console.status(f"[bold]Exams [green]booking[/] in progress....[/]", spinner="aesthetic"):
         time.sleep(2)
         value = esse_wrapper.add_reservation(list(names))
         if value == "ok":
@@ -182,7 +185,7 @@ def command_remove_reservation(
         reservations: str = typer.Argument(
             ...,
             metavar="Reservations name",
-            help='A string of the form: "name1-name2...." or "name1" for single value'
+            help='[bold]A string of the form: [#E1C699]"name1-name2...."[/] or [#E1C699]"name1"[/] for single value'
         ),
 
 ):
@@ -206,7 +209,7 @@ def command_remove_reservation(
 
     esse3_wrapper = new_esse3_wrapper()
 
-    with console.status(f"[bold][green]Searching reservations[/] to remove in progress....[/]", spinner="aesthetic"):
+    with console.status(f"[bold]Searching [green]reservations[/] to remove in progress....[/]", spinner="aesthetic"):
         time.sleep(3)
         values = esse3_wrapper.remove_reservation(list(names))
 
@@ -232,10 +235,10 @@ def command_remove_reservation(
 
 @app.command(name="booklet")
 def command_booklet(
-        academic_year: int = typer.Option(int, help="academic year (1 to 3)"),
-        exam_state: str = typer.Option(str, help="'Superata' like 'Passed' or 'Frequenza attribuita d'ufficio' like 'To do'"),
-        vote: int = typer.Option(int, help="vote of the exam"),
-        new_average: Tuple[int, str] = typer.Option((None, None), help="calculate new average: (vote cfu); ex: '25 12' "),
+        academic_year: int = typer.Option(int, help="[bold]Academic year (1 to 3)"),
+        exam_status: str = typer.Option(str, help="[bold]'[green]Superata[/]' like 'Passed' or '[yellow]Frequenza attribuita d'ufficio[/]' like 'To do'[/]"),
+        grade: int = typer.Option(int, help="[bold]Grade of the exam[/]"),
+        new_average: Tuple[int, str] = typer.Option((None, None), help="[bold]calculate new average: (grade cfu); ex: '25 12' [/]"),
 ) -> None:
 
     """
@@ -249,16 +252,16 @@ def command_booklet(
             console.print("[bold yellow]Invalid year[/]")
             raise typer.Exit()
 
-    if exam_state:
+    if exam_status:
         try:
-            exam_state = ExamState(exam_state)
+            exam_status = ExamState(exam_status)
         except ValueError:
             console.print("[bold yellow]Invalid exam state[/]")
             raise typer.Exit()
 
-    if vote:
+    if grade:
         try:
-            vote = Vote(vote)
+            grade = Vote(grade)
         except ValueError:
             console.print("[bold yellow]Invalid vote[/]")
             raise typer.Exit()
@@ -285,7 +288,7 @@ def command_booklet(
     table.add_column("Academic Year", style="bold", justify="center")
     table.add_column("CFU", style="bold", justify="center")
     table.add_column("State", style="bold")
-    table.add_column("Vote - Date", style="bold")
+    table.add_column("Grade - Date", style="bold")
 
     def get_state_color(state):
         colors = {"Superata":"green", "Frequenza attribuita d'ufficio":"yellow"}
@@ -298,7 +301,7 @@ def command_booklet(
                   '':"white", "IDO":"green"}
         return colors[vote]
 
-    for index, exam in enumerate(track(exams, description="Processing....", transient=True), start=1):
+    for index, exam in enumerate(track(exams, description="[bold]Processing....[/]", transient=True), start=1):
         colums = exam.value.split("&")
         if len(colums) != 3:
             c = get_state_color(colums[3])
@@ -313,11 +316,11 @@ def command_booklet(
             if academic_year:
                 if colums[1] == str(academic_year.value):
                     table.add_row(str(index), colums[0], colums[1], colums[2], f'[{c}]{colums[3]}[/{c}]', vote_style)
-            elif exam_state:
-                if colums[3] == exam_state.value:
+            elif exam_status:
+                if colums[3] == exam_status.value:
                     table.add_row(str(index), colums[0], colums[1], colums[2], f'[{c}]{colums[3]}[/{c}]', vote_style)
-            elif vote:
-                if colums[4][0:2] == str(vote.value):
+            elif grade:
+                if colums[4][0:2] == str(grade.value):
                     table.add_row(str(index), colums[0], colums[1], colums[2], f'[{c}]{colums[3]}[/{c}]', vote_style)
             else:
                 table.add_row(str(index), colums[0], colums[1], colums[2], f'[{c}]{colums[3]}[/{c}]', vote_style)
@@ -350,15 +353,15 @@ def command_booklet(
     else:
         table.add_row(arithmetic, weighted, str(round(degree_basis, 2)))
 
-    if not academic_year and not vote and not exam_state:
+    if not academic_year and not grade and not exam_status:
         console.rule("[bold]STATISTICS[/bold]")
         console.print(table, justify="center")
 
 
 @app.command(name="taxes")
 def command_taxes(
-        to_pay: Optional[bool] = typer.Option(False, "--to-pay", help="Show all taxes to be paid"),
-        year: int = typer.Option(int, "--year", help="es: '2021'; filter taxes by year"),
+        to_pay: Optional[bool] = typer.Option(False, "--to-pay", help="[bold]Show all taxes to be paid"),
+        year: int = typer.Option(int, "--year", help="[bold]es: '2021'; filter taxes by year"),
 ) -> None:
 
     """
@@ -373,7 +376,7 @@ def command_taxes(
             raise typer.Exit()
 
     esse3_wrapper = new_esse3_wrapper()
-    with console.status("[bold][green]Fetching taxes[/] in progress....[/]", spinner="aesthetic"):
+    with console.status("[bold]Fetching [green]taxes[/] in progress....[/]", spinner="aesthetic"):
         taxes = esse3_wrapper.fetch_taxes()
 
     table = Table(style="rgb(139,69,19) bold", box=box.SIMPLE_HEAD)
@@ -388,7 +391,7 @@ def command_taxes(
         names = {" pagato confermato": "payment confirmed", " non pagato": "to pay", " pagato": "refund"}
         return names[payment_status], colors[payment_status]
 
-    for index, taxe in enumerate(track(taxes, description="Processing...", transient=True), start=1):
+    for index, taxe in enumerate(track(taxes, description="[bold]Processing....[/]", transient=True), start=1):
         colums = taxe.split("&")
         payment_status, c = payment_changes(colums[3])
         year_date = colums[1].split("-")
