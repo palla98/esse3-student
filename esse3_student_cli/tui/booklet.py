@@ -234,38 +234,50 @@ class Booklet(Screen):
                     new_average = ((actual_average * actual_cfu) + (int(vote) * int(cfu))) / (
                                 actual_cfu + int(cfu))
                     new_degree_basis = (new_average * 11.0) / 3.0
-                    """try:
+                    try:
+                        element2 = self.query_one("#result")
+                        element2.remove()
+                    except:
+                        pass
+                    try:
                         element2 = self.query_one("#booklet-value-error")
                         element2.remove()
                     except:
-                        pass"""
-                    self.query_one(".booklet-container-filters").mount(Static(f"{round(new_average, 2)} {round(new_degree_basis, 2)}"))
+                        pass
+                    self.query_one(".booklet-container-filters").mount(Static(f"{round(new_average, 2)} {round(new_degree_basis, 2)}", id="result"))
                 except ValueError:
+                    try:
+                        element2 = self.query_one("#booklet-value-error")
+                        element2.remove()
+                    except:
+                        pass
+                    try:
+                        element2 = self.query_one("#result")
+                        element2.remove()
+                    except:
+                        pass
                     self.query_one(".booklet-container-filters").mount(Static("[red]Wrong values[/]", id="booklet-value-error"))
 
         if event.button.id == "degree":
-            self.query_one("#principale").mount(
-                                Horizontal(
-                                    Static("che voto di laurea vorresti avere?"),
-                                    Input(placeholder="66-110"),
-                                    Static("quanti cfu hai ancora?"),
-                                    Input(placeholder="n° CFU"),
-                                    Button("compute"),
-                                    classes="booklet-average"
-                                ),
-            )
-
-        if event.button.id == "averagee":
-            try:
-                element1 = self.query(self.NewAverage).last()
-                element1.remove()
-            except:
-                pass
             try:
                 element2 = self.query(".booklet-container-filters").last()
                 element2.remove()
             except:
                 pass
+
+            self.query_one("#principale").mount(
+                                Horizontal(
+                                    Static("[b]Che voto di laurea vorresti avere?[/]"),
+                                    Input(placeholder="66-110", id="base"),
+                                    Static("[b]Quanti cfu hai ancora?[/]"),
+                                    Input(placeholder="n° CFU", id="CFU"),
+                                    Button("[b]compute[/]", classes="compute", id="compute-degree"),
+                                    classes="booklet-container-filters"
+                                ),
+            )
+
+        if event.button.id == "compute-degree":
+            pass
 
 
     def compose(self) -> ComposeResult:

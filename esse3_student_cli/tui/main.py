@@ -98,17 +98,17 @@ class Tui(App):
             self.uninstall_screen("add-"+name)
 
     async def on_key(self, event: events.Key):
-        if event.key == "up":
+        if event.key == "up" or event.key == "left":
             pilot = Pilot(self)
             await pilot.press("shift+tab")
-        if event.key == "down":
+        if event.key == "down" or event.key == "right":
             pilot = Pilot(self)
             await pilot.press("tab")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         screens = {"booklet": Booklet(), "reservations": Reservations(), "taxes": Taxes(), "exams": Exams()}
         commands = ["booklet", "reservations", "taxes", "exams"]
-        booklet_buttons = ["average", "clear", "degree", "votes", "compute-average", "compute-vote"]
+        booklet_buttons = ["average", "clear", "degree", "votes", "compute-average", "compute-vote", "compute-degree"]
         if event.button.id == "exams-send":
             self.add_exams()
         elif event.button.id == "reservations-remove":

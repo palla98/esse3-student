@@ -108,7 +108,7 @@ Screen {
     height: auto;
     layout: horizontal;
     align: center middle;
-    border: #ec971f;
+    border: #2b542c;
 }
 
 .booklet-container-filters > Average {
@@ -134,7 +134,7 @@ Screen {
 }
 
 .booklet-container-filters > Input {
-    width: auto;
+    width: 7%;
     height: auto;
 }
 
