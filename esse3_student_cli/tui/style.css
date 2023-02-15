@@ -159,6 +159,11 @@ Screen {
     background: #818360;
 }
 
+#result {
+    margin-left: 2;
+    border: none;
+}
+
 /*
 #booklet-filters{
     align: center middle;
