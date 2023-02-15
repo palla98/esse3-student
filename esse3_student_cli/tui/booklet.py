@@ -57,8 +57,8 @@ class Booklet(Screen):
             table.add_column("Name", style="cyan bold")
             table.add_column("Academic Year", style="bold", justify="center")
             table.add_column("CFU", style="bold", justify="center")
-            table.add_column("State", style="bold")
-            table.add_column("Vote", style="bold")
+            table.add_column("Status", style="bold")
+            table.add_column("Grade", style="bold", justify="center")
 
             for index, exam in enumerate(exams, start=1):
                 if index <= 15:
@@ -116,7 +116,7 @@ class Booklet(Screen):
 
         def table(self, averages, new_vote, new_cfu):
             table = Table(header_style="rgb(255,204,51) bold", box=box.SIMPLE_HEAD)
-            table.add_column("Vote", style="bold", justify="center")
+            table.add_column("Grade", style="bold", justify="center")
             table.add_column("Cfu", style="bold", justify="center")
             table.add_column("New Average", style="bold", justify="center")
             table.add_column("New Degree basis", style="bold", justify="center")
@@ -131,7 +131,7 @@ class Booklet(Screen):
             self.update(table)
 
     async def fetch_data(self) -> None:
-        self.exams = [
+        """self.exams = [
             Exam(value='27007802 - AGILE SOFTWARE DEVELOPMENT&1&6&Superata&23 - 31/01/2022'),
             Exam(value='27008537 - ALGORITHMIC GAME THEORY&1&6&Superata&30 - 25/02/2022'),
             Exam(value="27006172 - CRYPTOGRAPHY&1&6&Frequenza attribuita d'ufficio&"),
@@ -142,8 +142,8 @@ class Booklet(Screen):
             Exam(value="27005226 - ASPETTI ETICI E GIURIDICI DELL’INFORMATICA&2&6&Frequenza attribuita d'ufficio&"),
             Exam(value="27000275 - BUSINESS GAME&2&6&Frequenza attribuita d'ufficio&"),
             Exam(value='27008777 - CYBER OFFENSE AND DEFENSE&2&6&Superata&27 - 31/01/2023'),
-            ]
-        #self.exams = cli.new_esse3_wrapper().fetch_booklet()
+            ]"""
+        self.exams = cli.new_esse3_wrapper().fetch_booklet()
 
         await self.query_one("#booklet-loading").remove()
         await self.query_one("#principale").mount(
@@ -155,7 +155,7 @@ class Booklet(Screen):
                                 self.Average(self.exams),
                                 Button("Schedule Average", id="average"),
                                 Button("Schedule Degree basis", id="degree"),
-                                Button("project vote", id="votes"),
+                                Button("project grade", id="votes"),
                                 Button("clear", id="clear"),
                                 #Horizontal(
                                  #   self.Filter("vote"),
@@ -211,9 +211,9 @@ class Booklet(Screen):
 
             self.query_one("#principale").mount(
                                 Container(
-                                    Static("[b]Che voto pensi di prendere?[/]"),
-                                    Input(placeholder="voto...", id="vote"),
-                                    Static("[b]Quanti cfu ha l'esame?[/]"),
+                                    Static("[b]What grade do you think you get?[/]"),
+                                    Input(placeholder="grade...", id="vote"),
+                                    Static("[b]How many CFU does the exam have?[/]"),
                                     Input(placeholder="cfu...", id="cfu"),
                                     Button("[b]compute[/]", classes="compute", id="compute-vote"),
                                     classes="booklet-container-filters",
@@ -244,7 +244,7 @@ class Booklet(Screen):
                         element2.remove()
                     except:
                         pass
-                    self.query_one(".booklet-container-filters").mount(Static(f"[b][yellow]New Average:[/] {round(new_average, 2)}\n[yellow]New Degree basis:[/] {round(new_degree_basis, 2)}[/]", id="result"))
+                    self.query_one(".booklet-container-filters").mount(Static(f"[b][yellow]New Average:[/] {round(new_average, 2)}/30\n[yellow]New Degree basis:[/] {round(new_degree_basis, 2)}/110[/]", id="result"))
                 except ValueError:
                     try:
                         element2 = self.query_one("#booklet-value-error")
