@@ -179,6 +179,7 @@ class Esse3Wrapper:
 
         self.driver.get(EXAMS_URL)
         exams = self.driver.find_elements(By.XPATH, "//table/tbody/tr")
+        time.sleep(1)
         values = {}
         entro = False
         if not exams:
