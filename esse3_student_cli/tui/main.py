@@ -23,10 +23,10 @@ class HomePage(Screen):
         yield Container(
             Static("Commands:", classes="title"),
             Vertical(
-                Button("Booklet", id="booklet"),
-                Button("Taxes", id="taxes"),
-                Button("Exams", id="exams"),
-                Button("Reservations", id="reservations"),
+                Button("[bold]Booklet[/] - [italic]show all activities[/]", id="booklet"),
+                Button("[bold]Taxes[/] - [italic]show all taxes[/]", id="taxes"),
+                Button("[bold]Exams[/] - [italic]show available exams[/]", id="exams"),
+                Button("[bold]Reservations[/] - [italic]show booked exams[/]", id="reservations"),
             ),
             id="homepage"
         )

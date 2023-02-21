@@ -78,7 +78,7 @@ def main(
 def command_exams() -> None:
 
     """
-    [bold][#E1C699]Show all available exams list[/][/bold] :bookmark_tabs:
+    [bold][#E1C699]Show available exams list[/][/bold] :bookmark_tabs:
     """
 
     esse_wrapper = new_esse3_wrapper()
@@ -105,14 +105,14 @@ def command_exams() -> None:
 
     console.print(table, justify="center")
     console.rule("[bold]STATISTICS[/]", style="yellow")
-    console.print("\n[bold]clicks saved: [blue]4[/]\n", justify="center")
+    console.print("\n[bold]clicks saved: [blue]7[/]\n", justify="center")
 
 
 @app.command(name="reservations")
 def command_reservations() -> None:
 
     """
-    [bold][#E1C699]Show all available reservations list[/][/bold] :bookmark_tabs:
+    [bold][#E1C699]Show exams booked list[/][/bold] :bookmark_tabs:
     """
 
     esse_wrapper = new_esse3_wrapper()
@@ -143,8 +143,11 @@ def command_reservations() -> None:
         tables[f'table_{index}'].add_row(str(index+1), *row)
         console.print(tables[f'table_{index}'], justify="center")
 
+    console.rule("[bold]STATISTICS[/]", style="yellow")
+    console.print("\n[bold]clicks saved: [blue]7[/]\n", justify="center")
 
-@app.command(name="book_exams")
+
+@app.command(name="add")
 def command_add_reservation(
         exams: str = typer.Argument(
             ...,
@@ -153,7 +156,7 @@ def command_add_reservation(
         ),
 ):
     """
-    [bold][#E1C699]Operation that allows the [green]booking[/green] of exams[/][/bold] :blue_book:
+    [bold][#E1C699]Operation that allows the [green]booking[/green] of examinations[/][/bold] :blue_book:
     """
 
     def parse(exams) -> []:
@@ -175,12 +178,15 @@ def command_add_reservation(
         time.sleep(2)
         value = esse_wrapper.add_reservation(list(names))
         if value == "ok":
-            console.log(f"[bold] ✅ Exams with name: [green]{', '.join(map(str, names))}[/] added")
+            console.log(f"[bold] ✅ Exams with name: [green]{', '.join(map(str, names))}[/] added\n")
         elif value == "empty":
-            console.print("No exams available!!!", style="bold red")
+            console.print("No exams available or wrong values passed!!!\n", style="bold red")
+
+    console.rule("[bold]STATISTICS[/]", style="yellow")
+    console.print("\n[bold]clicks saved: [blue]7[/]\n", justify="center")
 
 
-@app.command(name="remove_reservations")
+@app.command(name="remove")
 def command_remove_reservation(
         reservations: str = typer.Argument(
             ...,
@@ -191,7 +197,7 @@ def command_remove_reservation(
 ):
 
     """
-    [bold][#E1C699]Operation that allows the [red]removal[/red] of exam bookings[/][/bold] :wastebasket:
+    [bold][#E1C699]Operation that allows the [red]deletion[/red] of booked examinations[/][/bold] :wastebasket:
     """
 
     def parse(reservations) -> list:
@@ -227,10 +233,13 @@ def command_remove_reservation(
             if all_closed:
                 console.log(f"[bold]❌ Impossible to remove: [red]{', '.join([x for x in values[0]])}[/] cause subscription closed[/]")
             elif all_success:
-                console.log(f"[bold]Reservations: [green]{', '.join([x for x in values[1]])}[/] removed[/]")
+                console.log(f"[bold]Reservations: [green]{', '.join([x for x in values[1]])}[/] removed\n[/]")
             else:
                 console.log(f"[bold]✅ Reservations: [green]{', '.join([x for x in values[1]])}[/] removed[/]")
                 console.log(f"[bold]❌ Impossible to remove: [red]{', '.join([x for x in values[0]])}[/] cause subscription closed[/]")
+
+    console.rule("[bold]STATISTICS[/]", style="yellow")
+    console.print("\n[bold]clicks saved: [blue]9[/]\n", justify="center")
 
 
 @app.command(name="booklet")
@@ -242,7 +251,7 @@ def command_booklet(
 ) -> None:
 
     """
-    [bold][#E1C699]Show all carrier exams[/][/bold] :bookmark_tabs:
+    [bold][#E1C699]shows all the student's activities[/][/bold] :bookmark_tabs:
     """
 
     if academic_year:
@@ -356,6 +365,7 @@ def command_booklet(
     if not academic_year and not grade and not exam_status:
         console.rule("[bold]STATISTICS[/bold]")
         console.print(table, justify="center")
+        console.print("\n[bold]clicks saved: [blue]7[/]\n", justify="center")
 
 
 @app.command(name="taxes")
@@ -412,6 +422,8 @@ def command_taxes(
 
     console.rule("[bold]TAXES SHOWCASE[/bold]")
     console.print(table, justify="center")
+    console.rule("[bold]STATISTICS[/]", style="yellow")
+    console.print("\n[bold]clicks saved: [blue]9[/]\n", justify="center")
 
 
 @app.command(name="tui")

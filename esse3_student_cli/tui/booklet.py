@@ -279,7 +279,6 @@ class Booklet(Screen):
         if event.button.id == "compute-degree":
             pass
 
-
     def compose(self) -> ComposeResult:
         yield Header("Booklet", classes="header")
         yield Container(

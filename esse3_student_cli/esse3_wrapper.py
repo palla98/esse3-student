@@ -56,9 +56,10 @@ class Esse3Wrapper:
         self.choose_carrier()  # commentare quando si fanno i test
 
     def __del__(self):
-        if not self.debug:
+        if self.debug or not self.debug:
             try:
                 self.__logout()
+                time.sleep(2)
                 self.driver.close()
             except WebDriverException:
                 pass
@@ -182,6 +183,7 @@ class Esse3Wrapper:
         time.sleep(1)
         values = {}
         entro = False
+        mai = True
         if not exams:
             return "empty"
         while names:
@@ -191,6 +193,7 @@ class Esse3Wrapper:
                 if exam.find_element(By.XPATH, f"//table/tbody/tr[{i}]/td[2]").text == name:
                     values[1] = name
                     entro = True
+                    mai = False
                     exam_link = self.driver.find_element(By.XPATH, f"//table/tbody/tr[{i}]/td/div/a")
                     self.driver.execute_script("arguments[0].scrollIntoView();", exam_link)
                     exam_link.send_keys(Keys.ENTER)
@@ -200,10 +203,13 @@ class Esse3Wrapper:
                     break
             if not entro:
                 values[0] = name
-            self.driver.get(EXAMS_URL)
-            WebDriverWait(self.driver, 10).until(
-                EC.visibility_of_element_located((By.XPATH, "//table/tbody/tr")))
-            exams = self.driver.find_elements(By.XPATH, "//table/tbody/tr")
+            if len(names) != 0:
+                self.driver.get(EXAMS_URL)
+                WebDriverWait(self.driver, 10).until(
+                    EC.visibility_of_element_located((By.XPATH, "//table/tbody/tr")))
+                exams = self.driver.find_elements(By.XPATH, "//table/tbody/tr")
+        if mai:
+            return "empty"
         return "ok"
 
     def remove_reservation(self, names: list) -> {}:

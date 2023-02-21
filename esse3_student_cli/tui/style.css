@@ -39,6 +39,7 @@ Screen {
     border: tall #1d2e38;
     width: 50%;
     background: $primary-background-darken-2;
+    text-style: none;
 }
 
 #homepage > Vertical > Button:hover {
