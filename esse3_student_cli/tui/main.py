@@ -6,6 +6,7 @@ from textual.screen import Screen
 from textual import events
 from textual.pilot import Pilot
 
+from esse3_student_cli.primitives import Exam
 from esse3_student_cli.tui.booklet import Booklet
 from esse3_student_cli.tui.exams import Exams
 from esse3_student_cli.tui.reservations import Reservations
@@ -53,9 +54,8 @@ class Tui(App):
         for c in self.query("Checkbox"):
             if c.value:
                 name = c.name_value
-                exams.append(name)
+                exams.append(Exam(name))
                 entro = True
-                #break
         if not entro:
             return
 
@@ -80,7 +80,7 @@ class Tui(App):
         for c in self.query("Checkbox"):
             if c.value:
                 name = c.name_value
-                exams.append(name)
+                exams.append(Exam(name))
                 entro = True
         if not entro:
             return

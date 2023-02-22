@@ -115,10 +115,11 @@ class Exams(Screen):
             super().__init__()
 
         async def fetch_date(self) -> None:
-            cli.new_esse3_wrapper().add_reservation(list(self.exams))
+            added, click = cli.new_esse3_wrapper().add(list(self.exams))
             await self.query_one(".exams-loading2").remove()
             self.query_one(Container).mount \
-                (Static(f"Exams: [green]{', '.join(map(str, self.exams))}[/] added", id="exams-added-success"))
+                (Static(f"Exams: [green]{', '.join(map(str, added))}[/] added\n"
+                        f"\n[bold]click saved: [blue]{click}", id="exams-added-success"))
 
         async def on_mount(self) -> None:
             await asyncio.sleep(0.1)

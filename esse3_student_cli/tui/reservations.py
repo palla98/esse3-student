@@ -131,7 +131,7 @@ class Reservations(Screen):
             super().__init__()
 
         async def fetch_date(self) -> None:
-            values = cli.new_esse3_wrapper().remove_reservation(list(self.reservations))
+            values, click = cli.new_esse3_wrapper().remove(list(self.reservations))
 
             all_success = True
             all_closed = True
@@ -145,16 +145,19 @@ class Reservations(Screen):
 
             if all_closed:
                 self.query_one(Container).mount(
-                    Static(f"❌ Impossible to remove: [red]{', '.join([x for x in values[0]])}[/] cause subscription closed",
+                    Static(f"❌ Impossible to remove: [red]{', '.join([x for x in values[0]])}[/] cause subscription closed\n"
+                           f"\n[bold]click saved: [blue]{click}",
                            classes="reservations-removed-error"))
             elif all_success:
                 self.query_one(Container).mount(
-                    Static(f"Reservations: [green]{', '.join([x for x in values[1]])}[/] removed",
+                    Static(f"Reservations: [green]{', '.join([x for x in values[1]])}[/] removed\n"
+                           f"\n[bold]click saved: [blue]{click}",
                            id="reservations-removed-success"))
             else:
                 self.query_one(Container).mount(
                     Static(f"✅ Reservations: [green]{', '.join([x for x in values[1]])}[/] removed \n\n"
-                           f"❌ Impossible to remove: [red]{', '.join([x for x in values[0]])}[/] cause subscription closed",
+                           f"❌ Impossible to remove: [red]{', '.join([x for x in values[0]])}[/] cause subscription closed\n"
+                           f"\n[bold]click saved: [blue]{click}",
                            classes="reservations-removed-mix"))
 
         async def on_mount(self) -> None:
@@ -163,7 +166,7 @@ class Reservations(Screen):
 
         def compose(self) -> ComposeResult:
             yield Header("Reservation removed", classes="header")
-            yield Container(Static("exams [yellow]booking removal[/] in progress.....", id="reservations-loading-removed"))
+            yield Container(Static("Rreservations [yellow]removal[/] in progress.....", id="reservations-loading-removed"))
             yield Footer()
 
         BINDINGS = [

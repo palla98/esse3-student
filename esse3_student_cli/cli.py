@@ -159,31 +159,30 @@ def command_add_reservation(
     [bold][#E1C699]Operation that allows the [green]booking[/green] of examinations[/][/bold] :blue_book:
     """
 
-    def parse(exams) -> []:
+    def parse(exams: str) -> list[Exam]:
         values = exams.split("-")
         try:
-            for v in values:
-                Exam(v)
+            exams_list = [Exam(v) for v in values]
         except ValueError:
             console.print("[bold red]Invalid characters or values[/]")
             raise typer.Exit()
 
-        return values
+        return exams_list
 
-    names = parse(exams)
+    values = parse(exams)
 
     esse_wrapper = new_esse3_wrapper()
 
     with console.status(f"[bold]Exams [green]booking[/] in progress....[/]", spinner="aesthetic"):
         time.sleep(2)
-        value = esse_wrapper.add_reservation(list(names))
-        if value == "ok":
-            console.log(f"[bold] ✅ Exams with name: [green]{', '.join(map(str, names))}[/] added\n")
-        elif value == "empty":
-            console.print("No exams available or wrong values passed!!!\n", style="bold red")
+        values, click = esse_wrapper.add(list(values))
+        if len(values) == 0:
+            console.print("No exams available or wrong names passed!!!\n", style="bold red")
+        else:
+            console.log(f"[bold] ✅ Exams with name: [green]{', '.join(map(str, values))}[/] added\n")
 
     console.rule("[bold]STATISTICS[/]", style="yellow")
-    console.print("\n[bold]clicks saved: [blue]7[/]\n", justify="center")
+    console.print(f"\n[bold]clicks saved: [blue]{click}[/]\n", justify="center")
 
 
 @app.command(name="remove")
@@ -200,24 +199,23 @@ def command_remove_reservation(
     [bold][#E1C699]Operation that allows the [red]deletion[/red] of booked examinations[/][/bold] :wastebasket:
     """
 
-    def parse(reservations) -> list:
-        values = []
+    def parse(reservations: str) -> list[Exam]:
+        values = reservations.split("-")
         try:
-            for r in reservations.split("-"):
-                values.append(Exam(r).value)
+            exams_list = [Exam(v) for v in values]
         except ValueError:
             console.print("[bold red]Invalid characters or values[/]")
             raise typer.Exit()
 
-        return values
+        return exams_list
 
-    names = parse(reservations)
+    values = parse(reservations)
 
     esse3_wrapper = new_esse3_wrapper()
 
     with console.status(f"[bold]Searching [green]reservations[/] to remove in progress....[/]", spinner="aesthetic"):
-        time.sleep(3)
-        values = esse3_wrapper.remove_reservation(list(names))
+        time.sleep(2)
+        values, click = esse3_wrapper.remove(list(values))
 
         if len(values) == 0:
             console.log(f"[bold]❌ No exams to remove or wrong values passed[/]!!!")
@@ -231,15 +229,17 @@ def command_remove_reservation(
                     all_closed = False
 
             if all_closed:
-                console.log(f"[bold]❌ Impossible to remove: [red]{', '.join([x for x in values[0]])}[/] cause subscription closed[/]")
+                console.log(
+                    f"[bold]❌ Impossible to remove: [red]{', '.join([x for x in values[0]])}[/] cause subscription closed or wrong names passed[/]")
             elif all_success:
                 console.log(f"[bold]Reservations: [green]{', '.join([x for x in values[1]])}[/] removed\n[/]")
             else:
                 console.log(f"[bold]✅ Reservations: [green]{', '.join([x for x in values[1]])}[/] removed[/]")
-                console.log(f"[bold]❌ Impossible to remove: [red]{', '.join([x for x in values[0]])}[/] cause subscription closed[/]")
+                console.log(
+                    f"[bold]❌ Impossible to remove: [red]{', '.join([x for x in values[0]])}[/] cause subscription closed or wrong names passed[/]")
 
     console.rule("[bold]STATISTICS[/]", style="yellow")
-    console.print("\n[bold]clicks saved: [blue]9[/]\n", justify="center")
+    console.print(f"\n[bold]clicks saved: [blue]{click}[/]\n", justify="center")
 
 
 @app.command(name="booklet")

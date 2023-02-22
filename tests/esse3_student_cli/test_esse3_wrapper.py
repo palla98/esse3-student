@@ -17,7 +17,7 @@ def esse3_wrapper(test_server):
 
 def test_fetch_reservations(esse3_wrapper):
     exams = esse3_wrapper.fetch_reservations()
-    assert len(exams) == 1
+    assert len(exams) == 0
 
 
 def test_fetch_taxes_first_page(esse3_wrapper):

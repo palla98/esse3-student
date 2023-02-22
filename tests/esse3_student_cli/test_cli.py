@@ -12,7 +12,7 @@ def runner(test_server):
 def test_reservations(runner):
     result = runner.invoke(app, ["reservations"])
     assert result.exit_code == 0
-    assert "Reservations showcase" in result.stdout
+    assert "RESERVATIONS SHOWCASE" in result.stdout
 
 
 def test_booklet(runner):
