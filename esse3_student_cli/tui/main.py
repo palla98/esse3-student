@@ -22,7 +22,7 @@ class HomePage(Screen):
     def compose(self) -> ComposeResult:
         yield Header("Homepage", classes="header")
         yield Container(
-            Static("Commands:", classes="title"),
+            Static("[bold][green]Esse3 command line utility[/green][/bold] :computer:", classes="title"),
             Vertical(
                 Button("[bold]Booklet[/] - [italic]show all activities[/]", id="booklet"),
                 Button("[bold]Taxes[/] - [italic]show all taxes[/]", id="taxes"),
@@ -47,55 +47,56 @@ class Tui(App):
     def on_mount(self) -> None:
         self.push_screen("homepage")
 
-    def add_exams(self) -> None:
-        name = None
-        entro = False
-        exams = []
-        for c in self.query("Checkbox"):
-            if c.value:
-                name = c.name_value
-                exams.append(Exam(name))
-                entro = True
-        if not entro:
+    def modify(self, action: str) -> None:
+        selected_exam_name = None
+        at_least_one_checkbox_selected = False
+        selected_exams = []
+        for checkbox in self.query("Checkbox"):
+            if checkbox.value:
+                selected_exam_name = checkbox.name_value
+                selected_exams.append(Exam(selected_exam_name))
+                at_least_one_checkbox_selected = True
+        if not at_least_one_checkbox_selected:
             return
 
-        name_value = "add-" + name
+        name_value = f"{action}-{selected_exam_name}"
 
-        if not self.is_screen_installed(name_value):
-            self.install_screen(Exams.AddExams(exams), name=name_value)
+        if action == "add":
+            if not self.is_screen_installed(name_value):
+                self.install_screen(Exams.Add(selected_exams), name=name_value)
+        elif action == "remove":
+            if not self.is_screen_installed(name_value):
+                self.install_screen(Reservations.Remove(selected_exams), name=name_value)
+
         self.push_screen(name_value)
 
         for c in self.query("Checkbox"):
             c.value = False
 
-        if self.is_screen_installed("reservations"):
-            self.uninstall_screen("reservations")
-        if self.is_screen_installed("remove-"+name_value):
-            self.uninstall_screen("remove-"+name_value)
+        if action == "add":
+            if self.is_screen_installed("reservations"):
+                self.uninstall_screen("reservations")
+            if self.is_screen_installed("remove-" + selected_exam_name):
+                self.uninstall_screen("remove-" + selected_exam_name)
+        else:
+            if self.is_screen_installed("exams"):
+                self.uninstall_screen("exams")
+            if self.is_screen_installed("add-" + selected_exam_name):
+                self.uninstall_screen("add-" + selected_exam_name)
 
-    def remove_reservation(self) -> None:
-        name = None
-        entro = False
-        exams = []
-        for c in self.query("Checkbox"):
-            if c.value:
-                name = c.name_value
-                exams.append(Exam(name))
-                entro = True
-        if not entro:
-            return
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        screens = {"booklet": Booklet(), "reservations": Reservations(), "taxes": Taxes(), "exams": Exams()}
+        booklet_buttons = ["average", "clear", "degree", "votes", "compute-average", "compute-vote", "compute-degree"]
+        changes = ["add", "remove"]
+        if event.button.id in changes:
+            self.modify(event.button.id)
 
-        if not self.is_screen_installed("reservations-removed"):
-            self.install_screen(Reservations.RemoveReservation(exams), name="reservations-removed")
-        self.push_screen("reservations-removed")
-
-        for c in self.query("Checkbox"):
-            c.value = False
-
-        if self.is_screen_installed("exams"):
-            self.uninstall_screen("exams")
-        if self.is_screen_installed("add-"+name):
-            self.uninstall_screen("add-"+name)
+        elif event.button.id not in booklet_buttons and event.button.id not in changes:
+            if not self.is_screen_installed(f"{event.button.id}"):
+                self.install_screen(screens[f"{event.button.id}"], name=f"{event.button.id}")
+                self.push_screen(f"{event.button.id}")
+            else:
+                self.push_screen(f"{event.button.id}")
 
     async def on_key(self, event: events.Key):
         if event.key == "up" or event.key == "left":
@@ -105,43 +106,10 @@ class Tui(App):
             pilot = Pilot(self)
             await pilot.press("tab")
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        screens = {"booklet": Booklet(), "reservations": Reservations(), "taxes": Taxes(), "exams": Exams()}
-        commands = ["booklet", "reservations", "taxes", "exams"]
-        booklet_buttons = ["average", "clear", "degree", "votes", "compute-average", "compute-vote", "compute-degree"]
-        if event.button.id == "exams-send":
-            self.add_exams()
-        elif event.button.id == "reservations-remove":
-            self.remove_reservation()
-        else:
-            if event.button.id not in commands and event.button.id not in booklet_buttons:
-                if not self.is_screen_installed("remove-"+event.button.id):
-                    self.install_screen(Reservations.RemoveReservation(event.button.id), name="remove-"+event.button.id)
-                    self.push_screen("remove-"+event.button.id)
-                else:
-                    self.push_screen("remove-"+event.button.id)
-                if self.is_screen_installed("exams"):
-                    self.uninstall_screen("exams")
-                if self.is_screen_installed("add-" + event.button.id):
-                    self.uninstall_screen("add-" + event.button.id)
-            elif event.button.id not in booklet_buttons:
-                if not self.is_screen_installed(f"{event.button.id}"):
-                    self.install_screen(screens[f"{event.button.id}"], name=f"{event.button.id}")
-                    self.push_screen(f"{event.button.id}")
-                else:
-                    self.push_screen(f"{event.button.id}")
-
     def action_key_escape(self) -> None:
         self.exit()
 
-    def action_refresh(self, screen):
-        screens = {"booklet": Booklet(), "reservations": Reservations(), "taxes": Taxes(), "exams": Exams()}
-        self.pop_screen()
-        self.uninstall_screen(screen)
-        self.install_screen(screens[f"{screen}"], name=f"{screen}")
-        self.push_screen(screen)
-
-    def action_reload(self, screen):
+    def action_return(self, screen):
         screens = {"booklet": Booklet(), "reservations": Reservations(), "taxes": Taxes(), "exams": Exams()}
         self.uninstall_screen(self.pop_screen())
         self.pop_screen()

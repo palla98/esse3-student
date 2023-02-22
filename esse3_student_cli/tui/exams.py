@@ -71,7 +71,6 @@ class Exams(Screen):
 
     BINDINGS = [
         Binding(key="r", action="app.pop_screen", description="return"),
-        Binding(key="w", action="app.refresh('exams')", description="refresh")
     ]
 
     async def fetch_date(self) -> None:
@@ -94,7 +93,7 @@ class Exams(Screen):
             await self.query_one("#exams-table").mount(self.Tables(exams))
             for index, exam in enumerate(exams, start=1):
                 await self.query_one(".reservations-buttons").mount(self.Line(exam))
-            await self.query_one(".reservations-container").mount(Horizontal(Button("send data", id="exams-send")))
+            await self.query_one(".reservations-container").mount(Horizontal(Button("book", id="add")))
 
     async def on_mount(self) -> None:
         await asyncio.sleep(0.1)
@@ -108,14 +107,14 @@ class Exams(Screen):
                         )
         yield Footer()
 
-    class AddExams(Screen):
+    class Add(Screen):
 
         def __init__(self, exams) -> None:
             self.exams = exams
             super().__init__()
 
         async def fetch_date(self) -> None:
-            added, click = cli.new_esse3_wrapper().add(list(self.exams))
+            added, click = cli.new_esse3_wrapper().add(self.exams)
             await self.query_one(".exams-loading2").remove()
             self.query_one(Container).mount \
                 (Static(f"Exams: [green]{', '.join(map(str, added))}[/] added\n"
@@ -127,10 +126,10 @@ class Exams(Screen):
 
         def compose(self) -> ComposeResult:
             yield Header("Exam added", classes="header")
-            yield Container(Static("adding [#ec971f]reservations[/] in progress.....", classes="exams-loading2"))
+            yield Container(Static("adding [yellow]reservations[/] in progress.....", classes="exams-loading2"))
             yield Footer()
 
         BINDINGS = [
-            Binding(key="r", action="app.reload('exams')", description="return"),
+            Binding(key="r", action="app.return('exams')", description="return"),
             Binding(key="h", action="app.homepage('exams')", description="homepage"),
         ]

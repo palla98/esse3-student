@@ -75,7 +75,6 @@ class Reservations(Screen):
 
     BINDINGS = [
         Binding(key="r", action="app.pop_screen", description="return"),
-        Binding(key="w", action="app.refresh('reservations')", description="refresh")
     ]
 
     async def fetch_date(self) -> None:
@@ -111,7 +110,7 @@ class Reservations(Screen):
             for index, reservation in enumerate(reservations, start=1):
                 self.query_one(Vertical).mount(self.Tables(reservation, index))
                 await self.query_one(".reservations-buttons").mount(self.Line(reservation))
-            await self.query_one(".reservations-container").mount(Horizontal(Button("send data", id="reservations-remove")))
+            await self.query_one(".reservations-container").mount(Horizontal(Button("remove", id="remove")))
 
     async def on_mount(self) -> None:
         await asyncio.sleep(0.1)
@@ -120,18 +119,18 @@ class Reservations(Screen):
     def compose(self) -> ComposeResult:
         yield Header("Reservations", classes="header")
         yield Container(Static("List of Reservations:", classes="title"),
-                        Static("loading [yellow]exams booked[/] in progress.....", classes="reservations-loading"),
+                        Static("loading [yellow]reservations[/] in progress.....", classes="reservations-loading"),
                         classes="reservations-container")
         yield Footer()
 
-    class RemoveReservation(Screen):
+    class Remove(Screen):
 
         def __init__(self, reservations) -> None:
             self.reservations = reservations
             super().__init__()
 
         async def fetch_date(self) -> None:
-            values, click = cli.new_esse3_wrapper().remove(list(self.reservations))
+            values, click = cli.new_esse3_wrapper().remove(self.reservations)
 
             all_success = True
             all_closed = True
@@ -166,10 +165,10 @@ class Reservations(Screen):
 
         def compose(self) -> ComposeResult:
             yield Header("Reservation removed", classes="header")
-            yield Container(Static("Rreservations [yellow]removal[/] in progress.....", id="reservations-loading-removed"))
+            yield Container(Static("Reservations [yellow]removal[/] in progress.....", id="reservations-loading-removed"))
             yield Footer()
 
         BINDINGS = [
-            Binding(key="r", action="app.reload('reservations')", description="return"),
+            Binding(key="r", action="app.return('exams')", description="return"),
             Binding(key="h", action="app.homepage('reservations')", description="homepage"),
         ]

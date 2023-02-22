@@ -76,5 +76,4 @@ class Taxes(Screen):
 
     BINDINGS = [
         Binding(key="r", action="app.pop_screen", description="return"),
-        Binding(key="w", action="app.refresh('taxes')", description="refresh")
     ]

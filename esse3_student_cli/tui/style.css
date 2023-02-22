@@ -303,13 +303,13 @@ Screen {
     width: auto;
 }
 
-#exams-send {
+#add {
     border: tall #1d2e38;
     width: 30%;
     background: $primary-background-darken-2;
 }
 
-#exams-send:hover {
+#add:hover {
     background: #2d4156;
 }
 
@@ -406,13 +406,13 @@ Screen {
     width: 100%;
 }
 
-#reservations-remove {
+#remove {
     border: tall #1d2e38;
     width: 30%;
     background: $primary-background-darken-2;
 }
 
-#reservations-remove:hover {
+#remove:hover {
     background: #2d4156;
 }
 
