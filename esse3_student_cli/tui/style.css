@@ -48,15 +48,14 @@ Screen {
 
 /* BOOKLET */
 
-#principale > Vertical > Tables{
+#booklet-container > Vertical > Tables{
     content-align: center middle;
     border: #ec971f;
     width: 100%;
     height: auto;
 }
 
-#principale > NewAverage{
-    border: #ec971f;
+#booklet-container > NewAverage{
     content-align: center middle;
 }
 
@@ -116,17 +115,6 @@ Screen {
     width: auto;
 }
 
-.booklet-container-filters > Button{
-    margin-left: 1;
-    margin-top: 2;
-    border: tall #1d2e38;
-    width: auto;
-    background: $primary-background-darken-2;
-}
-
-.booklet-container-filters > Button:hover {
-    background: #2d4156;
-}
 
 .booklet-container-filters > Static {
     width: auto;
@@ -140,7 +128,6 @@ Screen {
 }
 
 .booklet-container-filters > .compute{
-    margin-left: 10;
     border: tall #1d2e38;
     width: auto;
     background: $primary-background-darken-2;
@@ -239,6 +226,9 @@ Screen {
 
 /* TAXES */
 
+#taxes-container {
+}
+
 #taxes-table{
     content-align: center middle;
     border: #ec971f;
@@ -254,10 +244,15 @@ Screen {
     text-style: bold italic;
 }
 
-/* EXAMS */
-#exams-container {
+/*
+.click-saved {
     width: 100%;
+    height: auto;
+    border: red;
+    content-align: center middle;
 }
+*/
+/* EXAMS */
 
 #exams-table {
     border: #ec971f;
@@ -270,39 +265,6 @@ Screen {
     /* height: auto; questo qua fa in modo che rimpicciolendo lo schermo poi mi esce la scrollbar, senza invece si adatta*/
 }
 
-#exams-add {
-    border: heavy #54422b;
-    border: seagreen;
-    width: 100%;
-    height: 100%;
-    layout: vertical;
-    overflow: auto auto;
-}
-
-#exams-checkbox  {
-    layout: grid;
-    overflow-y: auto;
-    grid-size: 2;
-    border: none;
-}
-
-#exams-checkbox > Line  {
-    height: 100%;
-    width: 100%;
-    border: heavy #54422b;
-    align: center middle;
-}
-
-#exams-checkbox  > Line > Static {
-    height: auto;
-    width: auto;
-}
-
-#exams-checkbox  > Line > Check {
-    height: auto;
-    width: auto;
-}
-
 #add {
     border: tall #1d2e38;
     width: 30%;
@@ -313,34 +275,18 @@ Screen {
     background: #2d4156;
 }
 
-.exams-loading1{
+.exams-loading{
     width: 100%;
     height: 1fr;
     border: double #ec971f;
     content-align: center middle;
     text-style: bold italic;
-}
-
-.exams-loading2{
-    width: 100%;
-    height: 1fr;
-    border: double #ec971f;
-    content-align: center middle;
-    text-style: bold italic
 }
 
 #exams-added-success{
     width: 100%;
     height: 1fr;
     border: heavy #2b542c;
-    content-align: center middle;
-    text-style: bold italic;
-}
-
-.exams-added-error{
-    width: 100%;
-    height: 1fr;
-    border: heavy #9B0000;
     content-align: center middle;
     text-style: bold italic;
 }
@@ -355,12 +301,12 @@ Screen {
 
 /* RESERVATIONS */
 
-.reservations-vertical {
+.reservations-table{
     height: 40%;
     border: #ec971f;
 }
 
-.reservations-vertical > Tables {
+.reservations-table > Tables {
     content-align: center middle;
     border: none;
     width: 100%;

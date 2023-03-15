@@ -1,20 +1,23 @@
 import dataclasses
+import subprocess
 import time
 import screeninfo
 from dataclasses import InitVar
-from typing import List
+from typing import List, Tuple, Union, Any
 
 import typeguard
 from selenium import webdriver
 from selenium.common import WebDriverException
 from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 from esse3_student_cli.utils import validators
-from esse3_student_cli.primitives import Username, Password, Exam
+from esse3_student_cli.primitives import Username, Password, Exam, Taxe, Name, Description, Date, SigningUp, \
+    AcademicYear, Cfu, ExamStatus, Grade, BookletGrade
 
 ESSE3_SERVER = "https://unical.esse3.cineca.it"
 LOGIN_URL = f'{ESSE3_SERVER}/auth/Logon.do?menu_opened_cod='
@@ -51,15 +54,16 @@ class Esse3Wrapper:
     def __post_init__(self, key: object, username: Username, password: Password):
         validators.validate_dataclass(self)
         validators.validate('key', key, equals=self.__key, help_msg="Can only be instantiated using a factory method")
+
         self.maximize()
-        self.__login(username, password)
-        self.choose_carrier()  # commentare quando si fanno i test
+        self.__login(username, password) # commentare quando si fanno i test per i coockie
+        #self.choose_carrier()  # commentare quando si fanno i test
 
     def __del__(self):
         if self.debug or not self.debug:
             try:
-                self.__logout()
-                time.sleep(2)
+                #self.__logout()
+                #time.sleep(2)
                 self.driver.close()
             except WebDriverException:
                 pass
@@ -88,17 +92,27 @@ class Esse3Wrapper:
         return self.driver.execute_script("return navigator.webdriver")
 
     def __login(self, username: Username, password: Password) -> None:
+
         self.driver.get(LOGIN_URL)
+
         try:
-            WebDriverWait(self.driver, 20).until \
+            WebDriverWait(self.driver, 10).until \
                 (EC.visibility_of_element_located(
                     (By.XPATH, "//*[@id='c-s-bn']")))
-        except NoSuchElementException:
+            self.driver.find_element(By.XPATH, "//*[@id='c-s-bn']").click()
+            self.driver.find_element(By.ID, 'u').send_keys(username.value)
+            self.driver.find_element(By.ID, 'p').send_keys(password.value)
+            self.driver.find_element(By.ID, 'btnLogin').send_keys(Keys.RETURN)
+
+        except Exception:
+            raise RuntimeError("Wrong credentials")
+
+        try:
+            carrier = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(
+                (By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/table/tbody/tr[1]/td[5]/div/a")))
+            carrier.click()
+        except TimeoutException:
             pass
-        self.driver.find_element(By.XPATH, "//*[@id='c-s-bn']").click()
-        self.driver.find_element(By.ID, 'u').send_keys(username.value)
-        self.driver.find_element(By.ID, 'p').send_keys(password.value)
-        self.driver.find_element(By.ID, 'btnLogin').send_keys(Keys.RETURN)
 
     def __logout(self) -> None:
         self.driver.get(LOGOUT_URL)
@@ -107,42 +121,52 @@ class Esse3Wrapper:
         self.driver.minimize_window()
 
     def maximize(self) -> None:
-        #self.driver.maximize_window()
+
+        """#self.driver.maximize_window()
+        result = subprocess.run(["xdotool", "getactivewindow"], capture_output=True)
+        window_id = result.stdout.decode().strip()
+
+        # Get the screen height
+        screen_height = subprocess.check_output(["xdotool", "getdisplaygeometry"]).decode().split()[1]
+
+        # Set the window position and size
+        subprocess.run(["xdotool", "windowmove", window_id, "0", str(int(screen_height) // 4)])
+        subprocess.run(["xdotool", "windowsize", window_id, "50%", str(int(screen_height) // 2)])"""
+
         screen = screeninfo.get_monitors()[0]
         width, height = screen.width, screen.height
         self.driver.set_window_size(width // 2, height)
         self.driver.set_window_position(width // 2, 0)
 
-    def choose_carrier(self) -> None:
-        # nota: dentro la funzione visibility_of_element_located i due argomenti devono essere passati nelle () per essere come unico arg
-        carrier = WebDriverWait(self.driver, 10).until\
-            (EC.visibility_of_element_located((By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/table/tbody/tr[1]/td[5]/div/a")))
-        carrier.click()
+    """def choose_carrier(self) -> None:
+        try:
+            carrier = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(
+                (By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/table/tbody/tr[1]/td[5]/div/a")))
+            carrier.click()
+        except Exception as e:
+            raise RuntimeError("Failed to choose carrier: {}".format(e))"""
 
-    def fetch_exams(self) -> List[Exam]:
+    def fetch_exams(self) -> List[Tuple[Name, Date, SigningUp, Description]]:
+
         self.driver.get(EXAMS_URL)
         try:
             exams = WebDriverWait(self.driver, 5).until(
-                EC.visibility_of_all_elements_located((By.XPATH, "//*[@id='app-tabella_appelli']/tbody/tr")))
-        except:
+                EC.visibility_of_all_elements_located((By.XPATH,
+                        "//*[@id='app-tabella_appelli']/tbody/tr")))
+        except TimeoutException:
             return []
 
         rows = []
 
-        for index, exam in enumerate(exams, start=1):
-            xpath_base = "//*[@id='app-tabella_appelli']/tbody/tr"
-            if len(exams) == 1:
-                xpath_suffix = ""
-            else:
-                xpath_suffix = f"[{index}]"
-            elements = exam.find_elements(By.XPATH, f"{xpath_base}{xpath_suffix}/td")
-            name = elements[1].text
-            date = elements[2].text
+        for exam in exams:
+            elements = exam.find_elements(By.TAG_NAME, "td")
+            name = Name.of(elements[1].text)
+            date = Date.of(elements[2].text)
             s = elements[3].get_attribute('innerText')
-            signing_up = s[:10] + " - " + s[10:]
-            description = elements[4].get_attribute('innerHTML')
-            row = f"{name}&{date}&{signing_up}&{description}"
-            rows.append(Exam.of(row))
+            signing_up = SigningUp.of(f"{s[:10]} - {s[10:]}")
+            description = Description.of(elements[4].get_attribute("innerHTML"))
+
+            rows.append((name, date, signing_up, description))
 
         return rows
 
@@ -177,7 +201,7 @@ class Esse3Wrapper:
 
         return rows
 
-    def add(self, names: list[Exam]) -> tuple[list[str], int]:
+    def add(self, names: list[Name]) -> tuple[list[Name], int]:
 
         self.driver.get(EXAMS_URL)
         click = 7
@@ -193,8 +217,9 @@ class Esse3Wrapper:
             name = names.pop().value
             wrong = True
             for i, exam in enumerate(exams, start=1):
-                if exam.find_element(By.XPATH, f"//table/tbody/tr[{i}]/td[2]").text == name:
-                    added.append(name)
+                exam_name = name.upper()
+                if exam.find_element(By.XPATH, f"//table/tbody/tr[{i}]/td[2]").text == exam_name:
+                    added.append(Name.of(f"{exam_name}"))
                     wrong = False
                     exam_link = self.driver.find_element(By.XPATH, f"//table/tbody/tr[{i}]/td/div/a")
                     self.driver.execute_script("arguments[0].scrollIntoView();", exam_link)
@@ -220,9 +245,9 @@ class Esse3Wrapper:
         click = 7
 
         try:
-            boxprenotazione = WebDriverWait(self.driver, 5).until(
+            box_prenotazione = WebDriverWait(self.driver, 5).until(
                 EC.visibility_of_all_elements_located((By.XPATH, "//*[@id='boxPrenotazione']")))
-            toolbar = WebDriverWait(self.driver, 5).until(
+            tool_bar = WebDriverWait(self.driver, 5).until(
                 EC.visibility_of_all_elements_located((By.XPATH, "//*[@id='toolbarAzioni']")))
         except:
             return {}, click
@@ -234,16 +259,17 @@ class Esse3Wrapper:
 
         for reservation in names:
             found = False
-            for i, name in enumerate(boxprenotazione, start=1):
+            for i, name in enumerate(box_prenotazione, start=1):
                 value = name.find_element(By.CLASS_NAME, "record-h2").text.split(" [")[0].strip()
-                if value == reservation.value:
+                reservation_name = reservation.value.upper()
+                if value == reservation_name:
                     try:
-                        element = toolbar[i - 1].find_element(By.ID, 'btnCancella')
+                        element = tool_bar[i - 1].find_element(By.ID, 'btnCancella')
                         element.click()
                         confirm = self.driver.find_element(By.XPATH, "//*[@id='btnConferma']")
                         confirm.click()
                         click += 2
-                        values[1].append(reservation.value)
+                        values[1].append(reservation_name)
                         found = True
                         break
                     except NoSuchElementException:
@@ -254,67 +280,63 @@ class Esse3Wrapper:
                 self.driver.get(RESERVATIONS_URL)
                 WebDriverWait(self.driver, 10).until(
                     EC.visibility_of_element_located((By.XPATH, "//*[@id='textHeader']")))
-                boxprenotazione = self.driver.find_elements(By.XPATH, "//*[@id='boxPrenotazione']")
-                toolbar = self.driver.find_elements(By.XPATH, "//*[@id='toolbarAzioni']")
+                box_prenotazione = self.driver.find_elements(By.XPATH, "//*[@id='boxPrenotazione']")
+                tool_bar = self.driver.find_elements(By.XPATH, "//*[@id='toolbarAzioni']")
 
         values = {k: v for k, v in values.items() if v}
 
         return values, click
 
-    def fetch_booklet(self) -> list[Exam]:
+    def fetch_booklet(self) -> Union[
+        tuple[list[Any], tuple], tuple[list[tuple[Name, AcademicYear, Cfu, ExamStatus, BookletGrade, Date]], tuple[float, int]]]:
 
         self.driver.get(BOOKLET_URL)
 
-        WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located((By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/div/table/tbody/tr")))
+        try:
+            exams = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_all_elements_located((By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/div/table/tbody/tr")))
+        except TimeoutException:
+            return [], ()
 
-        arithmetic_average = self.driver.find_element(By.XPATH, "//div[@id='boxMedie']//li[1]").text.split()[4]
         weighted_average = self.driver.find_element(By.XPATH, "//div[@id='boxMedie']//li[2]").text.split()[4]
-        sum = 0
+        cfu_achieved = 0
 
-        exams = self.driver.find_elements(By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/div/table/tbody/tr")
         rows = []
+
         for i, exam in enumerate(exams, start=1):
+
             name = exam.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/div/table/tbody/tr[{i}]/td[1]/a").text
             academic_year = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[2]").get_attribute("innerHTML")
             cfu = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[3]").get_attribute("innerHTML")
-            state = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[4]/img").get_attribute('aria-label')
-            vote_date = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[6]").get_attribute("innerHTML")
-            vote_date = vote_date.replace("&nbsp;-&nbsp;", " - ")
-            if state == "Superata":
-                sum = sum + int(cfu)
+            status = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[4]/img").get_attribute('aria-label')
+            grade_date = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{i}]/td[6]").get_attribute("innerHTML")
 
-            row = f"{name}&{academic_year}&{cfu}&{state}&{vote_date}"
-            rows.append(Exam.of(row))
-        rows.append(Exam.of(f"{arithmetic_average}&{weighted_average}&{sum}"))
-        return rows
+            # Remove characters preceding the first space immediately after the hyphen.
+            name = name[name.index(" - ") + 3:]
+            # Separate the string "grade_date" into two parts using the separator " - "
+            grade, date = (grade_date.replace("&nbsp;-&nbsp;", " - ").split(" - ") + [''])[:2]
 
-    def fetch_exams_average(self) -> str:
+            grade = "ELIGIBLE" if grade == "IDO" else grade or "..."
+            date = Date.of(date or "00/00/00")
 
-        WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located((By.XPATH, "//*[@id='voce-sel']")))
-        arithmetic_average = self.driver.find_element(By.XPATH, "//div[@id='boxMedie']//li[1]")
-        weighted_average = self.driver.find_element(By.XPATH, "//div[@id='boxMedie']//li[2]")
+            if status == "Superata":
+                status = "Passed"
+                cfu_achieved += int(cfu)
+            else:
+                status = "Ex officio assigned frequency"
 
-        WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located(
-                (By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/div/table/tbody/tr")))
-        exams = self.driver.find_elements(By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/div/table/tbody/tr")
-        sum = 0
-        for index, exam in enumerate(exams, start=1):
-            cfu = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{index}]/td[3]")
-            state = exam.find_element(By.XPATH, f"//*[@id='tableLibretto']/tbody/tr[{index}]/td[4]/img")
+            rows.append((Name.of(name), AcademicYear.of(int(academic_year)), Cfu.of(cfu),
+                         Exam.of(status), BookletGrade.of(grade), date))
 
-            if state.get_attribute('aria-label') == "Superata":
-                sum = sum + int(cfu.text)
+        statistics = (float(weighted_average), int(cfu_achieved))
 
-        row = arithmetic_average.text + "&" + weighted_average.text + "&" + str(sum)
+        return rows, statistics
 
-        return row
 
-    def fetch_taxes(self) -> List[str]:  # la cosa giusta da fare è ritornare una tupla di primitive di domineo anche se ha poco senso
+    def fetch_taxes(self) -> tuple[List[Taxe], int]:  # the right thing to do is to return a tuple of domineo primitives even though it makes little sense
 
         self.driver.get(TAXES_URL)
+        click = 7
 
         WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located((By.XPATH, "//*[@id='tasse-tableFatt']/tfoot/tr/td/div/ul")))
@@ -327,21 +349,24 @@ class Esse3Wrapper:
             if 0 < int(page.text) < 10:
                 if start != 3:
                     page.click()
+                    click += 1
                 time.sleep(1)
-                taxes = self.driver.find_elements(By.XPATH,
-                                                  "/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr")
+                taxes = self.driver.find_elements(By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr")
                 for index, taxe in enumerate(taxes, start=1):
-                    id = taxe.find_element(By.XPATH,
-                                           f"/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr[{index}]/td[1]/a")
-                    expiration_date = taxe.find_element(By.XPATH,
-                                                        f"/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr[{index}]/td[5]")
-                    amount = taxe.find_element(By.XPATH,
-                                               f"/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr[{index}]/td[6]")
-                    payment_status = taxe.find_element(By.XPATH,
-                                                       f"/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr[{index}]/td[7]")
 
-                    row = id.text + "&" + str(expiration_date.get_dom_attribute('data-sort-value')) + "&" + amount.text + "&" + payment_status.text
-                    rows.append(row)
+                    id = taxe.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr[{index}]/td[1]/a")
+                    expiration_date = taxe.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr[{index}]/td[4]")
+                    amount = taxe.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr[{index}]/td[5]")
+                    payment_status = taxe.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr[{index}]/td[6]")
+
+                    expiration_date_value = expiration_date.get_dom_attribute('data-sort-value')
+                    if expiration_date_value is not None:
+                        year, month, day = expiration_date_value.split("-")
+                        expiration_date = f"{day}-{month}-{year}"
+                    else:
+                        expiration_date = " "
+                    row = f"{id.text}&{expiration_date}&{amount.text}&{payment_status.text}"
+                    rows.append(Taxe.of(row))
             start = start + 1
 
-        return rows
+        return rows, click

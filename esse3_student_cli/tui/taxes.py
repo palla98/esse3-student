@@ -47,20 +47,23 @@ class Taxes(Screen):
             table.add_column("Payment status", style="bold #f7ecb5")
 
             for index, taxe in enumerate(taxes, start=1):
-                colums = taxe.split("&")
+                colums = taxe.value.split("&")
                 amount, payment = self.payment_changes(colums[2], colums[3])
                 table.add_row(str(index), colums[0], colums[1], amount, payment)
 
             self.update(table)
 
     async def fetch_date(self) -> None:
-        taxes = cli.new_esse3_wrapper().fetch_taxes()
+        taxes, click = cli.new_esse3_wrapper().fetch_taxes()
         await self.query_one("#taxes-loading").remove()
         self.query_one(Container).mount(
             Vertical(
                 self.Tables(taxes),
             )
         )
+        """self.query_one(Container).mount(
+            Static(f"[bold]Click saved: [blue]{click}", classes="click-saved")
+        )"""
 
     async def on_mount(self) -> None:
         await asyncio.sleep(0.1)
@@ -71,6 +74,7 @@ class Taxes(Screen):
         yield Container(
             Static("List of taxes:", classes="title"),
             Static("[yellow]taxes loading[/] in progress.....", id="taxes-loading"),
+            id="taxes-container"
         )
         yield Footer()
 

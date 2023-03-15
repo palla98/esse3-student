@@ -84,9 +84,11 @@ class Tui(App):
             if self.is_screen_installed("add-" + selected_exam_name):
                 self.uninstall_screen("add-" + selected_exam_name)
 
+
+    # potrei fare in modo che nella riga 96 controllo solo se è presente in screens e basta
     def on_button_pressed(self, event: Button.Pressed) -> None:
         screens = {"booklet": Booklet(), "reservations": Reservations(), "taxes": Taxes(), "exams": Exams()}
-        booklet_buttons = ["average", "clear", "degree", "votes", "compute-average", "compute-vote", "compute-degree"]
+        booklet_buttons = ["average", "clear", "degree", "grade", "compute-average", "compute-grade", "compute-degree"]
         changes = ["add", "remove"]
         if event.button.id in changes:
             self.modify(event.button.id)
@@ -99,10 +101,10 @@ class Tui(App):
                 self.push_screen(f"{event.button.id}")
 
     async def on_key(self, event: events.Key):
-        if event.key == "up" or event.key == "left":
+        if event.key == "up":
             pilot = Pilot(self)
             await pilot.press("shift+tab")
-        if event.key == "down" or event.key == "right":
+        if event.key == "down":
             pilot = Pilot(self)
             await pilot.press("tab")
 

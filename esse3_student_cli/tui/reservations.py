@@ -103,7 +103,7 @@ class Reservations(Screen):
             await self.query_one(".reservations-container").mount(Static(f"❌ No appeals booked !!", classes="reservations-empty"))
         else:
             await self.query_one(".reservations-container").mount(
-                Vertical(classes="reservations-vertical"),
+                Vertical(classes="reservations-table"),
                 Static("Select the checkboxes of the exams to be removed:", classes="title"),
                 Container(classes="reservations-buttons"),
             )

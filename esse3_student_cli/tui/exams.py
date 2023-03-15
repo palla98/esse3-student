@@ -81,7 +81,7 @@ class Exams(Screen):
                  Exam(value='TRAINING&25/02/2023&01/02/2023 - 24/02/2023&appello sessione invernale')
                 ]"""
         exams = cli.new_esse3_wrapper().fetch_exams()
-        await self.query_one(".exams-loading1").remove()
+        await self.query_one(".exams-loading").remove()
         if len(exams) == 0:
             await self.query_one(".reservations-container").mount(Static("No exams available !!!", id="exams-empty"))
         else:
@@ -102,7 +102,7 @@ class Exams(Screen):
     def compose(self) -> ComposeResult:
         yield Header("Exams", classes="header")
         yield Container(Static("List of available exams:", classes="title"),
-                        Static("loading [yellow]available exams[/] in progress.....", classes="exams-loading1"),
+                        Static("loading [yellow]available exams[/] in progress.....", classes="exams-loading"),
                         classes="reservations-container"
                         )
         yield Footer()
@@ -115,7 +115,7 @@ class Exams(Screen):
 
         async def fetch_date(self) -> None:
             added, click = cli.new_esse3_wrapper().add(self.exams)
-            await self.query_one(".exams-loading2").remove()
+            await self.query_one(".exams-loading").remove()
             self.query_one(Container).mount \
                 (Static(f"Exams: [green]{', '.join(map(str, added))}[/] added\n"
                         f"\n[bold]click saved: [blue]{click}", id="exams-added-success"))
@@ -126,7 +126,7 @@ class Exams(Screen):
 
         def compose(self) -> ComposeResult:
             yield Header("Exam added", classes="header")
-            yield Container(Static("adding [yellow]reservations[/] in progress.....", classes="exams-loading2"))
+            yield Container(Static("adding [yellow]reservations[/] in progress.....", classes="exams-loading"))
             yield Footer()
 
         BINDINGS = [

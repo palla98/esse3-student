@@ -10,9 +10,12 @@ from rich.table import Table
 from rich.text import Text
 
 from esse3_student_cli.esse3_wrapper import Esse3Wrapper
-from esse3_student_cli.primitives import ExaminationProcedure, ExamNotes, AcademicYear, ExamState, Vote, Cfu, Year, Exam
+from esse3_student_cli.primitives import AcademicYear, ExamStatus, Grade, Cfu, Year, \
+    Exam, Name
 
 from esse3_student_cli.utils.console import console
+
+from typing import Optional
 
 
 @dataclasses.dataclass(frozen=True)
@@ -57,9 +60,11 @@ def new_esse3_wrapper(detached: bool = False, with_live_status: bool = True):
 
 @app.callback()
 def main(
+        #username: str = typer.Option('pllntn98d20m208d'),
+        #password: str = typer.Option('!?Tony98?!'),
         username: str = typer.Option(..., prompt=True, envvar="CLI_STUDENT_USERNAME"),
-        password: str = typer.Option(..., prompt=True, hide_input=True, envvar="CLI_STUDENT_PASSWORD"),
-        debug: bool = typer.Option(False, "--debug", help="To show browser backend operations"),
+        password: str = typer.Option(..., "--password", prompt=True, hide_input=True, envvar="CLI_STUDENT_PASSWORD"),
+        debug: bool = typer.Option(False, "--debug", help="To show browser operations"),
 ):
 
     """
@@ -82,7 +87,8 @@ def command_exams() -> None:
     """
 
     esse_wrapper = new_esse3_wrapper()
-    with console.status("[bold]Fetching [green]available exams[/] in progress....[/]", spinner="aesthetic"):
+    with console.status("[bold]Retrieval of [green]available exams[/green] in progress[/]",
+                        spinner="aesthetic"):
         time.sleep(2)
         exams = esse_wrapper.fetch_exams()
 
@@ -99,9 +105,8 @@ def command_exams() -> None:
     table.add_column("Signing up", justify="center", style="bold yellow")
     table.add_column("Description", justify="center", style="bold #f7ecb5")
 
-    for index, exam in enumerate(exams, start=1):
-        row = list(exam.value.split("&"))
-        table.add_row(str(index), *row)
+    for index, (name, date, signing_up, description) in enumerate(exams, start=1):
+        table.add_row(str(index), name.value, date.value, signing_up.value, description.value)
 
     console.print(table, justify="center")
     console.rule("[bold]STATISTICS[/]", style="yellow")
@@ -148,23 +153,22 @@ def command_reservations() -> None:
 
 
 @app.command(name="add")
-def command_add_reservation(
-        exams: str = typer.Argument(
+def command_add(
+        exams: list[str] = typer.Argument(
             ...,
-            metavar="Exams name",
-            help='[bold]A string of the form: [#E1C699]"name1-name2...."[/] or [#E1C699]"name1"[/] for single value'
+            metavar="exam names",
+            help="[bold]one or more strings of the form 'add name1 name2'"
         ),
 ):
     """
     [bold][#E1C699]Operation that allows the [green]booking[/green] of examinations[/][/bold] :blue_book:
     """
 
-    def parse(exams: str) -> list[Exam]:
-        values = exams.split("-")
+    def parse(exams) -> list[Name]:
         try:
-            exams_list = [Exam(v) for v in values]
+            exams_list = [Name(v) for v in exams]
         except ValueError:
-            console.print("[bold red]Invalid characters or values[/]")
+            console.print("[bold red]Invalid strings[/]")
             raise typer.Exit()
 
         return exams_list
@@ -174,8 +178,8 @@ def command_add_reservation(
     esse_wrapper = new_esse3_wrapper()
 
     with console.status(f"[bold]Exams [green]booking[/] in progress....[/]", spinner="aesthetic"):
-        time.sleep(2)
-        values, click = esse_wrapper.add(list(values))
+        exams, click = esse_wrapper.add(list(values))
+        values = [i.value for i in exams]
         if len(values) == 0:
             console.print("No exams available or wrong names passed!!!\n", style="bold red")
         else:
@@ -246,8 +250,10 @@ def command_remove_reservation(
 def command_booklet(
         academic_year: int = typer.Option(int, help="[bold]Academic year (1 to 3)"),
         exam_status: str = typer.Option(str, help="[bold]'[green]Superata[/]' like 'Passed' or '[yellow]Frequenza attribuita d'ufficio[/]' like 'To do'[/]"),
-        grade: int = typer.Option(int, help="[bold]Grade of the exam[/]"),
+        exam_grade: int = typer.Option(int, help="[bold]Grade of the exam[/]"),
         new_average: Tuple[int, str] = typer.Option((None, None), help="[bold]calculate new average: (grade cfu); ex: '25 12' [/]"),
+        statistics: Optional[bool] = typer.Option(False, "--statistics", "-s", help="[bold]show statistics on the average "),
+        #prova: int = typer.Argument(int, help="caaooooooooooooooooooooo"), #valore predefinito è zero in questo caso
 ) -> None:
 
     """
@@ -263,21 +269,23 @@ def command_booklet(
 
     if exam_status:
         try:
-            exam_status = ExamState(exam_status)
+            exam_status = ExamStatus(exam_status)
         except ValueError:
-            console.print("[bold yellow]Invalid exam state[/]")
+            console.print("[bold yellow]Invalid exam status[/]")
             raise typer.Exit()
 
-    if grade:
+    if exam_grade:
         try:
-            grade = Vote(grade)
+            exam_grade = Grade(exam_grade)
         except ValueError:
-            console.print("[bold yellow]Invalid vote[/]")
+            console.print("[bold yellow]Invalid grade[/]")
             raise typer.Exit()
 
+    new_vote = None
+    new_cfu = None
     if new_average[1]:
         try:
-            new_vote = Vote(int(new_average[0])).value
+            new_vote = Grade(int(new_average[0])).value
         except ValueError:
             console.print("[bold yellow]Invalid vote value[/]")
             raise typer.Exit()
@@ -289,89 +297,82 @@ def command_booklet(
 
     esse3_wrapper = new_esse3_wrapper()
     with console.status("[bold]Fetching [green]exams booklet[/] in progress....[/]", spinner="aesthetic"):
-        exams = esse3_wrapper.fetch_booklet()
+        exams, averages = esse3_wrapper.fetch_booklet()
 
     table = Table(style="rgb(139,69,19) bold", box=box.SIMPLE_HEAD)
     table.add_column("#", style="red bold")
     table.add_column("Name", style="cyan bold")
     table.add_column("Academic Year", style="bold", justify="center")
     table.add_column("CFU", style="bold", justify="center")
-    table.add_column("State", style="bold")
-    table.add_column("Grade - Date", style="bold")
+    table.add_column("Status", style="bold")
+    table.add_column("Grade", style="bold", justify="center")
+    table.add_column("Date", style="#E1C699 bold", justify="center")
 
-    def get_state_color(state):
-        colors = {"Superata":"green", "Frequenza attribuita d'ufficio":"yellow"}
-        return colors[state]
+    def get_status_color(status):
+        colors = {"Passed": "green", "Ex officio assigned frequency": "yellow"}
+        return colors[status]
 
-    def get_vote_color(vote):
-        colors = {"18":"bright_red", "19":"bright_red", "20":"bright_red", "21":"bright_red",\
-                  "22":"yellow", "23":"yellow", "24":"yellow", "25":"yellow",\
-                  "26":"blue", "27":"blue", "28":"blue", "29":"blue", "30":"blue", \
-                  '':"white", "IDO":"green"}
-        return colors[vote]
+    def get_grade_color(grade):
+        colors = {"18": "bright_red", "19": "bright_red", "20": "bright_red", "21": "bright_red",
+                  "22": "yellow", "23": "yellow", "24": "yellow", "25": "yellow",
+                  "26": "blue", "27": "blue", "28": "blue", "29": "blue", "30": "blue",
+                  '': "white", "...": "white", "ELIGIBLE": "green"}
+        return colors[grade]
 
-    for index, exam in enumerate(track(exams, description="[bold]Processing....[/]", transient=True), start=1):
-        colums = exam.value.split("&")
-        if len(colums) != 3:
-            c = get_state_color(colums[3])
-            vote_split = colums[4].split(" - ")
-            v = get_vote_color(vote_split[0])
-            vote_style = Text(colums[4])
-            if vote_style[0:3] == Text("IDO"):
-                vote_style = Text(str(vote_style).replace("IDO", "IDONEO"))
-                vote_style.stylize(f"bold {v}", 0, 6)
-            else:
-                vote_style.stylize(f"bold {v}", 0, 2)
-            if academic_year:
-                if colums[1] == str(academic_year.value):
-                    table.add_row(str(index), colums[0], colums[1], colums[2], f'[{c}]{colums[3]}[/{c}]', vote_style)
-            elif exam_status:
-                if colums[3] == exam_status.value:
-                    table.add_row(str(index), colums[0], colums[1], colums[2], f'[{c}]{colums[3]}[/{c}]', vote_style)
-            elif grade:
-                if colums[4][0:2] == str(grade.value):
-                    table.add_row(str(index), colums[0], colums[1], colums[2], f'[{c}]{colums[3]}[/{c}]', vote_style)
-            else:
-                table.add_row(str(index), colums[0], colums[1], colums[2], f'[{c}]{colums[3]}[/{c}]', vote_style)
+    for index, (name, year, cfu, status, grade, date) in enumerate(exams, start=1):
 
-        time.sleep(0.1)
+        name, year, cfu, status, grade, date = map(lambda x: x.value, (name, year, cfu, status, grade, date))
+
+        status_color = get_status_color(status)
+        grade_color = get_grade_color(grade)
+
+        grade_style = Text(grade)
+        grade_style.stylize(f"{grade_color}")
+
+        if academic_year and year != academic_year.value:
+            continue
+        if exam_status and status != exam_status.value:
+            continue
+        if exam_grade and grade[0:2] != str(exam_grade.value):
+            continue
+
+        table.add_row(str(index), name, str(year), cfu, f'[{status_color}]{status}[/{status_color}]',
+                      grade_style, date)
 
     console.rule("[bold]BOOKLET SHOWCASE[/bold]")
     console.print(table, justify="center")
 
     table = Table(header_style="rgb(210,105,30) bold", box=box.SIMPLE_HEAD)
-    table.add_column("Arithmetic average", style="bold", justify="center")
     table.add_column("Weighted average", style="bold", justify="center")
     table.add_column("Degree basis", style="bold", justify="center")
-    averages = exams[len(exams)-1].value.split("&")
-    arithmetic = averages[0]
-    weighted = averages[1]
-    degree_basis = (float(weighted)*11.0)/3.0
-    if new_average[1] is not None:
-        table.add_column("Vote", style="bold", justify="center")
-        table.add_column("Cfu", style="bold", justify="center")
-        table.add_column("new average", style="bold", justify="center")
-        table.add_column("New degree basis", style="bold", justify="center")
-        actual_average = float(weighted)
-        actual_cfu = float(averages[2])
-        new = ((actual_average*actual_cfu)+(new_vote*new_cfu)) / (actual_cfu+new_cfu)
-        new_degree_basis = (new * 11.0) / 3.0
 
-        table.add_row(arithmetic, weighted, str(round(degree_basis, 2)), str(new_vote),
+    actual_average, actual_cfu = averages
+    degree_basis = (actual_average * 11) / 3
+
+    if new_average[1] is not None:
+        table.add_column("Grade", style="bold", justify="center")
+        table.add_column("Cfu", style="bold", justify="center")
+        table.add_column("New Average", style="bold", justify="center")
+        table.add_column("New Degree Basis", style="bold", justify="center")
+
+        new = ((actual_average * actual_cfu) + (new_vote * new_cfu)) / (actual_cfu + new_cfu)
+        new_degree_basis = (new * 11) / 3
+
+        table.add_row(str(actual_average), str(round(degree_basis, 2)), str(new_vote),
                       str(new_cfu), str(round(new, 2)), str(round(new_degree_basis, 2)))
     else:
-        table.add_row(arithmetic, weighted, str(round(degree_basis, 2)))
+        table.add_row(str(actual_average), str(round(degree_basis, 2)))
 
-    if not academic_year and not grade and not exam_status:
-        console.rule("[bold]STATISTICS[/bold]")
+    if statistics:
         console.print(table, justify="center")
-        console.print("\n[bold]clicks saved: [blue]7[/]\n", justify="center")
+    console.rule("[bold]STATISTICS[/bold]")
+    console.print("\n[bold]clicks saved: [blue]7[/]\n", justify="center")
 
 
 @app.command(name="taxes")
 def command_taxes(
         to_pay: Optional[bool] = typer.Option(False, "--to-pay", help="[bold]Show all taxes to be paid"),
-        year: int = typer.Option(int, "--year", help="[bold]es: '2021'; filter taxes by year"),
+        year: int = typer.Option(int, "--year", "-y", help="[bold]filter taxes by year; es: '2021'"),
 ) -> None:
 
     """
@@ -387,7 +388,7 @@ def command_taxes(
 
     esse3_wrapper = new_esse3_wrapper()
     with console.status("[bold]Fetching [green]taxes[/] in progress....[/]", spinner="aesthetic"):
-        taxes = esse3_wrapper.fetch_taxes()
+        taxes, click = esse3_wrapper.fetch_taxes()
 
     table = Table(style="rgb(139,69,19) bold", box=box.SIMPLE_HEAD)
     table.add_column("#", style="red bold")
@@ -402,28 +403,16 @@ def command_taxes(
         return names[payment_status], colors[payment_status]
 
     for index, taxe in enumerate(track(taxes, description="[bold]Processing....[/]", transient=True), start=1):
-        colums = taxe.split("&")
+        colums = taxe.value.split("&")
         payment_status, c = payment_changes(colums[3])
-        year_date = colums[1].split("-")
 
-        if to_pay and year:
-            if year_date[0] == str(year.value) and payment_status == "to pay":
-                table.add_row(str(index), colums[0], colums[1], f'[{c}]{colums[2]}[/{c}]', payment_status)
-        elif to_pay:
-            if payment_status == "to pay":
-                table.add_row(str(index), colums[0], colums[1], f'[{c}]{colums[2]}[/{c}]', payment_status)
-        elif year:
-            if year_date[0] == str(year.value):
-                table.add_row(str(index), colums[0], colums[1], f'[{c}]{colums[2]}[/{c}]', payment_status)
-        else:
+        if (not to_pay or payment_status == "to pay") and (not year or str(year.value) in colums[1]):
             table.add_row(str(index), colums[0], colums[1], f'[{c}]{colums[2]}[/{c}]', payment_status)
-
-        time.sleep(0.1)
 
     console.rule("[bold]TAXES SHOWCASE[/bold]")
     console.print(table, justify="center")
     console.rule("[bold]STATISTICS[/]", style="yellow")
-    console.print("\n[bold]clicks saved: [blue]9[/]\n", justify="center")
+    console.print(f"\n[bold]clicks saved: [blue]{click}[/]\n", justify="center")
 
 
 @app.command(name="tui")

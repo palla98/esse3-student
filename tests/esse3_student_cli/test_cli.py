@@ -15,6 +15,13 @@ def test_reservations(runner):
     assert "RESERVATIONS SHOWCASE" in result.stdout
 
 
+def test_remove(runner):
+    result = runner.invoke(app, ["remove", "TRAINING"])
+    print(result.output)
+    assert result.exit_code == 0
+    assert "❌ Impossible to remove: TRAINING cause subscription" in result.stdout
+
+
 def test_booklet(runner):
     result = runner.invoke(app, ["booklet"])
     assert result.exit_code == 0

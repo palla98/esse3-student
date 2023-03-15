@@ -1,0 +1,92 @@
+/* css del modulo guide */
+@import url("guide.css");
+
+/* css del modulo gestione_utente */
+@import url("gestione_utente.css?v=22.07.01");
+
+/* css del modulo titoli */
+@import url("degrees.css");
+
+/* css del modulo enrollment */
+@import url("enrollment.css?v=20.11.03");
+
+/* css del modulo dirittoAlloStudio */
+@import url("diritto_allo_studio.css");
+
+/* css del modulo autocertificazione */
+@import url("autocertificazione.css");
+
+/* css del modulo timesheet */
+@import url("timesheet.css");
+
+/* css del modulo fiscal_declaration */
+@import url("fiscal_declaration.css");
+
+/* css del modulo Carriera */
+@import url("carriera.css");
+
+/* css del modulo Carriera */
+@import url("calendar.css");
+
+/* css del modulo tirocini */
+@import url("tiro.css?v=19.11.00");
+
+/* css del modulo addressbook */
+@import url("addressbook.css?v=19.08.02");
+
+/* css del modulo calendario esami */
+@import url("cal_esa.css");
+
+/* css del modulo Missioni */
+@import url("ms.css");
+
+/* css del modulo elezioni */
+@import url("elezioni.css");
+
+/* css del modulo graduation */
+@import url("graduation.css");
+
+/* css del modulo mobility */
+@import url("mobility.css");
+
+/* css del modulo PurchaseRequest */
+@import url("ra.css");
+
+/* css del modulo Registro docente */
+@import url("registro_docente.css");
+
+/* css del modulo questionari */
+@import url("questionari.css");
+
+/* css del modulo emrex */
+@import url("emrex.css");
+
+/* css del modulo Piani */
+@import url("piani.css");
+
+/* css del modulo Appelli */
+@import url("appelli.css");
+
+/* css del modulo CCS (valutazione processi) */
+@import url("ccs.css?v=19.06.03");
+
+/* css del modulo ewp */
+@import url("ewp.css");
+
+/* css del modulo integrazioni */
+@import url("integrazioni.css");
+
+/* css del modulo Didattica */
+@import url("didattica.css");
+
+/* css del modulo Libretto */
+@import url("libretto.css?v=22.07.01");
+
+/* css del modulo administrativeFunctions */
+@import url("administrative_fuctions.css");
+
+/*css del modulo Esoneri */
+@import url("esoneri.css");
+
+/*css del modulo Tasse*/
+@import url("tasse.css");

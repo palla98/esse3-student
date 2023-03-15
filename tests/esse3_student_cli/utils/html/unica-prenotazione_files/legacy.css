@@ -1,0 +1,161 @@
+/*
+*
+*	Stili necessari per una visualizzazione corretta di tutte le pagine all'interno della nuova cornice
+* 
+*/
+
+/* --------------------------------------------------  */
+/* --------------------------------------------------  */
+/* solo per pagine implementate con i vecchi templates */
+/* --------------------------------------------------  */
+/* --------------------------------------------------  */
+
+#esse3old input[type="file"][name="foglio"] {
+    max-width: 300px; /* fix firefox */
+    overflow: hidden; /* fix chrome */
+}
+
+#esse3old table {
+	width: 100%;
+}
+
+#esse3old a.tplFormSubmit {
+	text-decoration: none !important;
+	color:#282828!important;
+	padding: 7px 10px;
+	border-radius: 4px;	
+	border: 1px solid #CBCBCB;
+	font-size: inherit;
+	background-color: #efefef;
+	white-space: nowrap;
+} 
+ #esse3old INPUT.tplFormSubmit {
+	color: inherit;
+	border-radius: 4px;	
+	line-height: 1.4;
+	height: 34px;
+	background-color: #efefef;
+	border: 1px solid #CBCBCB;
+}
+#esse3old INPUT.tplFormSubmit:hover, #esse3old a.tplFormSubmit:hover{
+	background-color: #D8D8D8;
+}
+#esse3old td.tplFormSubmit {
+	line-height: 40px;
+	padding-bottom: 0.5em;
+	
+} 
+
+#esse3old INPUT.tplForm, select.tplForm {
+    margin-right: 5px;
+    padding: 6px 12px;
+    margin: 2px;
+    border-radius: 4px;
+    background-color: #fff;
+	border: 1px solid #ccc;
+}
+
+
+/* -------------------------------------------------- */
+/* -------------------------------------------------- */
+/* solo per pagine implementate con i nuovi templates */
+/* -------------------------------------------------- */
+/* -------------------------------------------------- */
+
+#esse3 .form-control {
+	padding: 6px;
+}
+
+#esse3 select.form-control {
+	min-width: 50px;
+}
+
+
+/* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ */
+/* per pagine implementate sia con i vecchi che con i nuovi templates */
+/* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ */
+
+
+
+/* -------------------------------------------------- */
+/* -------------------------------------------------- */
+/* per l'uso di bootstrap                             */
+/* -------------------------------------------------- */
+/* -------------------------------------------------- */
+ 
+
+/* ---------------------------- */
+/* stili per template container */
+/* ---------------------------- */
+#esse3 fieldset.form-fieldset legend {
+	/* senza gli stili seguenti, il bordo superiore del fieldset si vede male amche a causa di un width 100% impostato da bootstrap sul legend */
+	/* rif: http://stackoverflow.com/questions/16852484/use-fieldset-legend-with-bootstrap */
+	border-bottom: none;
+	padding: 0 2px;
+	margin-bottom: 0px;
+	width: auto;
+}
+
+#esse3 .form-horizontal .form-group {
+	/* l'action bar viene spostata di 15px a sinistra da bootstrap, viene azzerato questo spostamento */
+	margin-left: -5px;
+	/* al momento sembra non essere necessario, ma per uniformità lo metto comunque */
+	margin-right: 0;
+	/* tra un controllo e l'altro di un form viene inserito un margine di 15px da bootstrap, viene ridotto questo margine altrimenti il form diventa molto alto; non dev'essere troppo poco altrimenti non si capisce a che title afferiscono i campi */
+	margin-bottom: 8px;
+}
+
+#esse3 .form-horizontal .form-group.footable-filtering-search {
+	margin-left: 0;
+}
+
+/* ---------------------------- */
+/* stili per form e controlli   */
+/* ---------------------------- */
+#esse3 .table-1 th {
+	/* viene rimosso il valore rgb(221, 221, 221); (o anche #ddd;) impostato da bootstrap; necessario per la checklist dei processi */
+	border-top-color: rgb(51, 51, 51);
+}
+
+@-moz-document url-prefix() {
+	/* solo per firefox è necessario applicare gli stili seguenti */
+	/* viene impostata l'altezza della casella di input di tipo file per fare in modo che sia uguale a quella delle altre tipologie di input */
+	/* senza questa impostazione su Firefox il pulsante per la selezione di file viene mostrato più in basso al punto da sovrapporsi alla casella di input stessa */
+	#esse3 input[type="file"].form-control {
+		height: auto;
+		padding-top: 3px;
+		padding-bottom: 3px;
+	}
+} 
+
+/* ------------------------------------------------------------------------------ */
+/* stili per definition list (in particolare template legend)                     */
+/* ------------------------------------------------------------------------------ */
+
+/* di default la definition list con bootstrap è allineata a dx, mentre nella legenda serve allineata a sx*/
+@media (min-width: 768px) {
+	.dl-horizontal dt {
+		width: auto;
+	}
+
+	.dl-horizontal dd {
+		margin-left: 30px;
+	}
+}
+
+/* viene aggiunto un bordo sopra la definition list per separarla dal titolo */
+.dl-horizontal {
+	border-top: 1px solid #194E72;
+}
+
+/* viene aggiunto un pò di spazio tra i vari item della legenda */
+.dl-horizontal dt {
+	margin-top: 10px;
+}
+
+/* viene aggiunto un pò di spazio tra i vari item della legenda */
+.dl-horizontal dd {
+	margin-top: 10px;
+}
