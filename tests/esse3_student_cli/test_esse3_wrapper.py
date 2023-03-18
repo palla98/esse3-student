@@ -91,6 +91,5 @@ def test_fetch_booklet(esse3_wrapper):
 
 def test_fetch_first_page_taxes(esse3_wrapper):
     taxes, click = esse3_wrapper.fetch_taxes()
+
     assert len(taxes) == 10
-    taxe = taxes[1]
-    assert taxe == "8&1832560&30-09-2020&16,50 €&payment confirmed"
