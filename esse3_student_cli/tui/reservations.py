@@ -78,26 +78,14 @@ class Reservations(Screen):
     ]
 
     async def fetch_date(self) -> None:
-        """reservations = [{'name': 'BUSINESS GAME', '1': 'igikpwnygi', '2': 'jfsxfckizr', '3': 'rsyxjxhxgw', '4': 'otykbzckdf',
-                          '5': 'ulxxftcxzp', '6': 'wlyztntjtl', '7': 'kjagclbcax', '8': 'pshhggmmxw',
-                          '9': 'upbluuynsj'},
-                        {'name': 'DATA ANALYTICS', '1': 'unqfqxmbbs', '2': 'wnjhosvbck', '3': 'azrprrbrgw', '4': 'vifbxzwefb',
-                          '5': 'kmiehveaol', '6': 'rytpxgepda', '7': 'fyznnfjkrc', '8': 'ymkklaxmkj',
-                          '9': 'cwzojlxgxf'},
-                        {'name': "DIDATTICA DELL'INFORMATICA", '1': 'unqfqxmbbs', '2': 'wnjhosvbck', '3': 'azrprrbrgw',
-                         '4': 'vifbxzwefb',
-                         '5': 'kmiehveaol', '6': 'rytpxgepda', '7': 'fyznnfjkrc', '8': 'ymkklaxmkj',
-                         '9': 'cwzojlxgxf'},
-                        {'name': 'TRAINING', '1': 'unqfqxmbbs', '2': 'wnjhosvbck', '3': 'azrprrbrgw',
-                         '4': 'vifbxzwefb',
-                         '5': 'kmiehveaol', '6': 'rytpxgepda', '7': 'fyznnfjkrc', '8': 'ymkklaxmkj',
-                         '9': 'cwzojlxgxf'},
-                        {'name': 'GOOD', '1': 'unqfqxmbbs', '2': 'wnjhosvbck', '3': 'azrprrbrgw',
-                         '4': 'vifbxzwefb',
-                         '5': 'kmiehveaol', '6': 'rytpxgepda', '7': 'fyznnfjkrc', '8': 'ymkklaxmkj',
-                         '9': 'cwzojlxgxf'}
-                       ]"""
-        reservations = cli.new_esse3_wrapper().fetch_reservations()
+        reservations = [{"name": "TRAINING", "Date": "10/12/2022  09:00", "Appello": "appello sessione straordinaria", "Numero Iscrizione": "15 su 22", "Svolgimento Esame": "Esame in Presenza",
+                          "Docenti": "PERRI SIMONA RICCA FRANCESCO", "Cancella Prenotazione": "Impossibile cancellare l'iscrizione: iscrizione chiusa"},
+                        {"name": "PROCESS MINING", "Date": "24/01/2023  09:00", "Appello": "First Exam session", "Numero Iscrizione": "19 su 23", "Svolgimento Esame": "Esame in Presenza",
+                         "Edificio": "Cubo 30B", "Aula": "MT6", "Docenti": "FIONDA VALERIA", "Cancella Prenotazione": "Impossibile cancellare l'iscrizione: iscrizione chiusa"},
+                        {"name": "CYBER OFFENSE AND DEFENSE", "Date": "31/01/2023  09:00", "Appello": "Scritto, discussione ed eventuale orale", "Numero Iscrizione": "1 su 8", "Svolgimento Esame": "Esame in Presenza",
+                         "Docenti": "ALVIANO MARIO"},
+                       ]
+        #reservations = cli.new_esse3_wrapper().fetch_reservations()
         await self.query_one(".reservations-loading").remove()
         if len(reservations) == 0:
             await self.query_one(".reservations-container").mount(Static(f"❌ No appeals booked !!", classes="reservations-empty"))
@@ -164,7 +152,7 @@ class Reservations(Screen):
             asyncio.create_task(self.fetch_date())
 
         def compose(self) -> ComposeResult:
-            yield Header("Reservation removed", classes="header")
+            yield Header("Reservations removed page", classes="header")
             yield Container(Static("Reservations [yellow]removal[/] in progress.....", id="reservations-loading-removed"))
             yield Footer()
 

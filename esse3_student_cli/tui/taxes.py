@@ -46,10 +46,10 @@ class Taxes(Screen):
             table.add_column("Amount", style="bold")
             table.add_column("Payment status", style="bold #f7ecb5")
 
-            for index, taxe in enumerate(taxes, start=1):
-                colums = taxe.value.split("&")
-                amount, payment = self.payment_changes(colums[2], colums[3])
-                table.add_row(str(index), colums[0], colums[1], amount, payment)
+            for index, (id, date, amount, status) in enumerate(taxes, start=1):
+                id, date, amount, status = map(lambda x: x.value, (id, date, amount, status))
+                amount, payment = self.payment_changes(amount, status)
+                table.add_row(str(index), id, date, amount, payment)
 
             self.update(table)
 
@@ -61,9 +61,6 @@ class Taxes(Screen):
                 self.Tables(taxes),
             )
         )
-        """self.query_one(Container).mount(
-            Static(f"[bold]Click saved: [blue]{click}", classes="click-saved")
-        )"""
 
     async def on_mount(self) -> None:
         await asyncio.sleep(0.1)

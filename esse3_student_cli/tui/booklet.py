@@ -1,12 +1,12 @@
 import asyncio
 
-from esse3_student_cli.primitives import Grade, Cfu, Exam
+from esse3_student_cli.primitives import Cfu, Grade
 from esse3_student_cli import cli
 
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.widgets import Static, Button, Footer, Input
-from textual.containers import Container, Horizontal, Vertical
+from textual.containers import Container, Vertical
 from textual.screen import Screen
 
 from rich import box
@@ -123,7 +123,7 @@ class Booklet(Screen):
                 if average_to_achieve != "" and remaining_cfu != "":
                     try:
 
-                        average_to_achieve = int(average_to_achieve)
+                        average_to_achieve = Grade(int(average_to_achieve)).value
                         remaining_cfu = int(remaining_cfu)
 
                         actual_average, actual_cfu = self.averages
@@ -187,64 +187,9 @@ class Booklet(Screen):
                         self.query_one(".booklet-container-filters").mount(
                             Static("[red][bold]Wrong values[/]", id="booklet-value-error"))
 
-    """class NewDegree(Static):
-
-        def __init__(self, averages) -> None:
-            self.averages = averages
-            super().__init__()
-
-        def compose(self) -> ComposeResult:
-            yield Container(
-                    Static("[b]What graduation grade would you like to have?[/]"),
-                    Input(placeholder="66-110", id="degree"),
-                    Static("[b]How many cfu do you still have?[/]"),
-                    Input(placeholder="n° CFU", id="cfu"),
-                    Button("[b]compute[/]", classes="compute", id="compute-degree"),
-                    classes="booklet-container-filters"
-                )
-
-        def on_button_pressed(self, event: Button.Pressed):
-
-            if event.button.id == "compute-degree":
-                buttons = ["#result", "#booklet-value-error"]
-                for element in buttons:
-                    try:
-                        self.query(element).last().remove()
-                    except:
-                        pass
-
-                gradutation_grade_to_achieve = self.query_one("#degree").value
-                remaining_cfu = self.query_one("#cfu").value
-                if gradutation_grade_to_achieve != "" and remaining_cfu != "":
-                    try:
-                        values = self.averages[0].value.split("&")
-                        weighted_average = values[1]
-                        actual_cfu = values[2]
-                        grade_to_obtain = ((float(gradutation_grade_to_achieve) * (120-int(actual_cfu))) - (
-                                    float(weighted_average) * float(actual_cfu))) \
-                                          / float(remaining_cfu)
-
-                        self.query_one(".booklet-container-filters").mount(
-                            Static(f"voto da prendere per ogni esame: {str(round(grade_to_obtain, 2))}", id="result"))
-
-                    except ValueError:
-                        self.query_one(".booklet-container-filters").mount(
-                            Static("[red][bold]Wrong values[/]", id="booklet-value-error"))"""
 
     async def fetch_data(self) -> None:
-        """self.exams = [
-            Exam(value='27007802 - AGILE SOFTWARE DEVELOPMENT&1&6&Superata&23&31/01/2022'),
-            Exam(value='27008537 - ALGORITHMIC GAME THEORY&1&6&Superata&30&25/02/2022'),
-            Exam(value="27006172 - CRYPTOGRAPHY&1&6&Frequenza attribuita d'ufficio& & "),
-            Exam(value="27007791 - DATA ANALYTICS&1&12&Frequenza attribuita d'ufficio& & "),
-            Exam(value="27007399 - NETWORK SECURITY&1&6&Frequenza attribuita d'ufficio& & "),
-            Exam(value='27006179 - SECURE SOFTWARE DESIGN&1&6&Superata&23&19/01/2022'),
-            Exam(value="27006163 - THEORETICAL COMPUTER SCIENCE&1&12&Frequenza attribuita d'ufficio& & "),
-            Exam(value="27005226 - ASPETTI ETICI E GIURIDICI DELL’INFORMATICA&2&6&Frequenza attribuita d'ufficio& & "),
-            Exam(value="27000275 - BUSINESS GAME&2&6&Frequenza attribuita d'ufficio& & "),
-            Exam(value='27008777 - CYBER OFFENSE AND DEFENSE&2&6&Superata&27&31/01/2023'),
-            ]
-        self.statistics = [Exam(value='25.8&25.8&30')]"""
+
         self.exams, self.statistics = cli.new_esse3_wrapper().fetch_booklet()
 
         await self.query_one("#booklet-loading").remove()
@@ -256,7 +201,6 @@ class Booklet(Screen):
                             Container(
                                 self.ActualAverage(self.statistics),
                                 Button("Schedule Average", id="average"),
-                                #Button("Schedule Degree basis", id="degree"),
                                 Button("schedule grade", id="grade"),
                                 Button("clear", id="clear"),
                                 classes="booklet-container-options"

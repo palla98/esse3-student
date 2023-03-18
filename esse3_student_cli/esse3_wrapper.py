@@ -1,5 +1,4 @@
 import dataclasses
-import subprocess
 import time
 import screeninfo
 from dataclasses import InitVar
@@ -16,8 +15,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 from esse3_student_cli.utils import validators
-from esse3_student_cli.primitives import Username, Password, Exam, Taxe, Name, Description, Date, SigningUp, \
-    AcademicYear, Cfu, ExamStatus, Grade, BookletGrade
+from esse3_student_cli.primitives import Username, Password, ExamName, Description, Date, SigningUp, \
+    AcademicYear, Cfu, ExamStatus, BookletGrade, TaxeID, Amount, TaxeStatus
 
 ESSE3_SERVER = "https://unical.esse3.cineca.it"
 LOGIN_URL = f'{ESSE3_SERVER}/auth/Logon.do?menu_opened_cod='
@@ -57,13 +56,11 @@ class Esse3Wrapper:
 
         self.maximize()
         self.__login(username, password) # commentare quando si fanno i test per i coockie
-        #self.choose_carrier()  # commentare quando si fanno i test
 
     def __del__(self):
-        if self.debug or not self.debug:
+        if not self.debug:
             try:
-                #self.__logout()
-                #time.sleep(2)
+                self.__logout()
                 self.driver.close()
             except WebDriverException:
                 pass
@@ -122,8 +119,9 @@ class Esse3Wrapper:
 
     def maximize(self) -> None:
 
-        """#self.driver.maximize_window()
-        result = subprocess.run(["xdotool", "getactivewindow"], capture_output=True)
+        #self.driver.maximize_window()
+
+        """result = subprocess.run(["xdotool", "getactivewindow"], capture_output=True)
         window_id = result.stdout.decode().strip()
 
         # Get the screen height
@@ -138,15 +136,8 @@ class Esse3Wrapper:
         self.driver.set_window_size(width // 2, height)
         self.driver.set_window_position(width // 2, 0)
 
-    """def choose_carrier(self) -> None:
-        try:
-            carrier = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(
-                (By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/table/tbody/tr[1]/td[5]/div/a")))
-            carrier.click()
-        except Exception as e:
-            raise RuntimeError("Failed to choose carrier: {}".format(e))"""
 
-    def fetch_exams(self) -> List[Tuple[Name, Date, SigningUp, Description]]:
+    def fetch_exams(self) -> list[tuple[ExamName, Date, SigningUp, Description]]:
 
         self.driver.get(EXAMS_URL)
         try:
@@ -160,10 +151,9 @@ class Esse3Wrapper:
 
         for exam in exams:
             elements = exam.find_elements(By.TAG_NAME, "td")
-            name = Name.of(elements[1].text)
+            name = ExamName.of(elements[1].text)
             date = Date.of(elements[2].text)
-            s = elements[3].get_attribute('innerText')
-            signing_up = SigningUp.of(f"{s[:10]} - {s[10:]}")
+            signing_up = SigningUp.of(elements[3].get_attribute('innerText').replace("\n", " - "))
             description = Description.of(elements[4].get_attribute("innerHTML"))
 
             rows.append((name, date, signing_up, description))
@@ -185,7 +175,7 @@ class Esse3Wrapper:
         for reservation in reservations:
             name = reservation.find_element(By.XPATH,
                                             f"/html/body/div[2]/div/div/main/div[3]/div/div/div/div[{index}]/h2").text
-            start = name.find(" [") # per evitare che stampi anche il codice nel nome
+            start = name.find(" [")
             name = name[:start]
             dict = {"Name": name}
             elements = reservation.find_elements(By.XPATH, "./dl/dt")
@@ -194,14 +184,14 @@ class Esse3Wrapper:
                 value = element.find_element(By.XPATH, f"../dd[{position}]").text
                 if position == 1:
                     dict["Date"] = key
-                elif key != "Riservato per" and key != "Data Prenotazione":
+                elif key != "Riservato per" and key != "Data Prenotazione" and key != '':
                     dict[key] = value
             rows.append(dict)
             index += 2
 
         return rows
 
-    def add(self, names: list[Name]) -> tuple[list[Name], int]:
+    def add(self, names: list[ExamName]) -> tuple[list[ExamName], int]:
 
         self.driver.get(EXAMS_URL)
         click = 7
@@ -219,7 +209,7 @@ class Esse3Wrapper:
             for i, exam in enumerate(exams, start=1):
                 exam_name = name.upper()
                 if exam.find_element(By.XPATH, f"//table/tbody/tr[{i}]/td[2]").text == exam_name:
-                    added.append(Name.of(f"{exam_name}"))
+                    added.append(ExamName.of(f"{exam_name}"))
                     wrong = False
                     exam_link = self.driver.find_element(By.XPATH, f"//table/tbody/tr[{i}]/td/div/a")
                     self.driver.execute_script("arguments[0].scrollIntoView();", exam_link)
@@ -239,7 +229,7 @@ class Esse3Wrapper:
 
         return added, click
 
-    def remove(self, names: list[Exam]) -> tuple[{}, int]:
+    def remove(self, names: list[ExamName]) -> tuple[{}, int]:
 
         self.driver.get(RESERVATIONS_URL)
         click = 7
@@ -287,16 +277,12 @@ class Esse3Wrapper:
 
         return values, click
 
-    def fetch_booklet(self) -> Union[
-        tuple[list[Any], tuple], tuple[list[tuple[Name, AcademicYear, Cfu, ExamStatus, BookletGrade, Date]], tuple[float, int]]]:
+    def fetch_booklet(self) -> tuple[list[tuple[ExamName, AcademicYear, Cfu, ExamStatus, BookletGrade, Date]], tuple[float, int]]:
 
         self.driver.get(BOOKLET_URL)
 
-        try:
-            exams = WebDriverWait(self.driver, 10).until(
-                EC.visibility_of_all_elements_located((By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/div/table/tbody/tr")))
-        except TimeoutException:
-            return [], ()
+        exams = WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_all_elements_located((By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/div/table/tbody/tr")))
 
         weighted_average = self.driver.find_element(By.XPATH, "//div[@id='boxMedie']//li[2]").text.split()[4]
         cfu_achieved = 0
@@ -317,7 +303,7 @@ class Esse3Wrapper:
             grade, date = (grade_date.replace("&nbsp;-&nbsp;", " - ").split(" - ") + [''])[:2]
 
             grade = "ELIGIBLE" if grade == "IDO" else grade or "..."
-            date = Date.of(date or "00/00/00")
+            date = Date.of(date or "None")
 
             if status == "Superata":
                 status = "Passed"
@@ -325,22 +311,21 @@ class Esse3Wrapper:
             else:
                 status = "Ex officio assigned frequency"
 
-            rows.append((Name.of(name), AcademicYear.of(int(academic_year)), Cfu.of(cfu),
-                         Exam.of(status), BookletGrade.of(grade), date))
+            rows.append((ExamName.of(name), AcademicYear.of(int(academic_year)), Cfu.of(cfu),
+                         ExamStatus.of(status), BookletGrade.of(grade), date))
 
         statistics = (float(weighted_average), int(cfu_achieved))
 
         return rows, statistics
 
 
-    def fetch_taxes(self) -> tuple[List[Taxe], int]:  # the right thing to do is to return a tuple of domineo primitives even though it makes little sense
+    def fetch_taxes(self) -> tuple[list[tuple[TaxeID, Date, Amount, TaxeStatus]], int]:
 
         self.driver.get(TAXES_URL)
         click = 7
 
-        WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located((By.XPATH, "//*[@id='tasse-tableFatt']/tfoot/tr/td/div/ul")))
-        taxes = self.driver.find_elements(By.XPATH, "//*[@id='tasse-tableFatt']/tfoot/tr/td/div/ul/li/a")
+        taxes = WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_all_elements_located((By.XPATH, "//*[@id='tasse-tableFatt']/tfoot/tr/td/div/ul/li/a")))
         rows = []
 
         start = 3
@@ -354,19 +339,16 @@ class Esse3Wrapper:
                 taxes = self.driver.find_elements(By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr")
                 for index, taxe in enumerate(taxes, start=1):
 
-                    id = taxe.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr[{index}]/td[1]/a")
-                    expiration_date = taxe.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr[{index}]/td[4]")
-                    amount = taxe.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr[{index}]/td[5]")
-                    payment_status = taxe.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr[{index}]/td[6]")
+                    id = taxe.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr[{index}]/td[1]/a").text
+                    expiration_date = taxe.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr[{index}]/td[4]").get_attribute('data-sort-value')
+                    amount = taxe.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr[{index}]/td[5]").text
+                    payment_status = taxe.find_element(By.XPATH, f"/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr[{index}]/td[6]").text
 
-                    expiration_date_value = expiration_date.get_dom_attribute('data-sort-value')
-                    if expiration_date_value is not None:
-                        year, month, day = expiration_date_value.split("-")
-                        expiration_date = f"{day}-{month}-{year}"
-                    else:
-                        expiration_date = " "
-                    row = f"{id.text}&{expiration_date}&{amount.text}&{payment_status.text}"
-                    rows.append(Taxe.of(row))
+                    if expiration_date is not None:
+                        year, month, day = expiration_date.split("-")
+                        expiration_date = f"{day}/{month}/{year}"
+
+                    rows.append((TaxeID.of(id), Date.of(expiration_date or "None"), Amount.of(amount), TaxeStatus.of(payment_status)))
             start = start + 1
 
         return rows, click

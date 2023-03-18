@@ -11,6 +11,8 @@ from textual.screen import Screen
 from rich import box
 from rich.table import Table
 
+from esse3_student_cli.primitives import ExamName, Date, SigningUp, Description
+
 
 class Header(Static):
     pass
@@ -36,21 +38,20 @@ class Exams(Screen):
             table.add_column("Signing up", justify="center", style="bold yellow")
             table.add_column("Description", justify="center", style="bold #f7ecb5")
 
-            for index, exam in enumerate(exams, start=1):
-                row = list(exam.value.split("&"))
-                table.add_row(str(index), *row)
+            for index, (name, date, signing_up, description) in enumerate(exams, start=1):
+                table.add_row(str(index), name.value, date.value, signing_up.value, description.value)
 
             self.update(table)
 
     class Line(Horizontal):
 
         def __init__(self, exam) -> None:
-            self.value = list(exam.value.split("&"))
+            self.value = exam
             super().__init__()
 
         def on_mount(self) -> None:
-            self.mount(self.Name(self.value[0]))
-            self.mount(self.Check(self.value[0]))
+            self.mount(self.Name(self.value[0].value))
+            self.mount(self.Check(self.value[0].value))
 
         class Name(Static):
             def __init__(self, name) -> None:
@@ -74,11 +75,10 @@ class Exams(Screen):
     ]
 
     async def fetch_date(self) -> None:
-        """exams = [Exam(value='BUSINESS GAME&08/02/2023&18/01/2023 - 06/02/2023&MDCS 6 ECTS'),
-                 Exam(value="DIDATTICA DELL'INFORMATICA&22/02/2023&23/01/2023 - 20/02/2023&Secondo appello sessione invernale"),
-                 Exam(value='NETWORK SECURITY&07/02/2023&05/01/2023 - 06/02/2023&Oral exam and project discussion'),
-                 Exam(value='THEORETICAL COMPUTER SCIENCE&18/02/2023&03/02/2023 - 17/02/2023&Prova orale con alcune domande scritte'),
-                 Exam(value='TRAINING&25/02/2023&01/02/2023 - 24/02/2023&appello sessione invernale')
+        """exams = [(ExamName(value='BUSINESS GAME'), Date(value='08/02/2023'), SigningUp(value='18/01/2023 - 06/02/2023'), Description(value='MDCS 6 ECTS')),
+                 (ExamName(value='DATA ANALYTICS'), Date(value='06/02/2023'), SigningUp(value='23/12/2022 - 04/02/2023'), Description(value='Secondo appello')),
+                 (ExamName(value='NETWORK SECURITY'), Date(value='07/02/2023'), SigningUp(value='05/01/2023 - 06/02/2023'), Description(value='Oral exam and project discussion')),
+                 (ExamName(value='THEORETICAL COMPUTER SCIENCE'), Date(value='28/01/2023'), SigningUp(value='13/01/2023 - 27/01/2023'), Description(value='Prova orale con alcune domande scritte')),
                 ]"""
         exams = cli.new_esse3_wrapper().fetch_exams()
         await self.query_one(".exams-loading").remove()

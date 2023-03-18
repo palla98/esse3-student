@@ -6,7 +6,7 @@ from textual.screen import Screen
 from textual import events
 from textual.pilot import Pilot
 
-from esse3_student_cli.primitives import Exam
+from esse3_student_cli.primitives import ExamName
 from esse3_student_cli.tui.booklet import Booklet
 from esse3_student_cli.tui.exams import Exams
 from esse3_student_cli.tui.reservations import Reservations
@@ -54,7 +54,7 @@ class Tui(App):
         for checkbox in self.query("Checkbox"):
             if checkbox.value:
                 selected_exam_name = checkbox.name_value
-                selected_exams.append(Exam(selected_exam_name))
+                selected_exams.append(ExamName(selected_exam_name))
                 at_least_one_checkbox_selected = True
         if not at_least_one_checkbox_selected:
             return
@@ -84,16 +84,13 @@ class Tui(App):
             if self.is_screen_installed("add-" + selected_exam_name):
                 self.uninstall_screen("add-" + selected_exam_name)
 
-
-    # potrei fare in modo che nella riga 96 controllo solo se è presente in screens e basta
     def on_button_pressed(self, event: Button.Pressed) -> None:
         screens = {"booklet": Booklet(), "reservations": Reservations(), "taxes": Taxes(), "exams": Exams()}
-        booklet_buttons = ["average", "clear", "degree", "grade", "compute-average", "compute-grade", "compute-degree"]
         changes = ["add", "remove"]
         if event.button.id in changes:
             self.modify(event.button.id)
 
-        elif event.button.id not in booklet_buttons and event.button.id not in changes:
+        elif event.button.id in screens:
             if not self.is_screen_installed(f"{event.button.id}"):
                 self.install_screen(screens[f"{event.button.id}"], name=f"{event.button.id}")
                 self.push_screen(f"{event.button.id}")

@@ -1,18 +1,15 @@
 import dataclasses
 import time
-
 import typer
-from typing import List, Tuple, Optional
+
+from typing import Tuple
 from rich import box
 from rich.progress import track
-from rich.style import Style
 from rich.table import Table
 from rich.text import Text
 
 from esse3_student_cli.esse3_wrapper import Esse3Wrapper
-from esse3_student_cli.primitives import AcademicYear, ExamStatus, Grade, Cfu, Year, \
-    Exam, Name
-
+from esse3_student_cli.primitives import AcademicYear, ExamStatus, Cfu, Year, ExamName, Grade
 from esse3_student_cli.utils.console import console
 
 from typing import Optional
@@ -125,7 +122,7 @@ def command_reservations() -> None:
         time.sleep(2)
         reservations = esse_wrapper.fetch_reservations()
         if len(reservations) == 0:
-            console.print("No exam booked!!!", style="bold red")
+            console.print("No exams booked!!!", style="bold red")
             exit()
 
     console.rule("[bold]RESERVATIONS SHOWCASE[/]")
@@ -164,9 +161,9 @@ def command_add(
     [bold][#E1C699]Operation that allows the [green]booking[/green] of examinations[/][/bold] :blue_book:
     """
 
-    def parse(exams) -> list[Name]:
+    def parse(exams: list) -> list[ExamName]:
         try:
-            exams_list = [Name(v) for v in exams]
+            exams_list = [ExamName(v) for v in exams]
         except ValueError:
             console.print("[bold red]Invalid strings[/]")
             raise typer.Exit()
@@ -191,10 +188,10 @@ def command_add(
 
 @app.command(name="remove")
 def command_remove_reservation(
-        reservations: str = typer.Argument(
+        reservations: list[str] = typer.Argument(
             ...,
             metavar="Reservations name",
-            help='[bold]A string of the form: [#E1C699]"name1-name2...."[/] or [#E1C699]"name1"[/] for single value'
+            help="[bold]one or more strings of the form 'remove name1 name2'"
         ),
 
 ):
@@ -203,12 +200,11 @@ def command_remove_reservation(
     [bold][#E1C699]Operation that allows the [red]deletion[/red] of booked examinations[/][/bold] :wastebasket:
     """
 
-    def parse(reservations: str) -> list[Exam]:
-        values = reservations.split("-")
+    def parse(reservations: list) -> list[ExamName]:
         try:
-            exams_list = [Exam(v) for v in values]
+            exams_list = [ExamName(v) for v in reservations]
         except ValueError:
-            console.print("[bold red]Invalid characters or values[/]")
+            console.print("[bold red]Invalid strings[/]")
             raise typer.Exit()
 
         return exams_list
@@ -402,12 +398,12 @@ def command_taxes(
         names = {" pagato confermato": "payment confirmed", " non pagato": "to pay", " pagato": "refund"}
         return names[payment_status], colors[payment_status]
 
-    for index, taxe in enumerate(track(taxes, description="[bold]Processing....[/]", transient=True), start=1):
-        colums = taxe.value.split("&")
-        payment_status, c = payment_changes(colums[3])
+    for index, (id, date, amount, status) in enumerate(track(taxes, description="[bold]Processing....[/]", transient=True), start=1):
+        id, date, amount, status = map(lambda x: x.value, (id, date, amount, status))
+        payment_status, c = payment_changes(status)
 
-        if (not to_pay or payment_status == "to pay") and (not year or str(year.value) in colums[1]):
-            table.add_row(str(index), colums[0], colums[1], f'[{c}]{colums[2]}[/{c}]', payment_status)
+        if (not to_pay or payment_status == "to pay") and (not year or str(year.value) in date):
+            table.add_row(str(index), id, date, f'[{c}]{amount}[/{c}]', payment_status)
 
     console.rule("[bold]TAXES SHOWCASE[/bold]")
     console.print(table, justify="center")
@@ -422,8 +418,7 @@ def tui() -> None:
     [bold][#E1C699]Run [yellow]text-user-interface[/yellow][/][/bold]
     """
     from esse3_student_cli.tui.main import Tui
-    # faccio l import qua perchè altrimenti: from textual.app import App, ComposeResult, RenderResult, mi apre
-    # un socket nonostante non lanci il run
+
     Tui().run()
 
 
