@@ -24,7 +24,6 @@ def test_exams_empty(runner):
 
 def test_reservations(runner):
     result = runner.invoke(app, ["reservations"])
-    print(result.stdout)
     assert result.exit_code == 0
     assert "RESERVATIONS SHOWCASE" in result.stdout
 

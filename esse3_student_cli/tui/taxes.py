@@ -54,7 +54,15 @@ class Taxes(Screen):
             self.update(table)
 
     async def fetch_date(self) -> None:
-        taxes, click = cli.new_esse3_wrapper().fetch_taxes()
+
+        global wrapper
+        try:
+            wrapper = cli.new_esse3_wrapper()
+        except:
+            await self.query_one("#taxes-loading").remove()
+            await self.query_one(Container).mount(Static("Login failed !!!", classes="login-failed"))
+
+        taxes, statistics = wrapper.fetch_taxes()
         await self.query_one("#taxes-loading").remove()
         self.query_one(Container).mount(
             Vertical(

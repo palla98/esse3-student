@@ -22,6 +22,14 @@ Screen {
     border: hkey #2d4156;
 }
 
+.login-failed {
+    width: 100%;
+    height: 1fr;
+    border: heavy #9B0000;
+    content-align: center middle;
+    text-style: bold italic;
+}
+
 /* HOMEPAGE */
 #homepage{
     width: 100%;
@@ -39,7 +47,6 @@ Screen {
     border: tall #1d2e38;
     width: 50%;
     background: $primary-background-darken-2;
-    text-style: none;
 }
 
 #homepage > Vertical > Button:hover {

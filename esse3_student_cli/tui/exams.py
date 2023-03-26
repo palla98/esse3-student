@@ -80,7 +80,14 @@ class Exams(Screen):
                  (ExamName(value='NETWORK SECURITY'), Date(value='07/02/2023'), SigningUp(value='05/01/2023 - 06/02/2023'), Description(value='Oral exam and project discussion')),
                  (ExamName(value='THEORETICAL COMPUTER SCIENCE'), Date(value='28/01/2023'), SigningUp(value='13/01/2023 - 27/01/2023'), Description(value='Prova orale con alcune domande scritte')),
                 ]"""
-        exams = cli.new_esse3_wrapper().fetch_exams()
+        global wrapper
+        try:
+            wrapper = cli.new_esse3_wrapper()
+        except:
+            await self.query_one(".exams-loading").remove()
+            await self.query_one(".reservations-container").mount(Static("Login failed !!!", classes="login-failed"))
+
+        exams = wrapper.fetch_exams()
         await self.query_one(".exams-loading").remove()
         if len(exams) == 0:
             await self.query_one(".reservations-container").mount(Static("No exams available !!!", id="exams-empty"))
@@ -94,6 +101,7 @@ class Exams(Screen):
             for index, exam in enumerate(exams, start=1):
                 await self.query_one(".reservations-buttons").mount(self.Line(exam))
             await self.query_one(".reservations-container").mount(Horizontal(Button("book", id="add")))
+
 
     async def on_mount(self) -> None:
         await asyncio.sleep(0.1)

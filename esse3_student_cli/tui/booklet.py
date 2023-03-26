@@ -190,7 +190,14 @@ class Booklet(Screen):
 
     async def fetch_data(self) -> None:
 
-        self.exams, self.statistics = cli.new_esse3_wrapper().fetch_booklet()
+        global wrapper
+        try:
+            wrapper = cli.new_esse3_wrapper()
+        except:
+            await self.query_one("#booklet-loading").remove()
+            await self.query_one("#booklet-container").mount(Static("Login failed !!!", classes="login-failed"))
+
+        self.exams, self.statistics = wrapper.fetch_booklet()
 
         await self.query_one("#booklet-loading").remove()
         await self.query_one("#booklet-container").mount(

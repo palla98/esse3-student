@@ -51,7 +51,7 @@ def mock_esse3_app(environ, start_response):
             html = read_html("2-prenotazioni.html")
         elif url == endpoint(EXAMS_URL) and not MOCK_ESSE3_STATE["add completed"]:
             MOCK_ESSE3_STATE["add completed"] = True
-            html = read_html("4_appelli.html")
+            html = read_html("nessun-appello.html")
         elif url == endpoint(EXAMS_URL) and MOCK_ESSE3_STATE["add completed"]:
             MOCK_ESSE3_STATE["add completed"] = False
             html = read_html("add-DATA ANALYTICS.html")

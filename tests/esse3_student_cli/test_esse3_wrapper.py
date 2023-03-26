@@ -45,7 +45,6 @@ def test_fetch_empty_reservations(esse3_wrapper):
 def test_remove_reservations(esse3_wrapper):
     reservations = [ExamName("TRAINING")]
     values, click = esse3_wrapper.remove(reservations)
-    print(values)
     first_value = " ".join([x for x in values[0]])
     assert first_value == "TRAINING"
     assert click == 7
@@ -55,7 +54,6 @@ def test_add_exams_but_empty(esse3_wrapper):
     n1 = ExamName("DATA ANALYTICS")
     n2 = ExamName("TRAINING")
     lista = [n1, n2]
-
     added, click = esse3_wrapper.add(lista)
     assert len(added) == 0
     assert click == 7
@@ -68,11 +66,6 @@ def test_add_exams_but_empty(esse3_wrapper):
     added, click = esse3_wrapper.add(lista)
     assert len(added) == 1"""
 
-
-def test_fetch_taxes_first_page(esse3_wrapper):
-    taxes = esse3_wrapper.fetch_taxes()
-    assert len(taxes) == 10
-    assert taxes[0] == "2013675&2022-12-22&16,50 €& non pagato"
 '''
 
 def test_fetch_exams(esse3_wrapper):
@@ -93,3 +86,8 @@ def test_fetch_first_page_taxes(esse3_wrapper):
     taxes, click = esse3_wrapper.fetch_taxes()
 
     assert len(taxes) == 10
+    id = taxes[3][0].value
+    amount = taxes[3][2].value
+    assert  id == "1965571"
+    assert amount == "455,64 €"
+

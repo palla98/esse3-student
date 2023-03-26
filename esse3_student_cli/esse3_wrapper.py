@@ -1,5 +1,7 @@
 import dataclasses
 import time
+import subprocess
+
 import screeninfo
 from dataclasses import InitVar
 from typing import List, Tuple, Union, Any
@@ -40,6 +42,25 @@ def change_esse3_server(url):
     ESSE3_SERVER = url
 
 
+
+def prompt_position() -> None:
+
+    result = subprocess.run(["xdotool", "getactivewindow"], capture_output=True)
+    window_id = result.stdout.decode().strip()
+    screen_height = subprocess.check_output(["xdotool", "getdisplaygeometry"]).decode().split()[1]
+
+    subprocess.run(["xdotool", "windowmove", window_id, "0", str(int(screen_height) // 4)])
+    subprocess.run(["xdotool", "windowsize", window_id, "50%", "-1"])
+    # con -1 l'altezza rimane invariata altrimenti lasciare  str(int(screen_height) // 2)
+
+def driver_position(driver) -> None:
+
+    #self.driver.maximize_window()
+    screen = screeninfo.get_monitors()[0]
+    width, height = screen.width, screen.height
+    driver.set_window_size(width // 2, height)
+    driver.set_window_position(width // 2, 0)
+
 @typeguard.typechecked
 @dataclasses.dataclass(frozen=True)
 class Esse3Wrapper:
@@ -54,8 +75,7 @@ class Esse3Wrapper:
         validators.validate_dataclass(self)
         validators.validate('key', key, equals=self.__key, help_msg="Can only be instantiated using a factory method")
 
-        self.maximize()
-        self.__login(username, password) # commentare quando si fanno i test per i coockie
+        self.__login(username, password)
 
     def __del__(self):
         if not self.debug:
@@ -74,7 +94,9 @@ class Esse3Wrapper:
         options.headless = headless
         if debug or detached:
             options.add_experimental_option("detach", True)
+            prompt_position()
         driver = webdriver.Chrome(options=options)
+        driver_position(driver)
 
         return Esse3Wrapper(
             key=cls.__key,
@@ -93,49 +115,28 @@ class Esse3Wrapper:
         self.driver.get(LOGIN_URL)
 
         try:
-            WebDriverWait(self.driver, 10).until \
+            WebDriverWait(self.driver, 2).until \
                 (EC.visibility_of_element_located(
                     (By.XPATH, "//*[@id='c-s-bn']")))
             self.driver.find_element(By.XPATH, "//*[@id='c-s-bn']").click()
+        except:
+            pass
+
+        try:
             self.driver.find_element(By.ID, 'u').send_keys(username.value)
             self.driver.find_element(By.ID, 'p').send_keys(password.value)
             self.driver.find_element(By.ID, 'btnLogin').send_keys(Keys.RETURN)
-
-        except Exception:
-            raise RuntimeError("Wrong credentials")
-
-        try:
-            carrier = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(
+            carrier = WebDriverWait(self.driver, 2).until(EC.visibility_of_element_located(
                 (By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/table/tbody/tr[1]/td[5]/div/a")))
             carrier.click()
-        except TimeoutException:
-            pass
+        except Exception:
+            raise RuntimeError("Wrong credentials")
 
     def __logout(self) -> None:
         self.driver.get(LOGOUT_URL)
 
     def minimize(self) -> None:
         self.driver.minimize_window()
-
-    def maximize(self) -> None:
-
-        #self.driver.maximize_window()
-
-        """result = subprocess.run(["xdotool", "getactivewindow"], capture_output=True)
-        window_id = result.stdout.decode().strip()
-
-        # Get the screen height
-        screen_height = subprocess.check_output(["xdotool", "getdisplaygeometry"]).decode().split()[1]
-
-        # Set the window position and size
-        subprocess.run(["xdotool", "windowmove", window_id, "0", str(int(screen_height) // 4)])
-        subprocess.run(["xdotool", "windowsize", window_id, "50%", str(int(screen_height) // 2)])"""
-
-        screen = screeninfo.get_monitors()[0]
-        width, height = screen.width, screen.height
-        self.driver.set_window_size(width // 2, height)
-        self.driver.set_window_position(width // 2, 0)
-
 
     def fetch_exams(self) -> list[tuple[ExamName, Date, SigningUp, Description]]:
 

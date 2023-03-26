@@ -247,8 +247,9 @@ def command_booklet(
         academic_year: int = typer.Option(int, help="[bold]Academic year (1 to 3)"),
         exam_status: str = typer.Option(str, help="[bold]'[green]Superata[/]' like 'Passed' or '[yellow]Frequenza attribuita d'ufficio[/]' like 'To do'[/]"),
         exam_grade: int = typer.Option(int, help="[bold]Grade of the exam[/]"),
-        new_average: Tuple[int, str] = typer.Option((None, None), help="[bold]calculate new average: (grade cfu); ex: '25 12' [/]"),
-        statistics: Optional[bool] = typer.Option(False, "--statistics", "-s", help="[bold]show statistics on the average "),
+        new_average: Tuple[int, str] = typer.Option((None, None), help="[bold]calculate new average with grade: (grade cfu); ex: '25 12' [/]"),
+        #new_degree: Tuple[int, str] = typer.Option((None, None), help="[bold]calculate new average with remaining cfu: (degree cfu); ex: '27 12' [/]"),
+        statistics: Optional[bool] = typer.Option(False, "--statistics", "-s", help="[bold]show statistics on the average"),
         #prova: int = typer.Argument(int, help="caaooooooooooooooooooooo"), #valore predefinito è zero in questo caso
 ) -> None:
 
@@ -367,7 +368,7 @@ def command_booklet(
 
 @app.command(name="taxes")
 def command_taxes(
-        to_pay: Optional[bool] = typer.Option(False, "--to-pay", help="[bold]Show all taxes to be paid"),
+        payment: str = typer.Option(str, help="[bold]Shows taxes by status type: ('to pay'|'confirmed'|'refund')"),
         year: int = typer.Option(int, "--year", "-y", help="[bold]filter taxes by year; es: '2021'"),
 ) -> None:
 
@@ -402,7 +403,17 @@ def command_taxes(
         id, date, amount, status = map(lambda x: x.value, (id, date, amount, status))
         payment_status, c = payment_changes(status)
 
-        if (not to_pay or payment_status == "to pay") and (not year or str(year.value) in date):
+        if payment and year:
+            if payment in payment_status and str(year.value) in date:
+                table.add_row(str(index), id, date, f'[{c}]{amount}[/{c}]', payment_status)
+
+        elif payment and payment in payment_status:
+            table.add_row(str(index), id, date, f'[{c}]{amount}[/{c}]', payment_status)
+
+        elif year and str(year.value) in date:
+            table.add_row(str(index), id, date, f'[{c}]{amount}[/{c}]', payment_status)
+
+        else:
             table.add_row(str(index), id, date, f'[{c}]{amount}[/{c}]', payment_status)
 
     console.rule("[bold]TAXES SHOWCASE[/bold]")

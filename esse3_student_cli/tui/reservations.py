@@ -78,14 +78,21 @@ class Reservations(Screen):
     ]
 
     async def fetch_date(self) -> None:
-        reservations = [{"name": "TRAINING", "Date": "10/12/2022  09:00", "Appello": "appello sessione straordinaria", "Numero Iscrizione": "15 su 22", "Svolgimento Esame": "Esame in Presenza",
+        """reservations = [{"name": "TRAINING", "Date": "10/12/2022  09:00", "Appello": "appello sessione straordinaria", "Numero Iscrizione": "15 su 22", "Svolgimento Esame": "Esame in Presenza",
                           "Docenti": "PERRI SIMONA RICCA FRANCESCO", "Cancella Prenotazione": "Impossibile cancellare l'iscrizione: iscrizione chiusa"},
                         {"name": "PROCESS MINING", "Date": "24/01/2023  09:00", "Appello": "First Exam session", "Numero Iscrizione": "19 su 23", "Svolgimento Esame": "Esame in Presenza",
                          "Edificio": "Cubo 30B", "Aula": "MT6", "Docenti": "FIONDA VALERIA", "Cancella Prenotazione": "Impossibile cancellare l'iscrizione: iscrizione chiusa"},
                         {"name": "CYBER OFFENSE AND DEFENSE", "Date": "31/01/2023  09:00", "Appello": "Scritto, discussione ed eventuale orale", "Numero Iscrizione": "1 su 8", "Svolgimento Esame": "Esame in Presenza",
                          "Docenti": "ALVIANO MARIO"},
-                       ]
-        #reservations = cli.new_esse3_wrapper().fetch_reservations()
+                       ]"""
+        global wrapper
+        try:
+            wrapper = cli.new_esse3_wrapper()
+        except:
+            await self.query_one(".reservations-loading").remove()
+            await self.query_one(".reservations-container").mount(Static("Login failed !!!", classes="login-failed"))
+
+        reservations = wrapper.fetch_reservations()
         await self.query_one(".reservations-loading").remove()
         if len(reservations) == 0:
             await self.query_one(".reservations-container").mount(Static(f"❌ No appeals booked !!", classes="reservations-empty"))

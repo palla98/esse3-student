@@ -126,6 +126,18 @@
 	text-align:right;
 }
 
+#esse3 .actionBar-align-left      {
+	text-align:left;
+}
+
+#esse3 .actionBar-align-center      {
+	text-align:center;
+}
+
+#esse3 .actionBar-align-right      {
+	text-align:right;
+}
+
 /*--- fine classi non presenti copiate da custom----*/
 
 /* ///////// ACTION BAR /////////// */
@@ -1797,7 +1809,7 @@ ul.list-iconlist li img {
 
 /*FINE SEZIONE GENERALE : CLASSI CSS RELATIVE AI TEMPLATE LIBRERIA*/
 
-/* Per la home mobile di area pubblica: in testa ci sono riquadri di menù ridotto e avvisi, sotto i links */
+/* Per la home mobile di area pubblica: in testa ci sono riquadri di menï¿½ ridotto e avvisi, sotto i links */
 @media screen and (max-width: 768px) {
 	[data-xsl="/xsl/AreaPubblicaHome.xsl"] #columnContainer, [data-xsl="/xsl/uniud/AreaPubblicaHome.xsl"] #columnContainer,
 	[data-xsl="/xsl/lumsa/AreaPubblicaHome.xsl"] #columnContainer, [data-xsl="/xsl/unina2/AreaPubblicaHome.xsl"] #columnContainer,
