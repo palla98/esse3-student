@@ -1,4 +1,4 @@
-#from esse3_student_cli.primitives import ExamDateTime
+#from esse3_student.primitives import ExamDateTime
 
 """
 def test_exam_date_time_order():

@@ -1,4 +1,4 @@
-# dumbo-esse3
+# esse3-student
 
 Esse3 command line utility, to save my future time!
 
@@ -23,20 +23,20 @@ $ sudo apt install python3-poetry
 After that, you can proceed either via PyPI, or by cloning the repository and install dependencies.
 If you opt for PyPI, run the following command:
 ```bash
-$ pip install esse3_student_cli
+$ pip install esse3_student
 Defaulting to user installation because normal site-packages is not writeable
-Collecting esse3_student_cli
-  Downloading esse3_student_cli-0.1.5-py3-none-any.whl (14 kB)
+Collecting esse3_student
+  Downloading esse3_student-0.1.5-py3-none-any.whl (14 kB)
 ...
-Installing collected packages: esse3_student_cli
-Successfully installed esse3_student_cli-0.1.5
+Installing collected packages: esse3_student
+Successfully installed esse3_student-0.1.5
 ```
 
 After that, **dumbo-esse3** can be run with
 ```bash
-$ python -m esse3_student_cli
-Usage: python -m esse3_student_cli [OPTIONS] COMMAND [ARGS]...
-Try 'python -m esse3_student_cli --help' for help.
+$ python -m esse3_student
+Usage: python -m esse3_student [OPTIONS] COMMAND [ARGS]...
+Try 'python -m esse3_student --help' for help.
 ╭─ Error ──────────────────────────────────────────────────────────────────────────────────────╮
 │ Missing command.                                                                             │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────╯

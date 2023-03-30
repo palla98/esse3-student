@@ -403,15 +403,16 @@ def command_taxes(
         id, date, amount, status = map(lambda x: x.value, (id, date, amount, status))
         payment_status, c = payment_changes(status)
 
-        if payment and year:
-            if payment in payment_status and str(year.value) in date:
+        if payment in payment_status and str(year.value) in date:
+            table.add_row(str(index), id, date, f'[{c}]{amount}[/{c}]', payment_status)
+
+        elif payment:
+            if payment in payment_status:
                 table.add_row(str(index), id, date, f'[{c}]{amount}[/{c}]', payment_status)
 
-        elif payment and payment in payment_status:
-            table.add_row(str(index), id, date, f'[{c}]{amount}[/{c}]', payment_status)
-
-        elif year and str(year.value) in date:
-            table.add_row(str(index), id, date, f'[{c}]{amount}[/{c}]', payment_status)
+        elif year:
+            if str(year.value) in date:
+                table.add_row(str(index), id, date, f'[{c}]{amount}[/{c}]', payment_status)
 
         else:
             table.add_row(str(index), id, date, f'[{c}]{amount}[/{c}]', payment_status)
