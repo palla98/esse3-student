@@ -378,7 +378,7 @@ def command_taxes(
 
     if year:
         try:
-            year = Year(year)
+            year = Year(year).value
         except ValueError:
             console.print("Invalid year value")
             raise typer.Exit()
@@ -403,7 +403,7 @@ def command_taxes(
         id, date, amount, status = map(lambda x: x.value, (id, date, amount, status))
         payment_status, c = payment_changes(status)
 
-        if payment in payment_status and str(year.value) in date:
+        if payment in payment_status and str(year) in date:
             table.add_row(str(index), id, date, f'[{c}]{amount}[/{c}]', payment_status)
 
         elif payment:
@@ -411,7 +411,7 @@ def command_taxes(
                 table.add_row(str(index), id, date, f'[{c}]{amount}[/{c}]', payment_status)
 
         elif year:
-            if str(year.value) in date:
+            if str(year) in date:
                 table.add_row(str(index), id, date, f'[{c}]{amount}[/{c}]', payment_status)
 
         else:
@@ -429,7 +429,7 @@ def tui() -> None:
     """
     [bold][#E1C699]Run [yellow]text-user-interface[/yellow][/][/bold]
     """
-    from esse3_student_cli.tui.main import Tui
+    from esse3_student.tui.main import Tui
 
     Tui().run()
 
