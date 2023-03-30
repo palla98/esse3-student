@@ -1,7 +1,7 @@
 import pytest
 
-from esse3_student_cli.esse3_wrapper import Esse3Wrapper
-from esse3_student_cli.primitives import ExamName
+from esse3_student.esse3_wrapper import Esse3Wrapper
+from esse3_student.primitives import ExamName
 from tests.test_environment import USERNAME, PASSWORD
 from tests.esse3_student_cli.utils.mocks import test_server  # noqa: F401 # pylint:disable=unused-import
 

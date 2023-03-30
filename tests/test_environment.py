@@ -1,6 +1,6 @@
 import os
 
-from esse3_student_cli.primitives import Username, Password
+from esse3_student.primitives import Username, Password
 
 # per i test wrapper
 #USERNAME = 'PLLNTN98D20M208D'

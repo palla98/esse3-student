@@ -16,8 +16,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from esse3_student_cli.utils import validators
-from esse3_student_cli.primitives import Username, Password, ExamName, Description, Date, SigningUp, \
+from esse3_student.utils import validators
+from esse3_student.primitives import Username, Password, ExamName, Description, Date, SigningUp, \
     AcademicYear, Cfu, ExamStatus, BookletGrade, TaxeID, Amount, TaxeStatus
 
 ESSE3_SERVER = "https://unical.esse3.cineca.it"
@@ -42,7 +42,6 @@ def change_esse3_server(url):
     ESSE3_SERVER = url
 
 
-
 def prompt_position() -> None:
 
     result = subprocess.run(["xdotool", "getactivewindow"], capture_output=True)
@@ -53,6 +52,7 @@ def prompt_position() -> None:
     subprocess.run(["xdotool", "windowsize", window_id, "50%", "-1"])
     # con -1 l'altezza rimane invariata altrimenti lasciare  str(int(screen_height) // 2)
 
+
 def driver_position(driver) -> None:
 
     #self.driver.maximize_window()
@@ -60,6 +60,7 @@ def driver_position(driver) -> None:
     width, height = screen.width, screen.height
     driver.set_window_size(width // 2, height)
     driver.set_window_position(width // 2, 0)
+
 
 @typeguard.typechecked
 @dataclasses.dataclass(frozen=True)

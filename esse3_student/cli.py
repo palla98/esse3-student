@@ -8,9 +8,9 @@ from rich.progress import track
 from rich.table import Table
 from rich.text import Text
 
-from esse3_student_cli.esse3_wrapper import Esse3Wrapper
-from esse3_student_cli.primitives import AcademicYear, ExamStatus, Cfu, Year, ExamName, Grade
-from esse3_student_cli.utils.console import console
+from esse3_student.esse3_wrapper import Esse3Wrapper
+from esse3_student.primitives import AcademicYear, ExamStatus, Cfu, Year, ExamName, Grade
+from esse3_student.utils.console import console
 
 from typing import Optional
 
@@ -154,7 +154,7 @@ def command_add(
         exams: list[str] = typer.Argument(
             ...,
             metavar="exam names",
-            help="[bold]one or more strings of the form 'add name1 name2'"
+            help="[bold]one or more strings of the form 'add name1 name2ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss'"
         ),
 ):
     """
@@ -245,7 +245,7 @@ def command_remove_reservation(
 @app.command(name="booklet")
 def command_booklet(
         academic_year: int = typer.Option(int, help="[bold]Academic year (1 to 3)"),
-        exam_status: str = typer.Option(str, help="[bold]'[green]Superata[/]' like 'Passed' or '[yellow]Frequenza attribuita d'ufficio[/]' like 'To do'[/]"),
+        exam_status: str = typer.Option(..., help="[bold]'[green]Superata[/]' like 'Passed' or '[yellow]Frequenza attribuita d'ufficio[/]' like 'To do'[/]"),
         exam_grade: int = typer.Option(int, help="[bold]Grade of the exam[/]"),
         new_average: Tuple[int, str] = typer.Option((None, None), help="[bold]calculate new average with grade: (grade cfu); ex: '25 12' [/]"),
         #new_degree: Tuple[int, str] = typer.Option((None, None), help="[bold]calculate new average with remaining cfu: (degree cfu); ex: '27 12' [/]"),

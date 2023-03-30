@@ -1,6 +1,6 @@
 import datetime
 
-from esse3_student_cli.utils.primitives import bounded_string, bounded_integer
+from esse3_student.utils.primitives import bounded_string, bounded_integer
 
 
 @bounded_string(min_length=3, max_length=30, pattern=r'[A-Za-z0-9]*')

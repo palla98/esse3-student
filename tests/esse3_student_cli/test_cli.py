@@ -1,6 +1,6 @@
 import pytest
 from typer.testing import CliRunner
-from esse3_student_cli.cli import app
+from esse3_student.cli import app
 from tests.esse3_student_cli.utils.mocks import test_server  # noqa: F401; pylint: disable=unused-variable
 
 

@@ -1,7 +1,7 @@
 import asyncio
 
-from esse3_student_cli.primitives import Cfu, Grade
-from esse3_student_cli import cli
+from esse3_student.primitives import Cfu, Grade
+from esse3_student import cli
 
 from textual.app import ComposeResult
 from textual.binding import Binding

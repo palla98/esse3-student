@@ -4,8 +4,8 @@ from typing import Optional
 
 import typeguard
 
-from esse3_student_cli.utils import validators
-from esse3_student_cli.utils.validators import validate, validate_dataclass
+from esse3_student.utils import validators
+from esse3_student.utils.validators import validate, validate_dataclass
 
 
 def _arithmetic(cls):

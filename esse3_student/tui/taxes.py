@@ -1,6 +1,6 @@
 import asyncio
 
-from esse3_student_cli import cli
+from esse3_student import cli
 from typing import Any
 
 from textual.app import ComposeResult

@@ -1,6 +1,7 @@
 import asyncio
 
-from esse3_student_cli import cli
+from esse3_student import cli
+from esse3_student.primitives import ExamName, Date, SigningUp, Description
 
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -10,8 +11,6 @@ from textual.screen import Screen
 
 from rich import box
 from rich.table import Table
-
-from esse3_student_cli.primitives import ExamName, Date, SigningUp, Description
 
 
 class Header(Static):

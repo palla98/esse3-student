@@ -6,11 +6,11 @@ from textual.screen import Screen
 from textual import events
 from textual.pilot import Pilot
 
-from esse3_student_cli.primitives import ExamName
-from esse3_student_cli.tui.booklet import Booklet
-from esse3_student_cli.tui.exams import Exams
-from esse3_student_cli.tui.reservations import Reservations
-from esse3_student_cli.tui.taxes import Taxes
+from esse3_student.primitives import ExamName
+from esse3_student.tui.booklet import Booklet
+from esse3_student.tui.exams import Exams
+from esse3_student.tui.reservations import Reservations
+from esse3_student.tui.taxes import Taxes
 
 
 class Header(Static):
