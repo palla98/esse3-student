@@ -57,8 +57,6 @@ def new_esse3_wrapper(detached: bool = False, with_live_status: bool = True):
 
 @app.callback()
 def main(
-        #username: str = typer.Option('pllntn98d20m208d'),
-        #password: str = typer.Option('!?Tony98?!'),
         username: str = typer.Option(..., prompt=True, envvar="CLI_STUDENT_USERNAME"),
         password: str = typer.Option(..., "--password", prompt=True, hide_input=True, envvar="CLI_STUDENT_PASSWORD"),
         debug: bool = typer.Option(False, "--debug", help="To show browser operations"),

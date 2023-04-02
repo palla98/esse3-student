@@ -115,13 +115,13 @@ class Esse3Wrapper:
 
         self.driver.get(LOGIN_URL)
 
-        try:
+        """try:
             WebDriverWait(self.driver, 2).until \
                 (EC.visibility_of_element_located(
                     (By.XPATH, "//*[@id='c-s-bn']")))
             self.driver.find_element(By.XPATH, "//*[@id='c-s-bn']").click()
         except:
-            pass
+            pass"""
 
         try:
             self.driver.find_element(By.ID, 'u').send_keys(username.value)

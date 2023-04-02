@@ -187,7 +187,6 @@ class Booklet(Screen):
                         self.query_one(".booklet-container-filters").mount(
                             Static("[red][bold]Wrong values[/]", id="booklet-value-error"))
 
-
     async def fetch_data(self) -> None:
 
         global wrapper
@@ -204,11 +203,11 @@ class Booklet(Screen):
             Vertical(self.Tables(self.exams))
         )
         await self.query_one("#booklet-container").mount(
-                            Static("Compute new average:", classes="title"),
+                            Static("Planning:", classes="title"),
                             Container(
                                 self.ActualAverage(self.statistics),
-                                Button("Schedule Average", id="average"),
-                                Button("schedule grade", id="grade"),
+                                Button("Plan a new average", id="average"),
+                                Button("Projects a new grade", id="grade"),
                                 Button("clear", id="clear"),
                                 classes="booklet-container-options"
                             ),
@@ -221,7 +220,7 @@ class Booklet(Screen):
     def compose(self) -> ComposeResult:
         yield Header("Booklet", classes="header")
         yield Container(
-            Static("Booklet exams:", classes="title"),
+            Static("Exams:", classes="title"),
             Static("[b][yellow]exams booklet[/] loading in progress....[/]", id="booklet-loading"),
             id="booklet-container"
         )

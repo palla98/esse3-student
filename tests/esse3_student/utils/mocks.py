@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from pytest_localserver.http import WSGIServer
 
-from esse3_student_cli.esse3_wrapper import ESSE3_SERVER, LOGIN_URL, LOGOUT_URL, EXAMS_URL, RESERVATIONS_URL, \
+from esse3_student.esse3_wrapper import ESSE3_SERVER, LOGIN_URL, LOGOUT_URL, EXAMS_URL, RESERVATIONS_URL, \
     change_esse3_server, BOOKLET_URL, TAXES_URL
 
 TRACE = False

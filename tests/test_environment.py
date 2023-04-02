@@ -2,9 +2,6 @@ import os
 
 from esse3_student.primitives import Username, Password
 
-# per i test wrapper
-#USERNAME = 'PLLNTN98D20M208D'
-#PASSWORD = '!?Tony98?!'
 USERNAME = os.environ.get("CLI_STUDENT_USERNAME")
 PASSWORD = os.environ.get("CLI_STUDENT_PASSWORD")
 
