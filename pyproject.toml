@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "esse3-student"
-version = "0.1.5"
+version = "3.1.0"
 description = "Esse3 command line utility"
 authors = ["Antonio Pallaria <pallaria98@gmail.com>"]
 
