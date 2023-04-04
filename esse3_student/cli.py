@@ -9,7 +9,7 @@ from rich.table import Table
 from rich.text import Text
 
 from esse3_student.esse3_wrapper import Esse3Wrapper
-from esse3_student.primitives import AcademicYear, ExamStatus, Cfu, Year, ExamName, Grade
+from esse3_student.primitives import AcademicYear, ExamStatus, Cfu, Year, ExamName, Grade, Date, SigningUp, Description
 from esse3_student.utils.console import console
 
 from typing import Optional
@@ -86,7 +86,11 @@ def command_exams() -> None:
                         spinner="aesthetic"):
         time.sleep(2)
         exams = esse_wrapper.fetch_exams()
-
+    exams = [(ExamName(value='BUSINESS GAME'), Date(value='08/02/2023'), SigningUp(value='18/01/2023 - 06/02/2023'), Description(value='MDCS 6 ECTS')),
+                     (ExamName(value='DATA ANALYTICS'), Date(value='06/02/2023'), SigningUp(value='23/12/2022 - 04/02/2023'), Description(value='Secondo appello')),
+                     (ExamName(value='NETWORK SECURITY'), Date(value='07/02/2023'), SigningUp(value='05/01/2023 - 06/02/2023'), Description(value='Oral exam and project discussion')),
+                     (ExamName(value='THEORETICAL COMPUTER SCIENCE'), Date(value='28/01/2023'), SigningUp(value='13/01/2023 - 27/01/2023'), Description(value='Prova orale con alcune domande scritte')),
+                    ]
     if len(exams) == 0:
         console.print("No exams available!!!", style="bold red")
         exit()
@@ -243,7 +247,7 @@ def command_remove_reservation(
 @app.command(name="booklet")
 def command_booklet(
         academic_year: int = typer.Option(int, help="[bold]Academic year (1 to 3)"),
-        exam_status: str = typer.Option(..., help="[bold]'[green]Superata[/]' like 'Passed' or '[yellow]Frequenza attribuita d'ufficio[/]' like 'To do'[/]"),
+        exam_status: str = typer.Option(str, help="[bold]'[green]Superata[/]' like 'Passed' or '[yellow]Frequenza attribuita d'ufficio[/]' like 'To do'[/]"),
         exam_grade: int = typer.Option(int, help="[bold]Grade of the exam[/]"),
         new_average: Tuple[int, str] = typer.Option((None, None), help="[bold]calculate new average with grade: (grade cfu); ex: '25 12' [/]"),
         #new_degree: Tuple[int, str] = typer.Option((None, None), help="[bold]calculate new average with remaining cfu: (degree cfu); ex: '27 12' [/]"),
