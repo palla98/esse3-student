@@ -250,9 +250,7 @@ def command_booklet(
         exam_status: str = typer.Option(str, help="[bold]'[green]Superata[/]' like 'Passed' or '[yellow]Frequenza attribuita d'ufficio[/]' like 'To do'[/]"),
         exam_grade: int = typer.Option(int, help="[bold]Grade of the exam[/]"),
         new_average: Tuple[int, str] = typer.Option((None, None), help="[bold]calculate new average with grade: (grade cfu); ex: '25 12' [/]"),
-        #new_degree: Tuple[int, str] = typer.Option((None, None), help="[bold]calculate new average with remaining cfu: (degree cfu); ex: '27 12' [/]"),
         statistics: Optional[bool] = typer.Option(False, "--statistics", "-s", help="[bold]show statistics on the average"),
-        #prova: int = typer.Argument(int, help="caaooooooooooooooooooooo"), #valore predefinito è zero in questo caso
 ) -> None:
 
     """
