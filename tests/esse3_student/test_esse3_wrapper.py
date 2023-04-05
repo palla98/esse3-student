@@ -59,22 +59,6 @@ def test_add_exams_but_empty(esse3_wrapper):
     assert click == 7
 
 
-"""def test_add_exams_confirm(esse3_wrapper):
-    n1 = Name("DATA ANALYTICS")
-    lista = [n1]
-
-    added, click = esse3_wrapper.add(lista)
-    assert len(added) == 1"""
-
-'''
-
-def test_fetch_exams(esse3_wrapper):
-    courses = esse3_wrapper.fetch_courses()
-    assert courses
-    exams = esse3_wrapper.fetch_exams(courses[0])
-    assert len(exams) == 2
-'''
-
 def test_fetch_booklet(esse3_wrapper):
     exams, statistics = esse3_wrapper.fetch_booklet()
     assert len(exams) == 15

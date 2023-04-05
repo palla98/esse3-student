@@ -8,8 +8,6 @@ from esse3_student.esse3_wrapper import ESSE3_SERVER, LOGIN_URL, LOGOUT_URL, EXA
 
 TRACE = False
 
-CONFERMA_DELETE = "https://unical.esse3.cineca.it/auth/studente/Appelli/ConfermaCancellaAppello.do?APP_ID=3&CDS_ESA_ID=10711&ATT_DID_ESA_ID=14517&APP_LOG_ID=1&ADSCE_ID=8758664&APP_LISTA_ID=1722454&return=BACHECA"
-
 
 def read_html(filename):
     file = (Path(__file__).parent / "html/filename").with_name(filename)
@@ -23,13 +21,6 @@ def read_html(filename):
 
 def endpoint(url):
     return url.replace(ESSE3_SERVER, '').replace("https://", "disable://").replace("http://", "disable://")
-
-
-MOCK_ESSE3_STATE = {
-    "add completed": False,
-    "register ae empty": True,
-    "theses signed": False,
-}
 
 
 def mock_esse3_app(environ, start_response):
@@ -49,18 +40,12 @@ def mock_esse3_app(environ, start_response):
             html = read_html("logout.html")
         elif url == endpoint(RESERVATIONS_URL):
             html = read_html("2-prenotazioni.html")
-        elif url == endpoint(EXAMS_URL) and not MOCK_ESSE3_STATE["add completed"]:
-            MOCK_ESSE3_STATE["add completed"] = True
+        elif url == endpoint(EXAMS_URL):
             html = read_html("nessun-appello.html")
-        elif url == endpoint(EXAMS_URL) and MOCK_ESSE3_STATE["add completed"]:
-            MOCK_ESSE3_STATE["add completed"] = False
-            html = read_html("add-DATA ANALYTICS.html")
         elif url == endpoint(BOOKLET_URL):
             html = read_html("booklet.html")
         elif url == endpoint(TAXES_URL):
             html = read_html("taxes-1.html")
-        elif url == endpoint(CONFERMA_DELETE):
-            html = read_html("conferma-delete-training.html")
 
     if TRACE and url.startswith("/auth/") and html is None:
         print('TRACE(mock_esse3_app)', 'missing page')
