@@ -34,7 +34,7 @@ def test_fetch_reservations(esse3_wrapper):
     reservations = esse3_wrapper.fetch_reservations()
     assert len(reservations) == 2
     name = reservations[0]["Name"]
-    assert  name == "PROCESS MINING"
+    assert name == "PROCESS MINING"
 
 
 def test_fetch_empty_reservations(esse3_wrapper):

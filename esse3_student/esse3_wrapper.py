@@ -48,8 +48,8 @@ def prompt_position() -> None:
     window_id = result.stdout.decode().strip()
     screen_height = subprocess.check_output(["xdotool", "getdisplaygeometry"]).decode().split()[1]
 
-    subprocess.run(["xdotool", "windowmove", window_id, "0", str(int(screen_height) // 4)])
-    subprocess.run(["xdotool", "windowsize", window_id, "50%", "-1"])
+    subprocess.run(["xdotool", "windowmove", window_id, "10", str(int(screen_height) // 4)])
+    subprocess.run(["xdotool", "windowsize", window_id, "50%", str(int(screen_height) // 2)])
     # con -1 l'altezza rimane invariata altrimenti lasciare  str(int(screen_height) // 2)
 
 
@@ -115,13 +115,13 @@ class Esse3Wrapper:
 
         self.driver.get(LOGIN_URL)
 
-        """try:
+        try:
             WebDriverWait(self.driver, 2).until \
                 (EC.visibility_of_element_located(
                     (By.XPATH, "//*[@id='c-s-bn']")))
             self.driver.find_element(By.XPATH, "//*[@id='c-s-bn']").click()
         except:
-            pass"""
+            pass
 
         try:
             self.driver.find_element(By.ID, 'u').send_keys(username.value)
@@ -129,7 +129,7 @@ class Esse3Wrapper:
             self.driver.find_element(By.ID, 'btnLogin').send_keys(Keys.RETURN)
             carrier = WebDriverWait(self.driver, 2).until(EC.visibility_of_element_located(
                 (By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/table/tbody/tr[1]/td[5]/div/a")))
-            carrier.click()
+            carrier.send_keys(Keys.RETURN)
         except Exception:
             raise RuntimeError("Wrong credentials")
 
@@ -237,7 +237,7 @@ class Esse3Wrapper:
         click = 7
 
         try:
-            box_prenotazione = WebDriverWait(self.driver, 5).until(
+            box_reservation = WebDriverWait(self.driver, 5).until(
                 EC.visibility_of_all_elements_located((By.XPATH, "//*[@id='boxPrenotazione']")))
             tool_bar = WebDriverWait(self.driver, 5).until(
                 EC.visibility_of_all_elements_located((By.XPATH, "//*[@id='toolbarAzioni']")))
@@ -251,15 +251,15 @@ class Esse3Wrapper:
 
         for reservation in names:
             found = False
-            for i, name in enumerate(box_prenotazione, start=1):
+            for i, name in enumerate(box_reservation, start=1):
                 value = name.find_element(By.CLASS_NAME, "record-h2").text.split(" [")[0].strip()
                 reservation_name = reservation.value.upper()
                 if value == reservation_name:
                     try:
                         element = tool_bar[i - 1].find_element(By.ID, 'btnCancella')
-                        element.click()
+                        element.send_keys(Keys.ENTER)
                         confirm = self.driver.find_element(By.XPATH, "//*[@id='btnConferma']")
-                        confirm.click()
+                        confirm.send_keys(Keys.ENTER)
                         click += 2
                         values[1].append(reservation_name)
                         found = True
@@ -272,7 +272,7 @@ class Esse3Wrapper:
                 self.driver.get(RESERVATIONS_URL)
                 WebDriverWait(self.driver, 10).until(
                     EC.visibility_of_element_located((By.XPATH, "//*[@id='textHeader']")))
-                box_prenotazione = self.driver.find_elements(By.XPATH, "//*[@id='boxPrenotazione']")
+                box_reservation = self.driver.find_elements(By.XPATH, "//*[@id='boxPrenotazione']")
                 tool_bar = self.driver.find_elements(By.XPATH, "//*[@id='toolbarAzioni']")
 
         values = {k: v for k, v in values.items() if v}
@@ -320,7 +320,6 @@ class Esse3Wrapper:
 
         return rows, statistics
 
-
     def fetch_taxes(self) -> tuple[list[tuple[TaxeID, Date, Amount, TaxeStatus]], int]:
 
         self.driver.get(TAXES_URL)
@@ -335,7 +334,7 @@ class Esse3Wrapper:
             page = self.driver.find_element(By.XPATH, f"//*[@id='tasse-tableFatt']/tfoot/tr/td/div/ul/li[{start}]/a")
             if 0 < int(page.text) < 10:
                 if start != 3:
-                    page.click()
+                    page.send_keys(Keys.RETURN)
                     click += 1
                 time.sleep(1)
                 taxes = self.driver.find_elements(By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/table[1]/tbody/tr")
