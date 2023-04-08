@@ -1,4 +1,5 @@
 import dataclasses
+import sys
 import time
 import subprocess
 
@@ -119,19 +120,30 @@ class Esse3Wrapper:
             WebDriverWait(self.driver, 2).until \
                 (EC.visibility_of_element_located(
                     (By.XPATH, "//*[@id='c-s-bn']")))
-            self.driver.find_element(By.XPATH, "//*[@id='c-s-bn']").click()
-        except:
+            btn_cookies = self.driver.find_element(By.XPATH, "//*[@id='c-s-bn']")
+            btn_cookies.send_keys(Keys.ENTER)
+        except TimeoutException:
+            pass
+
+        self.driver.find_element(By.ID, 'u').send_keys(username.value)
+        self.driver.find_element(By.ID, 'p').send_keys(password.value)
+        self.driver.find_element(By.ID, 'btnLogin').send_keys(Keys.RETURN)
+
+        try:
+            WebDriverWait(self.driver, 2).until(EC.visibility_of_element_located(
+                (By.XPATH, "//*[@id='alertErr']")))
+            error_message = "\033[1m\033[31mERROR:\033[0m \033[1m{}\033[0m".format("Wrong Credentials!!!")
+            print(error_message)
+            sys.exit(1)
+        except TimeoutException:
             pass
 
         try:
-            self.driver.find_element(By.ID, 'u').send_keys(username.value)
-            self.driver.find_element(By.ID, 'p').send_keys(password.value)
-            self.driver.find_element(By.ID, 'btnLogin').send_keys(Keys.RETURN)
             carrier = WebDriverWait(self.driver, 2).until(EC.visibility_of_element_located(
                 (By.XPATH, "/html/body/div[2]/div/div/main/div[3]/div/div/table/tbody/tr[1]/td[5]/div/a")))
             carrier.send_keys(Keys.RETURN)
-        except Exception:
-            raise RuntimeError("Wrong credentials")
+        except TimeoutException:
+            pass
 
     def __logout(self) -> None:
         self.driver.get(LOGOUT_URL)
