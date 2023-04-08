@@ -2,12 +2,11 @@ import dataclasses
 import sys
 import time
 import subprocess
-
-import screeninfo
-from dataclasses import InitVar
-from typing import List, Tuple, Union, Any
-
 import typeguard
+import screeninfo
+
+from dataclasses import InitVar
+
 from selenium import webdriver
 from selenium.common import WebDriverException
 from selenium.common.exceptions import NoSuchElementException
@@ -56,7 +55,6 @@ def prompt_position() -> None:
 
 def driver_position(driver) -> None:
 
-    #self.driver.maximize_window()
     screen = screeninfo.get_monitors()[0]
     width, height = screen.width, screen.height
     driver.set_window_size(width // 2, height)
@@ -180,7 +178,7 @@ class Esse3Wrapper:
         try:
             reservations = WebDriverWait(self.driver, 5).until(
                 EC.visibility_of_all_elements_located((By.XPATH, "//*[@id='boxPrenotazione']")))
-        except:
+        except TimeoutException:
             return []
 
         rows = []
@@ -212,7 +210,7 @@ class Esse3Wrapper:
         try:
             exams = WebDriverWait(self.driver, 5).until(
                 EC.visibility_of_all_elements_located((By.XPATH, "//table/tbody/tr")))
-        except:
+        except TimeoutException:
             return [], click
 
         added = []
@@ -253,7 +251,7 @@ class Esse3Wrapper:
                 EC.visibility_of_all_elements_located((By.XPATH, "//*[@id='boxPrenotazione']")))
             tool_bar = WebDriverWait(self.driver, 5).until(
                 EC.visibility_of_all_elements_located((By.XPATH, "//*[@id='toolbarAzioni']")))
-        except:
+        except TimeoutException:
             return {}, click
 
         values = {
@@ -320,10 +318,10 @@ class Esse3Wrapper:
             date = Date.of(date or "None")
 
             if status == "Superata":
-                status = "Passed"
+                status = "passed"
                 cfu_achieved += int(cfu)
             else:
-                status = "Ex officio assigned frequency"
+                status = "to be done"
 
             rows.append((ExamName.of(name), AcademicYear.of(int(academic_year)), Cfu.of(cfu),
                          ExamStatus.of(status), BookletGrade.of(grade), date))

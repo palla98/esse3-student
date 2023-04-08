@@ -19,7 +19,7 @@ class Header(Static):
 
 
 def get_status(status: str) -> Text:
-    colors = {"Passed": "green", "Ex officio assigned frequency": "#f7ecb5"}
+    colors = {"passed": "green", "to be done": "#f7ecb5"}
     value = Text(status)
     value.stylize(f"{colors[status]}")
 

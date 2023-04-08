@@ -9,7 +9,7 @@ from rich.table import Table
 from rich.text import Text
 
 from esse3_student.esse3_wrapper import Esse3Wrapper
-from esse3_student.primitives import AcademicYear, ExamStatus, Cfu, Year, ExamName, Grade, Date, SigningUp, Description
+from esse3_student.primitives import AcademicYear, ExamStatus, Cfu, Year, ExamName, Grade
 from esse3_student.utils.console import console
 
 from typing import Optional
@@ -86,28 +86,24 @@ def command_exams() -> None:
                         spinner="aesthetic"):
         time.sleep(2)
         exams = esse_wrapper.fetch_exams()
-    exams = [(ExamName(value='BUSINESS GAME'), Date(value='08/02/2023'), SigningUp(value='18/01/2023 - 06/02/2023'), Description(value='MDCS 6 ECTS')),
-                     (ExamName(value='DATA ANALYTICS'), Date(value='06/02/2023'), SigningUp(value='23/12/2022 - 04/02/2023'), Description(value='Secondo appello')),
-                     (ExamName(value='NETWORK SECURITY'), Date(value='07/02/2023'), SigningUp(value='05/01/2023 - 06/02/2023'), Description(value='Oral exam and project discussion')),
-                     (ExamName(value='THEORETICAL COMPUTER SCIENCE'), Date(value='28/01/2023'), SigningUp(value='13/01/2023 - 27/01/2023'), Description(value='Prova orale con alcune domande scritte')),
-                    ]
+
     if len(exams) == 0:
-        console.print("No exams available!!!", style="bold red")
-        exit()
+        console.log(f"[bold]❌ No available exams!!![/]\n")
+    else:
+        console.rule("[bold]EXAMS SHOWCASE[/]")
 
-    console.rule("[bold]EXAMS SHOWCASE[/]")
+        table = Table(box=box.SIMPLE_HEAD, style="rgb(139,69,19)", leading=1)
+        table.add_column("#", justify="center", style="bold red")
+        table.add_column("Name", justify="center", style="bold cyan")
+        table.add_column("Date", justify="center", style="bold green")
+        table.add_column("Signing up", justify="center", style="bold yellow")
+        table.add_column("Description", justify="center", style="bold #f7ecb5")
 
-    table = Table(box=box.SIMPLE_HEAD, style="rgb(139,69,19)", leading=1)
-    table.add_column("#", justify="center", style="bold red")
-    table.add_column("Name", justify="center", style="bold cyan")
-    table.add_column("Date", justify="center", style="bold green")
-    table.add_column("Signing up", justify="center", style="bold yellow")
-    table.add_column("Description", justify="center", style="bold #f7ecb5")
+        for index, (name, date, signing_up, description) in enumerate(exams, start=1):
+            table.add_row(str(index), name.value, date.value, signing_up.value, description.value)
 
-    for index, (name, date, signing_up, description) in enumerate(exams, start=1):
-        table.add_row(str(index), name.value, date.value, signing_up.value, description.value)
+        console.print(table, justify="center")
 
-    console.print(table, justify="center")
     console.rule("[bold]STATISTICS[/]", style="yellow")
     console.print("\n[bold]clicks saved: [blue]7[/]\n", justify="center")
 
@@ -124,28 +120,27 @@ def command_reservations() -> None:
         time.sleep(2)
         reservations = esse_wrapper.fetch_reservations()
         if len(reservations) == 0:
-            console.print("No exams booked!!!", style="bold red")
-            exit()
+            console.log(f"[bold]❌ No booked exams!!![/]\n")
+        else:
+            console.rule("[bold]RESERVATIONS SHOWCASE[/]")
+            tables = {}
+            for index in range(len(reservations)):
+                tables[f'table_{index}'] = Table(box=box.SIMPLE_HEAD, style="rgb(139,69,19)")
+                tables[f'table_{index}'].add_column("#", justify="center", style="bold red")
+                for colum in reservations[index].keys():
+                    if colum == "Name":
+                        tables[f'table_{index}'].add_column(colum, justify="center", style="bold cyan", no_wrap=True)
+                    elif colum == "Date":
+                        tables[f'table_{index}'].add_column(colum, justify="center", style="bold yellow")
+                    elif colum == "Cancella Prenotazione":
+                        tables[f'table_{index}'].add_column(colum, justify="center", style="bold red")
+                    else:
+                        tables[f'table_{index}'].add_column(colum, justify="center", style="bold #f7ecb5")
 
-    console.rule("[bold]RESERVATIONS SHOWCASE[/]")
-    tables = {}
-    for index in range(len(reservations)):
-        tables[f'table_{index}'] = Table(box=box.SIMPLE_HEAD, style="rgb(139,69,19)")
-        tables[f'table_{index}'].add_column("#", justify="center", style="bold red")
-        for colum in reservations[index].keys():
-            if colum == "Name":
-                tables[f'table_{index}'].add_column(colum, justify="center", style="bold cyan", no_wrap=True)
-            elif colum == "Date":
-                tables[f'table_{index}'].add_column(colum, justify="center", style="bold yellow")
-            elif colum == "Cancella Prenotazione":
-                tables[f'table_{index}'].add_column(colum, justify="center", style="bold red")
-            else:
-                tables[f'table_{index}'].add_column(colum, justify="center", style="bold #f7ecb5")
-
-    for index, reservation in enumerate(reservations, start=0):
-        row = list(reservation.values())
-        tables[f'table_{index}'].add_row(str(index+1), *row)
-        console.print(tables[f'table_{index}'], justify="center")
+            for index, reservation in enumerate(reservations, start=0):
+                row = list(reservation.values())
+                tables[f'table_{index}'].add_row(str(index+1), *row)
+                console.print(tables[f'table_{index}'], justify="center")
 
     console.rule("[bold]STATISTICS[/]", style="yellow")
     console.print("\n[bold]clicks saved: [blue]7[/]\n", justify="center")
@@ -155,19 +150,19 @@ def command_reservations() -> None:
 def command_add(
         exams: list[str] = typer.Argument(
             ...,
-            metavar="exam names",
-            help="[bold]one or more strings of the form 'add name1 name2ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss'"
+            metavar="Exam names",
+            help="[bold]One or more strings. Example: add 'name_1' 'name_2'"
         ),
 ):
     """
     [bold][#E1C699]Operation that allows the [green]booking[/green] of examinations[/][/bold] :blue_book:
     """
 
-    def parse(exams: list) -> list[ExamName]:
+    def parse(names: list) -> list[ExamName]:
         try:
-            exams_list = [ExamName(v) for v in exams]
+            exams_list = [ExamName(v) for v in names]
         except ValueError:
-            console.print("[bold red]Invalid strings[/]")
+            console.print("[bold yellow]Invalid strings[/]")
             raise typer.Exit()
 
         return exams_list
@@ -180,7 +175,7 @@ def command_add(
         exams, click = esse_wrapper.add(list(values))
         values = [i.value for i in exams]
         if len(values) == 0:
-            console.print("No exams available or wrong names passed!!!\n", style="bold red")
+            console.log("[bold]❌ No exams available or wrong names passed!!![/]\n")
         else:
             console.log(f"[bold] ✅ Exams with name: [green]{', '.join(map(str, values))}[/] added\n")
 
@@ -189,11 +184,11 @@ def command_add(
 
 
 @app.command(name="remove")
-def command_remove_reservation(
+def command_remove(
         reservations: list[str] = typer.Argument(
             ...,
             metavar="Reservations name",
-            help="[bold]one or more strings of the form 'remove name1 name2'"
+            help="[bold]One or more strings of the form. Example: remove 'name_1' 'name_2'"
         ),
 
 ):
@@ -202,11 +197,11 @@ def command_remove_reservation(
     [bold][#E1C699]Operation that allows the [red]deletion[/red] of booked examinations[/][/bold] :wastebasket:
     """
 
-    def parse(reservations: list) -> list[ExamName]:
+    def parse(names: list) -> list[ExamName]:
         try:
-            exams_list = [ExamName(v) for v in reservations]
+            exams_list = [ExamName(v) for v in names]
         except ValueError:
-            console.print("[bold red]Invalid strings[/]")
+            console.print("[bold yellow]Invalid strings[/]")
             raise typer.Exit()
 
         return exams_list
@@ -220,7 +215,7 @@ def command_remove_reservation(
         values, click = esse3_wrapper.remove(list(values))
 
         if len(values) == 0:
-            console.log(f"[bold]❌ No exams to remove or wrong values passed[/]!!!")
+            console.log(f"[bold]❌ No exams to remove or wrong values passed[/]!!!\n")
         else:
             all_success = True
             all_closed = True
@@ -232,13 +227,13 @@ def command_remove_reservation(
 
             if all_closed:
                 console.log(
-                    f"[bold]❌ Impossible to remove: [red]{', '.join([x for x in values[0]])}[/] cause subscription closed or wrong names passed[/]")
+                    f"[bold]❌ Impossible to remove: [red]{', '.join([x for x in values[0]])}[/] cause subscription closed or wrong names passed[/]\n")
             elif all_success:
-                console.log(f"[bold]Reservations: [green]{', '.join([x for x in values[1]])}[/] removed\n[/]")
+                console.log(f"[bold]✅ Reservations: [green]{', '.join([x for x in values[1]])}[/] removed\n[/]")
             else:
-                console.log(f"[bold]✅ Reservations: [green]{', '.join([x for x in values[1]])}[/] removed[/]")
+                console.log(f"[bold]✅ Reservations: [green]{', '.join([x for x in values[1]])}[/] removed[/]\n")
                 console.log(
-                    f"[bold]❌ Impossible to remove: [red]{', '.join([x for x in values[0]])}[/] cause subscription closed or wrong names passed[/]")
+                    f"[bold]❌ Impossible to remove: [red]{', '.join([x for x in values[0]])}[/] cause subscription closed or wrong names passed[/]\n")
 
     console.rule("[bold]STATISTICS[/]", style="yellow")
     console.print(f"\n[bold]clicks saved: [blue]{click}[/]\n", justify="center")
@@ -246,11 +241,11 @@ def command_remove_reservation(
 
 @app.command(name="booklet")
 def command_booklet(
-        academic_year: int = typer.Option(int, help="[bold]Academic year (1 to 3)"),
-        exam_status: str = typer.Option(str, help="[bold]'[green]Superata[/]' like 'Passed' or '[yellow]Frequenza attribuita d'ufficio[/]' like 'To do'[/]"),
-        exam_grade: int = typer.Option(int, help="[bold]Grade of the exam[/]"),
-        new_average: Tuple[int, str] = typer.Option((None, None), help="[bold]calculate new average with grade: (grade cfu); ex: '25 12' [/]"),
-        statistics: Optional[bool] = typer.Option(False, "--statistics", "-s", help="[bold]show statistics on the average"),
+        academic_year: int = typer.Option(int, help="[bold]Academic year (1|2|3)"),
+        exam_status: str = typer.Option(str, help="[bold][green]'passed'[/green] or [yellow]'to be done'[/yellow]"),
+        exam_grade: int = typer.Option(int, help="[bold]Grade of the exam (from 18 to 30)"),
+        new_average: Tuple[int, str] = typer.Option((None, None), help="[bold]Plan a new average: '25 12' (grade cfu)"),
+        statistics: Optional[bool] = typer.Option(False, "--statistics", "-s", help="[bold]Show statistics on the actual averages"),
 ) -> None:
 
     """
@@ -306,7 +301,7 @@ def command_booklet(
     table.add_column("Date", style="#E1C699 bold", justify="center")
 
     def get_status_color(status):
-        colors = {"Passed": "green", "Ex officio assigned frequency": "yellow"}
+        colors = {"passed": "green", "to be done": "yellow"}
         return colors[status]
 
     def get_grade_color(grade):
@@ -369,7 +364,7 @@ def command_booklet(
 @app.command(name="taxes")
 def command_taxes(
         payment: str = typer.Option(str, help="[bold]Shows taxes by status type: ('to pay'|'confirmed'|'refund')"),
-        year: int = typer.Option(int, "--year", "-y", help="[bold]filter taxes by year; es: '2021'"),
+        year: int = typer.Option(int, "--year", "-y", help="[bold]Filter taxes by year; es: 2021"),
 ) -> None:
 
     """

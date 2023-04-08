@@ -58,7 +58,7 @@ class Year:
     pass
 
 
-@bounded_string(min_length=6, max_length=29, pattern=r"(Passed|Ex officio assigned frequency)")
+@bounded_string(min_length=6, max_length=29, pattern=r"(passed|to be done)")
 class ExamStatus:
     pass
 
