@@ -1,7 +1,6 @@
 import asyncio
 
 from esse3_student import cli
-from esse3_student.primitives import ExamName, Date, SigningUp, Description
 
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -74,32 +73,32 @@ class Exams(Screen):
     ]
 
     async def fetch_date(self) -> None:
-        exams = [(ExamName(value='BUSINESS GAME'), Date(value='08/02/2023'), SigningUp(value='18/01/2023 - 06/02/2023'), Description(value='MDCS 6 ECTS')),
-                 (ExamName(value='DATA ANALYTICS'), Date(value='06/02/2023'), SigningUp(value='23/12/2022 - 04/02/2023'), Description(value='Secondo appello')),
-                 (ExamName(value='NETWORK SECURITY'), Date(value='07/02/2023'), SigningUp(value='05/01/2023 - 06/02/2023'), Description(value='Oral exam and project discussion')),
-                 (ExamName(value='THEORETICAL COMPUTER SCIENCE'), Date(value='28/01/2023'), SigningUp(value='13/01/2023 - 27/01/2023'), Description(value='Prova orale con alcune domande scritte')),
-                ]
-        """global wrapper
+
+        wrapper = None
         try:
             wrapper = cli.new_esse3_wrapper()
         except:
             await self.query_one(".exams-loading").remove()
             await self.query_one(".exams-container").mount(Static("Login failed !!!", classes="login-failed"))
 
-        exams = wrapper.fetch_exams()"""
-        await self.query_one(".exams-loading").remove()
-        if len(exams) == 0:
-            await self.query_one(".exams-container").mount(Static("No exams available !!!", id="exams-empty"))
-        else:
-            await self.query_one(".exams-container").mount(
-                Vertical(id="exams-table"),
-                Static("Select the checkboxes of the exams to be added:", classes="title"),
-                Container(classes="select-exams-container"),
-            )
-            await self.query_one("#exams-table").mount(self.ViewExams(exams))
-            for index, exam in enumerate(exams, start=1):
-                await self.query_one(".select-exams-container").mount(self.SelectExams(exam))
-            await self.query_one(".exams-container").mount(Horizontal(Button("book", id="add")))
+        if wrapper:
+            exams = wrapper.fetch_exams()
+            await self.query_one(".exams-loading").remove()
+
+            if len(exams) == 0:
+                await self.query_one(".exams-container").mount(Static("❌ No exams available!!!", id="exams-empty"))
+            else:
+                await self.query_one(".exams-container").mount(
+                    Vertical(id="exams-table"),
+                    Static("Select the checkboxes of the exams to be added:", classes="title"),
+                    Container(classes="select-exams-container"),
+                )
+                await self.query_one("#exams-table").mount(self.ViewExams(exams))
+
+                for exam in exams:
+                    await self.query_one(".select-exams-container").mount(self.SelectExams(exam))
+
+                await self.query_one(".exams-container").mount(Horizontal(Button("book", id="add")))
 
     async def on_mount(self) -> None:
         await asyncio.sleep(0.1)
@@ -131,7 +130,7 @@ class Exams(Screen):
             asyncio.create_task(self.fetch_date())
 
         def compose(self) -> ComposeResult:
-            yield Header("Exam added", classes="header")
+            yield Header("Result", classes="header")
             yield Container(Static("adding [yellow]reservations[/] in progress.....", classes="exams-loading"))
             yield Footer()
 

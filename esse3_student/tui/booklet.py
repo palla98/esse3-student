@@ -42,7 +42,7 @@ class Booklet(Screen):
     exams = None
     statistics = None
 
-    class Tables(Static):
+    class ViewExams(Static):
 
         def __init__(self, exams) -> None:
             self.exams = exams
@@ -87,13 +87,13 @@ class Booklet(Screen):
             table.add_column("Actual Average", style="bold", justify="center")
             table.add_column("Actual Degree basis", style="bold", justify="center")
 
-            actual_average, actual_cfu  = averages
+            actual_average, actual_cfu = averages
             degree_basis = (float(actual_average) * 11) / 3
 
             table.add_row(str(actual_average), str(round(degree_basis, 2)))
             self.update(table)
 
-    class NewAverage(Static):
+    class PlanAverage(Static):
 
         def __init__(self, averages) -> None:
             self.averages = averages
@@ -118,18 +118,17 @@ class Booklet(Screen):
                         self.query(element).last().remove()
                     except:
                         pass
+
                 average_to_achieve = self.query_one("#average").value
                 remaining_cfu = self.query_one("#cfu").value
+
                 if average_to_achieve != "" and remaining_cfu != "":
                     try:
 
                         average_to_achieve = Grade(int(average_to_achieve)).value
                         remaining_cfu = int(remaining_cfu)
-
                         actual_average, actual_cfu = self.averages
-
                         total_cfu = remaining_cfu + actual_cfu
-
                         grade_to_obtain = ((average_to_achieve * total_cfu) - (actual_average * actual_cfu)) \
                                           / float(remaining_cfu)
 
@@ -142,7 +141,7 @@ class Booklet(Screen):
                         self.query_one(".booklet-container-filters").mount(
                             Static("[red][bold]Wrong values[/]", id="booklet-value-error"))
 
-    class NewGrade(Static):
+    class ProjectsGrade(Static):
 
         def __init__(self, averages) -> None:
             self.averages = averages
@@ -167,12 +166,15 @@ class Booklet(Screen):
                         self.query(element).last().remove()
                     except:
                         pass
+
                 grade = self.query_one("#grade").value
                 cfu = self.query_one("#cfu").value
+
                 if grade != "" and cfu != "":
                     try:
                         grade = Grade(int(grade)).value
                         cfu = int(Cfu(cfu).value)
+
                         actual_average, actual_cfu = self.averages
                         new_average = ((actual_average * actual_cfu) + (int(grade) * int(cfu))) / (
                                 actual_cfu + int(cfu))
@@ -189,29 +191,30 @@ class Booklet(Screen):
 
     async def fetch_data(self) -> None:
 
-        global wrapper
+        wrapper = None
         try:
             wrapper = cli.new_esse3_wrapper()
         except:
             await self.query_one("#booklet-loading").remove()
             await self.query_one("#booklet-container").mount(Static("Login failed !!!", classes="login-failed"))
 
-        self.exams, self.statistics = wrapper.fetch_booklet()
+        if wrapper:
+            self.exams, self.statistics = wrapper.fetch_booklet()
 
-        await self.query_one("#booklet-loading").remove()
-        await self.query_one("#booklet-container").mount(
-            Vertical(self.Tables(self.exams))
-        )
-        await self.query_one("#booklet-container").mount(
-                            Static("Planning:", classes="title"),
-                            Container(
-                                self.ActualAverage(self.statistics),
-                                Button("Plan a new average", id="average"),
-                                Button("Projects a new grade", id="grade"),
-                                Button("clear", id="clear"),
-                                classes="booklet-container-options"
-                            ),
-                        )
+            await self.query_one("#booklet-loading").remove()
+            await self.query_one("#booklet-container").mount(
+                Vertical(self.ViewExams(self.exams))
+            )
+            await self.query_one("#booklet-container").mount(
+                                Static("Planning:", classes="title"),
+                                Container(
+                                    self.ActualAverage(self.statistics),
+                                    Button("Plan a new average", id="average"),
+                                    Button("Projects a new grade", id="grade"),
+                                    Button("clear", id="clear"),
+                                    classes="booklet-container-options"
+                                ),
+                            )
 
     async def on_mount(self) -> None:
         await asyncio.sleep(0.1)
@@ -228,7 +231,7 @@ class Booklet(Screen):
 
     def on_button_pressed(self, event: Button.Pressed):
 
-        elements_to_remove = [self.NewAverage, self.NewGrade]
+        elements_to_remove = [self.PlanAverage, self.ProjectsGrade]
         compute_buttons = ["compute-average", "compute-grade"]
 
         if event.button.id == "clear":
@@ -247,10 +250,10 @@ class Booklet(Screen):
                     pass
 
         if event.button.id == "average":
-            self.query_one("#booklet-container").mount(self.NewAverage(self.statistics))
+            self.query_one("#booklet-container").mount(self.PlanAverage(self.statistics))
 
         if event.button.id == "grade":
-            self.query_one("#booklet-container").mount(self.NewGrade(self.statistics))
+            self.query_one("#booklet-container").mount(self.ProjectsGrade(self.statistics))
 
         if event.button.id == "degree":
             self.query_one("#booklet-container").mount(self.NewDegree(self.exams))

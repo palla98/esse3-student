@@ -20,7 +20,7 @@ class Header(Static):
 
 class Taxes(Screen):
 
-    class Tables(Static):
+    class Viewtaxes(Static):
 
         def __init__(self, taxes) -> None:
             self.taxes = taxes
@@ -55,20 +55,22 @@ class Taxes(Screen):
 
     async def fetch_date(self) -> None:
 
-        global wrapper
+        wrapper = None
+
         try:
             wrapper = cli.new_esse3_wrapper()
         except:
             await self.query_one("#taxes-loading").remove()
             await self.query_one(Container).mount(Static("Login failed !!!", classes="login-failed"))
 
-        taxes, statistics = wrapper.fetch_taxes()
-        await self.query_one("#taxes-loading").remove()
-        self.query_one(Container).mount(
-            Vertical(
-                self.Tables(taxes),
+        if wrapper:
+            taxes, statistics = wrapper.fetch_taxes()
+            await self.query_one("#taxes-loading").remove()
+            self.query_one(Container).mount(
+                Vertical(
+                    self.Viewtaxes(taxes),
+                )
             )
-        )
 
     async def on_mount(self) -> None:
         await asyncio.sleep(0.1)

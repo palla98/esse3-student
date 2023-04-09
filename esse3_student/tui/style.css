@@ -55,14 +55,14 @@ Screen {
 
 /* BOOKLET */
 
-#booklet-container > Vertical > Tables{
+#booklet-container > Vertical > ViewExams{
     content-align: center middle;
     border: #ec971f;
     width: 100%;
     height: auto;
 }
 
-#booklet-container > NewAverage{
+#booklet-container > PlanAverage{
     content-align: center middle;
 }
 
@@ -73,7 +73,7 @@ Screen {
     border: #ec971f;
 }
 
-.booklet-container-options > Average {
+.booklet-container-options > ActualAverage {
     width: auto;
 }
 
@@ -121,7 +121,6 @@ Screen {
 .booklet-container-filters > Average {
     width: auto;
 }
-
 
 .booklet-container-filters > Static {
     width: auto;
@@ -211,9 +210,6 @@ Screen {
 
 
 /* TAXES */
-
-#taxes-container {
-}
 
 #taxes-table{
     content-align: center middle;
