@@ -159,27 +159,6 @@ Screen {
     border: none;
 }
 
-/*
-#booklet-filters{
-    align: center middle;
-    width: auto;
-}
-
-#booklet-filters > Input{
-    width: 10%;
-}
-
-#booklet-filters > Button{
-    margin-left: 3;
-    border: tall #1d2e38;
-    width: auto;
-    background: $primary-background-darken-2;
-}
-
-#booklet-filters > Button:hover {
-    background: #2d4156;
-}
-*/
 #booklet-table-exams{
     content-align: center middle;
     border: heavy #2b542c;
@@ -251,14 +230,6 @@ Screen {
     text-style: bold italic;
 }
 
-/*
-.click-saved {
-    width: 100%;
-    height: auto;
-    border: red;
-    content-align: center middle;
-}
-*/
 /* EXAMS */
 
 #exams-table {
@@ -267,7 +238,7 @@ Screen {
     height: auto;
 }
 
-#exams-table > Tables {
+#exams-table > ViewExams {
     content-align: center middle;
     /* height: auto; questo qua fa in modo che rimpicciolendo lo schermo poi mi esce la scrollbar, senza invece si adatta*/
 }
@@ -313,50 +284,11 @@ Screen {
     border: #ec971f;
 }
 
-.reservations-table > Tables {
+.reservations-table > ViewReservations {
     content-align: center middle;
     border: none;
     width: 100%;
     height: auto;
-}
-
-.reservations-buttons{
-    margin-top: 1;
-    layout: horizontal;
-    height: auto;
-    align: center middle;
-    scrollbar-color: #f7ecb5;
-    scrollbar-size: 1 2;
-}
-
-.reservations-buttons > Line  {
-    border: #ec971f;
-    align: center middle;
-    height: auto;
-    width: auto;
-}
-
-.reservations-buttons  > Line > Static {
-    width: auto;
-    height: auto;
-    text-style: bold;
-    border: $background;
-}
-
-.reservations-buttons  > Line > Check {
-    width: auto;
-    height: auto;
-}
-
-.reservations-buttons  > Line > Check:hover {
-    background: #2d4156;
-}
-
-.reservations-container > Horizontal {
-    margin-top: 1;
-    align: center middle;
-    height: auto;
-    width: 100%;
 }
 
 #remove {
@@ -415,6 +347,47 @@ Screen {
     border: heavy #2b542c;
     content-align: center middle;
     text-style: bold italic;
+}
+
+/* EXAMS & RESERVATIONS */
+
+.exams-container > Horizontal {
+    margin-top: 1;
+    align: center middle;
+    height: auto;
+    width: 100%;
+}
+
+.select-exams-container{
+    margin-top: 1;
+    layout: horizontal;
+    height: auto;
+    align: center middle;
+    scrollbar-color: #f7ecb5;
+    scrollbar-size: 1 2;
+}
+
+.select-exams-container > SelectExams {
+    border: #ec971f;
+    align: center middle;
+    height: auto;
+    width: auto;
+}
+
+.select-exams-container  > SelectExams > Static {
+    width: auto;
+    height: auto;
+    text-style: bold;
+    border: $background;
+}
+
+.select-exams-container  > SelectExams > Check {
+    width: auto;
+    height: auto;
+}
+
+.select-exams-container  > SelectExams > Check:hover {
+    background: #2d4156;
 }
 
 /* FOOTER */

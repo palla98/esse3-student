@@ -72,6 +72,6 @@ def test_fetch_first_page_taxes(esse3_wrapper):
     assert len(taxes) == 10
     id = taxes[3][0].value
     amount = taxes[3][2].value
-    assert  id == "1965571"
+    assert id == "1965571"
     assert amount == "455,64 €"
 
