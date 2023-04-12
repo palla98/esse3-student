@@ -194,7 +194,7 @@ def command_remove(
 ):
 
     """
-    [bold][#E1C699]Operation that allows the [red]deletion[/red] of booked examinations[/][/bold] :wastebasket:
+    [bold][#E1C699]Operation to [red]cancel[/red] exam reservations[/][/bold] :wastebasket:
     """
 
     def parse(names: list) -> list[ExamName]:
@@ -249,7 +249,7 @@ def command_booklet(
 ) -> None:
 
     """
-    [bold][#E1C699]shows all the student's activities[/][/bold] :bookmark_tabs:
+    [bold][#E1C699]Shows all the student's activities[/][/bold] :bookmark_tabs:
     """
 
     if academic_year:
@@ -368,7 +368,7 @@ def command_taxes(
 ) -> None:
 
     """
-    [bold][#E1C699]Show all taxes[/][/bold] :bookmark_tabs:
+    [bold][#E1C699]Show taxes list[/][/bold] :bookmark_tabs:
     """
 
     if year:
@@ -398,8 +398,9 @@ def command_taxes(
         id, date, amount, status = map(lambda x: x.value, (id, date, amount, status))
         payment_status, c = payment_changes(status)
 
-        if payment in payment_status and str(year) in date:
-            table.add_row(str(index), id, date, f'[{c}]{amount}[/{c}]', payment_status)
+        if payment and year:
+            if payment in payment_status and str(year) in date:
+                table.add_row(str(index), id, date, f'[{c}]{amount}[/{c}]', payment_status)
 
         elif payment:
             if payment in payment_status:

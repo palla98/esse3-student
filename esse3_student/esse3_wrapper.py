@@ -189,13 +189,13 @@ class Esse3Wrapper:
                                             f"/html/body/div[2]/div/div/main/div[3]/div/div/div/div[{index}]/h2").text
             start = name.find(" [")
             name = name[:start]
-            dict = {"Name": name}
+            dict = {"Nome": name}
             elements = reservation.find_elements(By.XPATH, "./dl/dt")
             for position, element in enumerate(elements, start=1):
                 key = element.text
                 value = element.find_element(By.XPATH, f"../dd[{position}]").text
                 if position == 1:
-                    dict["Date"] = key
+                    dict["Data"] = key
                 elif key != "Riservato per" and key != "Data Prenotazione" and key != '':
                     dict[key] = value
             rows.append(dict)
